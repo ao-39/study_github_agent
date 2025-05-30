@@ -1,0 +1,16 @@
+# ビルド生成物
+dist/
+.turbo/
+
+# 依存関係
+node_modules/
+
+# ログファイル
+*.log
+
+# カバレッジレポート
+coverage/
+
+# 一時ファイル
+.tmp/
+temp/

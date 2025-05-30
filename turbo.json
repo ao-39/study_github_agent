@@ -19,6 +19,9 @@
     "format": {
       "outputs": []
     },
+    "format-check": {
+      "outputs": []
+    },
     "type-check": {
       "outputs": []
     },
