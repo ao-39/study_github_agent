@@ -1,0 +1,32 @@
+{
+  "name": "@study-github-agent/monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GitHub Copilot agentを学習するためのmonorepoプロジェクト",
+  "keywords": [
+    "monorepo",
+    "react",
+    "vite",
+    "typescript",
+    "github-copilot"
+  ],
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "lint": "turbo run lint",
+    "format": "turbo run format",
+    "type-check": "turbo run type-check",
+    "spell-check": "turbo run spell-check",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^1.10.0"
+  }
+}
