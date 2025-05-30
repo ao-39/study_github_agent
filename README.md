@@ -4,6 +4,30 @@
 
 このリポジトリはGitHub Copilot agentを試すためのリポジトリです。
 
+## ディレクトリ構造
+
+```
+study_github_agent/
+├── .github/                    # GitHub関連の設定ファイル
+│   └── copilot-instructions.md # GitHub Copilotの動作設定
+├── apps/                       # アプリケーションパッケージ（予定）
+│   └── app/                    # Reactアプリケーション（予定）
+├── packages/                   # 共有ライブラリパッケージ（予定）
+└── README.md                   # プロジェクトドキュメント
+```
+
+### 主要ディレクトリ説明
+
+#### `.github/`
+GitHub関連の設定ファイルを格納するディレクトリです。
+- `copilot-instructions.md`: GitHub Copilotエージェントの動作設定とインストラクション
+
+#### `apps/`（予定）
+単体で動作するアプリケーションパッケージを設置するディレクトリです。
+
+#### `packages/`（予定）
+appsのパッケージから利用される共有ライブラリパッケージを設置するディレクトリです。
+
 ## アーキテクチャ
 
 本プロジェクトはmonorepo構成で構築されています。
