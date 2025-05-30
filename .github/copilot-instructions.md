@@ -8,6 +8,8 @@
 ## プロジェクト情報
 このプロジェクトはGitHub Copilot agentを学習するためのリポジトリです。
 
+**重要**: プロジェクトの詳細なアーキテクチャと技術スタックについてはREADME.mdを必ず参照してください。
+
 ### 技術スタック
 - React アプリケーション（monorepo構成でapps/app配下に構築予定）
 - JavaScript/TypeScript
