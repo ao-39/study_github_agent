@@ -83,6 +83,7 @@ packages/にそれぞれ設定ファイルを入れます。
 
 ### CI/CD
 - **GitHub Actions**: 継続的インテグレーション・継続的デプロイメントを実現します
+- **Vercel**: プロダクション・プレビューデプロイメント環境
 
 ## 環境要件
 
@@ -182,16 +183,51 @@ pnpm create-package <package-name>
 - ✅ GitHub Copilot インストラクション設定完了
 - ✅ monorepo環境の構築完了（pnpm + Turborepo）
 - ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
+- ✅ CI/CDパイプラインの構築完了（GitHub Actions + Vercel）
 - 📋 共有ライブラリパッケージの作成（予定）
 - 📋 E2Eテスト環境の構築（予定）
-- 📋 CI/CDパイプラインの構築（予定）
 
 ### 次のマイルストーン
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
 2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
-3. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
-4. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
-5. **CI/CDパイプライン** - GitHub Actionsでの自動化
+3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化、Vercelデプロイ
+4. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
+5. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
+
+## CI/CD パイプライン
+
+### 自動化ワークフロー
+
+#### 1. 継続的インテグレーション（CI）
+プルリクエスト・メインブランチプッシュ時に以下を自動実行：
+
+```bash
+# 品質チェック
+pnpm type-check  # TypeScript型チェック
+pnpm lint        # ESLintコード品質チェック  
+pnpm format      # Prettierフォーマットチェック
+
+# ビルド・テスト
+pnpm build       # プロダクションビルド
+pnpm test        # 単体テスト実行
+```
+
+#### 2. 継続的デプロイメント（CD）
+メインブランチマージ時にVercelへ自動デプロイ：
+
+- **本番環境**: `main`ブランチ → 本番URL
+- **プレビュー環境**: プルリクエスト → プレビューURL
+
+### デプロイメント設定
+
+Vercelを使用した簡単デプロイを実現：
+
+- ✅ **ゼロコンフィグ**: 設定ファイルで自動認識
+- ✅ **高速ビルド**: Vite最適化により高速デプロイ
+- ✅ **グローバルCDN**: 世界各地からの高速アクセス
+- ✅ **プレビューデプロイ**: プルリクエスト毎の検証環境
+
+詳細な設定方法は [`DEPLOYMENT.md`](./DEPLOYMENT.md) を参照してください。
 
 ## コントリビューション
 

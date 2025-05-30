@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "name": "study-github-agent",
+  "builds": [
+    {
+      "src": "apps/app/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/apps/app/dist/index.html"
+    }
+  ],
+  "installCommand": "npm install -g pnpm && pnpm install",
+  "buildCommand": "cd apps/app && pnpm build",
+  "outputDirectory": "apps/app/dist",
+  "framework": "vite"
+}
