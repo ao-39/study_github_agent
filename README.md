@@ -21,9 +21,12 @@
 study_github_agent/
 ├── .github/                    # GitHub関連の設定ファイル
 │   └── copilot-instructions.md # GitHub Copilotの動作設定
-├── apps/                       # アプリケーションパッケージ（予定）
-│   └── app/                    # Reactアプリケーション（予定）
+├── apps/                       # アプリケーションパッケージ
+│   └── app/                    # Reactアプリケーション（Vite + React + TypeScript）
 ├── packages/                   # 共有ライブラリパッケージ（予定）
+├── package.json                # monorepo設定とTurborepo
+├── pnpm-workspace.yaml         # pnpm workspace設定
+├── turbo.json                  # Turborepo設定
 └── README.md                   # プロジェクトドキュメント
 ```
 
@@ -33,8 +36,9 @@ study_github_agent/
 GitHub関連の設定ファイルを格納するディレクトリです。
 - `copilot-instructions.md`: GitHub Copilotエージェントの動作設定とインストラクション
 
-#### `apps/`（予定）
+#### `apps/`
 単体で動作するアプリケーションパッケージを設置するディレクトリです。
+- `app/`: Vite + React + TypeScriptで構築されたメインアプリケーション
 
 #### `packages/`（予定）
 appsのパッケージから利用される共有ライブラリパッケージを設置するディレクトリです。
@@ -44,7 +48,7 @@ appsのパッケージから利用される共有ライブラリパッケージ�
 本プロジェクトはmonorepo構成で構築されています。
 
 ### `apps/app`
-Reactアプリケーションを設置します。appは、アプリケーションのパッケージつまり、単体で動作するアプリケーションのパッケージを設置します。
+Reactアプリケーションを設置します。Vite + React + TypeScriptで構築されており、モダンなフロントエンド開発環境を提供します。
 
 ### `packages/`
 ライブラリとしてappsのパッケージに利用されるパッケージを設置します。
@@ -75,6 +79,7 @@ packages/にそれぞれ設定ファイルを入れます。
 ### ビルドツール
 - **vite**: ビルドツールとして利用します
 - **vitest**: テストランナーとして利用します
+- **turbo**: monorepoのタスクランナーとして利用します
 
 ### CI/CD
 - **GitHub Actions**: 継続的インテグレーション・継続的デプロイメントを実現します
@@ -175,14 +180,15 @@ pnpm create-package <package-name>
 - ✅ プロジェクト基盤の設計完了
 - ✅ README.md ドキュメント整備完了
 - ✅ GitHub Copilot インストラクション設定完了
-- 🔄 monorepo環境の構築（進行中）
-- 📋 Reactアプリケーションの実装（予定）
+- ✅ monorepo環境の構築完了（pnpm + Turborepo）
+- ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
 - 📋 共有ライブラリパッケージの作成（予定）
+- 📋 E2Eテスト環境の構築（予定）
 - 📋 CI/CDパイプラインの構築（予定）
 
 ### 次のマイルストーン
-1. **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
-2. **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
+1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
+2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
 3. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
 4. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 5. **CI/CDパイプライン** - GitHub Actionsでの自動化

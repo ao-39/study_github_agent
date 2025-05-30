@@ -19,11 +19,9 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
-    "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "turbo run format",
     "type-check": "turbo run type-check",
-    "spell-check": "turbo run spell-check",
     "clean": "turbo run clean"
   },
   "devDependencies": {

@@ -13,10 +13,6 @@
       "dependsOn": ["build"],
       "outputs": ["coverage/**"]
     },
-    "test:e2e": {
-      "dependsOn": ["build"],
-      "outputs": ["test-results/**", "playwright-report/**"]
-    },
     "lint": {
       "outputs": []
     },
@@ -24,9 +20,6 @@
       "outputs": []
     },
     "type-check": {
-      "outputs": []
-    },
-    "spell-check": {
       "outputs": []
     },
     "clean": {
