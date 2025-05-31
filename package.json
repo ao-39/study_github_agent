@@ -21,7 +21,6 @@
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "format-check": "turbo run format-check",
     "type-check": "turbo run type-check",
     "clean": "turbo run clean"
   },
