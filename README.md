@@ -41,8 +41,12 @@ GitHub関連の設定ファイルを格納するディレクトリです。
 単体で動作するアプリケーションパッケージを設置するディレクトリです。
 - `app/`: Vite + React + TypeScriptで構築されたメインアプリケーション
 
-#### `packages/`（予定）
+#### `packages/`
 appsのパッケージから利用される共有ライブラリパッケージを設置するディレクトリです。
+
+現在の共有パッケージ：
+- `eslint-config/`: ESLint設定パッケージ（@study-github-agent/eslint-config）
+- `prettier-config/`: Prettier設定パッケージ（@study-github-agent/prettier-config）
 
 ## アーキテクチャ
 
@@ -53,6 +57,39 @@ Reactアプリケーションを設置します。Vite + React + TypeScriptで�
 
 ### `packages/`
 ライブラリとしてappsのパッケージに利用されるパッケージを設置します。
+
+#### 共有設定パッケージ
+
+##### @study-github-agent/eslint-config
+TypeScript + React対応のESLint設定パッケージです。
+
+**特徴：**
+- TypeScript、React、React Hooksに対応
+- ESLint推奨 + TypeScript推奨 + React Hooksルールを含む
+- console.log警告、未使用変数警告などのカスタムルールを追加
+
+**使用方法：**
+```javascript
+// .eslintrc.js
+module.exports = {
+  extends: ['@study-github-agent/eslint-config']
+}
+```
+
+##### @study-github-agent/prettier-config
+プロジェクト統一のPrettier設定パッケージです。
+
+**特徴：**
+- セミコロンなし、シングルクォート、タブ幅2などの統一設定
+- 既存のapps/appの設定を踏襲
+
+**使用方法：**
+```json
+// package.json
+{
+  "prettier": "@study-github-agent/prettier-config"
+}
+```
 
 ## 技術スタック
 
@@ -71,7 +108,9 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 - **format**: prettierを利用します  
 - **スペルチェック**: cspellを利用します
 
-packages/にそれぞれ設定ファイルを入れます。
+**共有設定パッケージ**：ESLintとPrettierの設定は`packages/`ディレクトリに共有パッケージとして配置されています。
+- `@study-github-agent/eslint-config`: TypeScript + React対応のESLint設定
+- `@study-github-agent/prettier-config`: プロジェクト統一のPrettier設定
 
 ### テスト
 - **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
@@ -254,6 +293,7 @@ pnpm create-package <package-name>
 - ✅ monorepo環境の構築完了（pnpm + Turborepo）
 - ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
 - ✅ CI/CDパイプラインの構築完了（GitHub Actions）
+- ✅ 共有設定パッケージの作成完了（ESLint・Prettier）
 - 📋 共有ライブラリパッケージの作成（予定）
 - 📋 E2Eテストの拡充（CI統合済み）
 
@@ -261,8 +301,9 @@ pnpm create-package <package-name>
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
 2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
 3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化
-4. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
-5. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
+4. ✅ **共有設定パッケージの作成** - ESLint・Prettierの設定パッケージ
+5. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
+6. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 
 ## コントリビューション
 
