@@ -11,7 +11,7 @@ export default defineConfig({
   testDir: './tests',
 
   // 並列実行を無効にしてCI環境での安定性を向上
-  fullyParallel: true,
+  fullyParallel: false,
 
   // CI環境では失敗時のリトライを無効に
   forbidOnly: !!process.env.CI,
