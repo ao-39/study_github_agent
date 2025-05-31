@@ -11,14 +11,19 @@
     "github-copilot"
   ],
   "engines": {
-    "node": ">=18",
-    "pnpm": ">=8"
+    "node": ">=24",
+    "pnpm": ">=9"
   },
-  "packageManager": "pnpm@8.15.0",
+  "packageManager": "pnpm@9.15.0",
+  "volta": {
+    "node": "24.7.1",
+    "pnpm": "9.15.0"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
     "lint": "turbo run lint",
     "format": "turbo run format",
     "type-check": "turbo run type-check",

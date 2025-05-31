@@ -12,4 +12,9 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    exclude: ['**/tests/e2e/**', '**/node_modules/**', '**/dist/**'],
+  },
 })
