@@ -1,29 +1,32 @@
-name: CI
+name: "Copilot Setup Steps"
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# GitHub Copilot agentの開発環境をセットアップするワークフロー
+# 手動実行テスト用に workflow_dispatch を有効化
+on: workflow_dispatch
 
 jobs:
-  ci:
-    name: 継続的インテグレーション
+  # ジョブ名は必ず 'copilot-setup-steps' である必要があります
+  copilot-setup-steps:
     runs-on: ubuntu-latest
+
+    # Copilotが独自のトークンを取得するため、最小限の権限設定
+    permissions:
+      # リポジトリのクローンに必要
+      contents: read
 
     steps:
       - name: リポジトリのチェックアウト
         uses: actions/checkout@v4
 
-      - name: Node.jsのセットアップ
+      - name: Node.js 24の設定
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "24"
 
-      - name: pnpmのセットアップ
+      - name: pnpm 10.xの設定
         uses: pnpm/action-setup@v4
         with:
-          version: 10.11.0
+          version: "10.11.0"
 
       - name: pnpmストアディレクトリの取得
         shell: bash
@@ -47,27 +50,7 @@ jobs:
             ${{ runner.os }}-turbo-
 
       - name: 依存関係のインストール
-        run: pnpm install
-
-      - name: リンティング
-        run: pnpm lint
-
-      - name: フォーマットチェック
-        run: |
-          pnpm exec turbo run lint:format
-          pnpm run format:package --check
-
-      - name: 型チェック
-        run: pnpm type-check
-
-      - name: ビルド
-        run: pnpm build
-
-      - name: テスト実行
-        run: pnpm exec turbo run test -- --passWithNoTests
+        run: pnpm install --frozen-lockfile
 
       - name: Playwrightブラウザのインストール
         run: pnpm --filter app exec playwright install --with-deps chromium
-
-      - name: E2Eテスト実行
-        run: pnpm --filter app test:e2e:chromium
