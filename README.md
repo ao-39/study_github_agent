@@ -83,6 +83,9 @@ packages/にそれぞれ設定ファイルを入れます。
 
 ### CI/CD
 - **GitHub Actions**: 継続的インテグレーション・継続的デプロイメントを実現します
+- **自動実行**: Pull Request作成時とmainブランチへのpush時に自動実行
+- **実行項目**: lint、format、type-check、build、testの包括的チェック
+- **キャッシュ最適化**: pnpmストアとTurborepoキャッシュで高速実行
 
 ## 環境要件
 
@@ -185,16 +188,16 @@ pnpm create-package <package-name>
 - ✅ GitHub Copilot インストラクション設定完了
 - ✅ monorepo環境の構築完了（pnpm + Turborepo）
 - ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
+- ✅ CI/CDパイプラインの構築完了（GitHub Actions）
 - 📋 共有ライブラリパッケージの作成（予定）
 - 📋 E2Eテスト環境の構築（予定）
-- 📋 CI/CDパイプラインの構築（予定）
 
 ### 次のマイルストーン
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
 2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
-3. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
-4. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
-5. **CI/CDパイプライン** - GitHub Actionsでの自動化
+3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化
+4. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
+5. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 
 ## コントリビューション
 
