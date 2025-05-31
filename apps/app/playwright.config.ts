@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   // テストディレクトリ
-  testDir: './tests',
+  testDir: './src/e2e',
 
   // 並列実行を無効にしてCI環境での安定性を向上
   fullyParallel: false,
