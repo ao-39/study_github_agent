@@ -35,6 +35,7 @@ study_github_agent/
 #### `.github/`
 GitHub関連の設定ファイルを格納するディレクトリです。
 - `copilot-instructions.md`: GitHub Copilotエージェントの動作設定とインストラクション
+- `workflows/copilot-setup-steps.yml`: Copilot coding agent用の開発環境セットアップ
 
 #### `apps/`
 単体で動作するアプリケーションパッケージを設置するディレクトリです。
@@ -89,6 +90,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 - **mainブランチプッシュ時**: マージ後の最終確認と本番展開準備
 
 #### CI実行項目
+**通常のCI/CD環境**:
 1. **環境セットアップ**: Node.js 18 + pnpm 8.15.0
 2. **依存関係インストール**: `pnpm install --frozen-lockfile`
 3. **リンティング**: `pnpm lint` (ESLint)
@@ -109,6 +111,19 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 - **ビルド成功**: 本番環境への展開可能性確認
 - **テスト通過**: 全ての自動テストが正常に実行
 - **E2Eテスト通過**: ブラウザ実行環境での統合テストが正常に実行
+
+#### GitHub Copilot Coding Agent 環境設定
+このリポジトリはGitHub Copilot coding agentに対応した開発環境設定を提供しています。
+
+**Copilot Agent用の環境仕様**:
+- **Node.js**: 24 (最新LTS)
+- **pnpm**: 10.11.0
+- **セットアップファイル**: `.github/workflows/copilot-setup-steps.yml`
+
+Copilot agentは独自の一時的な開発環境でコードの探索、変更、テスト実行を行います。
+この環境は通常のCI/CDとは独立して動作し、最新の技術スタックを使用して効率的な開発をサポートします。
+
+**手動テスト**: リポジトリの「Actions」タブから `Copilot Setup Steps` ワークフローを手動実行してセットアップをテストできます。
 
 ## 環境要件
 

@@ -1,0 +1,56 @@
+name: "Copilot Setup Steps"
+
+# GitHub Copilot agentの開発環境をセットアップするワークフロー
+# 手動実行テスト用に workflow_dispatch を有効化
+on: workflow_dispatch
+
+jobs:
+  # ジョブ名は必ず 'copilot-setup-steps' である必要があります
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    # Copilotが独自のトークンを取得するため、最小限の権限設定
+    permissions:
+      # リポジトリのクローンに必要
+      contents: read
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js 24の設定
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: pnpm 10.xの設定
+        uses: pnpm/action-setup@v4
+        with:
+          version: "10.11.0"
+
+      - name: pnpmストアディレクトリの取得
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: pnpmキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Turborepoキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: 依存関係のインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: Playwrightブラウザのインストール
+        run: pnpm --filter app exec playwright install --with-deps chromium
