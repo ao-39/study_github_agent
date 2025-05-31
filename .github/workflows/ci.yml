@@ -46,6 +46,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
+      - name: Playwrightブラウザキャッシュの設定
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package.json', '**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: 依存関係のインストール
         run: pnpm install
 
@@ -67,6 +76,7 @@ jobs:
         run: pnpm exec turbo run test -- --passWithNoTests
 
       - name: Playwrightブラウザのインストール
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: pnpm --filter app exec playwright install --with-deps chromium
 
       - name: E2Eテスト実行
