@@ -1,0 +1,97 @@
+# GitHub Copilot Agent環境用 .dockerignore
+# Dockerビルドパフォーマンスを向上させるためのファイル除外設定
+
+# Node.js関連
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.pnpm-debug.log*
+.pnpm-store/
+
+# ビルド成果物
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# 開発ツール設定
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS生成ファイル
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git関連
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD関連
+.github/
+.circleci/
+.travis.yml
+.gitlab-ci.yml
+
+# ドキュメント（必要に応じて）
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# 設定ファイル（開発用）
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# テスト関連
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Volta設定（ローカル用）
+.volta/
+
+# デバッグ情報
+*.log
+logs/
+
+# 一時ファイル
+tmp/
+temp/
+.tmp/
+
+# Docker関連
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# エディタ設定
+.editorconfig
+.eslintrc*
+.prettierrc*
+tsconfig.json
+vite.config.ts
+vitest.config.ts
+playwright.config.ts
+
+# パッケージマネージャー設定
+pnpm-workspace.yaml
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# セットアップスクリプト
+setup.sh
+Makefile

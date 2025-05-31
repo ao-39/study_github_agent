@@ -1,0 +1,68 @@
+# GitHub Copilot Agent用の開発環境Docker Compose設定
+version: '3.8'
+
+services:
+  # メインの開発環境
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: github-copilot-agent-dev
+    ports:
+      - "5173:5173"  # Vite開発サーバー
+      - "9323:9323"  # Playwright UI (将来的に)
+    volumes:
+      # ソースコードのマウント (開発時の即座反映用)
+      - .:/workspace
+      - /workspace/node_modules  # node_modulesは除外
+      - /workspace/.pnpm-store   # pnpmストアは除外
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # ホットリロード用
+    stdin_open: true
+    tty: true
+    networks:
+      - copilot-network
+
+  # テスト専用環境 (CI/CD用)
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: github-copilot-agent-test
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: ["pnpm", "test"]
+    networks:
+      - copilot-network
+
+  # E2Eテスト専用環境
+  e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: github-copilot-agent-e2e
+    volumes:
+      - .:/workspace
+      - /workspace/node_modules
+    environment:
+      - NODE_ENV=test
+      - CI=true
+    command: ["pnpm", "test:e2e"]
+    networks:
+      - copilot-network
+
+networks:
+  copilot-network:
+    driver: bridge
+
+# 開発用のヘルプ情報
+# 使用方法:
+#   docker-compose up app          # 開発サーバー起動
+#   docker-compose run test        # テスト実行
+#   docker-compose run e2e         # E2Eテスト実行
+#   docker-compose exec app bash   # コンテナ内でシェル起動

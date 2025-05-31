@@ -1,10 +1,74 @@
 # study_github_agent
 
-## 目的
+## 🚀 環境セットアップ
 
-このリポジトリはGitHub Copilot agentを試すためのリポジトリです。
+### クイックスタート
 
-## 学習目標
+GitHub Copilot agentとの開発に最適化された環境を自動でセットアップできます：
+
+```bash
+# 自動セットアップスクリプトを実行
+./setup.sh
+
+# または、Makefileを使用
+make setup
+```
+
+### 環境選択肢
+
+#### 1. ローカル開発環境
+```bash
+# Node.js 24とpnpm 9の環境セットアップ
+./setup.sh
+pnpm dev
+```
+
+#### 2. Docker環境（推奨）
+```bash
+# Docker Compose環境の起動
+docker-compose up app
+
+# または、Makefileを使用
+make docker-dev
+```
+
+#### 3. VS Code Dev Containers
+1. VS Codeでプロジェクトを開く
+2. `Ctrl+Shift+P` → "Dev Containers: Reopen in Container"
+3. 自動的に環境が構築されます
+
+#### 4. GitHub Codespaces
+1. GitHubリポジトリで "Code" → "Codespaces" → "Create codespace"
+2. 自動的にセットアップが完了します
+
+詳細な設定手順は [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md) を参照してください。
+
+## 📋 利用可能なコマンド
+
+```bash
+# 開発
+pnpm dev          # 開発サーバー起動
+pnpm build        # プロダクションビルド
+
+# テスト
+pnpm test         # 単体テスト実行
+pnpm test:e2e     # E2Eテスト実行
+
+# コード品質
+pnpm lint         # ESLint実行
+pnpm format       # Prettier実行
+pnpm type-check   # TypeScript型チェック
+
+# Docker環境
+make docker-dev   # Docker開発環境起動
+make docker-test  # Dockerテスト実行
+
+# 環境管理
+make setup        # 環境セットアップ
+make check-all    # 全品質チェック実行
+```
+
+## 🎯 学習目標
 
 このリポジトリを通じて以下の学習を目指します：
 
@@ -15,18 +79,29 @@
 - **CI/CDパイプライン** - GitHub Actionsを使った自動化
 - **コラボレーション** - GitHub Copilotを活用したチーム開発
 
-## ディレクトリ構造
+## 🏗️ プロジェクト構成
+
+## 📁 ディレクトリ構造
 
 ```
 study_github_agent/
-├── .github/                    # GitHub関連の設定ファイル
+├── .devcontainer/               # VS Code Dev Container設定
+├── .github/                     # GitHub関連の設定ファイル
+│   ├── codespaces/             # GitHub Codespaces用設定
+│   ├── workflows/              # GitHub Actions CI/CD
 │   └── copilot-instructions.md # GitHub Copilotの動作設定
 ├── apps/                       # アプリケーションパッケージ
 │   └── app/                    # Reactアプリケーション（Vite + React + TypeScript）
 ├── packages/                   # 共有ライブラリパッケージ（予定）
+├── Dockerfile                  # GitHub Copilot Agent用開発環境
+├── docker-compose.yml          # Docker開発環境設定
+├── docker-entrypoint.sh        # Docker起動スクリプト
+├── setup.sh                    # 自動環境セットアップスクリプト
+├── Makefile                    # 環境管理用コマンド集
 ├── package.json                # monorepo設定とTurborepo
 ├── pnpm-workspace.yaml         # pnpm workspace設定
 ├── turbo.json                  # Turborepo設定
+├── ENVIRONMENT_SETUP.md        # 環境セットアップ詳細ガイド
 └── README.md                   # プロジェクトドキュメント
 ```
 
@@ -35,6 +110,12 @@ study_github_agent/
 #### `.github/`
 GitHub関連の設定ファイルを格納するディレクトリです。
 - `copilot-instructions.md`: GitHub Copilotエージェントの動作設定とインストラクション
+- `workflows/copilot-setup-steps.yml`: GitHub Copilot agent用のCI/CDワークフロー
+- `codespaces/setup.sh`: GitHub Codespaces環境セットアップスクリプト
+
+#### `.devcontainer/`
+VS Code Dev Container設定ファイルを格納するディレクトリです。
+- `devcontainer.json`: VS Code Dev Container設定（GitHub Copilot拡張機能含む）
 
 #### `apps/`
 単体で動作するアプリケーションパッケージを設置するディレクトリです。

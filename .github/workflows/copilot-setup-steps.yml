@@ -1,0 +1,141 @@
+# GitHub Copilot agent用の環境セットアップワークフロー
+# GitHub Copilot agentが効率的に作業できるよう、開発環境を自動で整備します
+
+name: Copilot Agent Environment Setup
+
+on:
+  workflow_dispatch: # 手動実行可能
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '24.7.1'
+  PNPM_VERSION: '9.15.0'
+
+jobs:
+  setup-environment:
+    name: GitHub Copilot Agent環境セットアップ
+    runs-on: ubuntu-latest
+    
+    steps:
+      # リポジトリのチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Node.js環境のセットアップ (Copilot agent用)
+      - name: Setup Node.js for Copilot
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      # Corepackを有効化してpnpmを使用
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+      
+      # 依存関係のインストール
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      # Playwrightブラウザのインストール
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+      
+      # TypeScript型チェック
+      - name: Type check
+        run: pnpm type-check
+      
+      # ESLintによるコード品質チェック
+      - name: Lint code
+        run: pnpm lint
+      
+      # Prettierによるフォーマットチェック
+      - name: Check code formatting
+        run: pnpm format --check
+      
+      # 単体テストの実行
+      - name: Run unit tests
+        run: pnpm test
+      
+      # ビルドの実行
+      - name: Build application
+        run: pnpm build
+      
+      # E2Eテストの実行
+      - name: Run E2E tests
+        run: pnpm test:e2e
+      
+      # 環境情報の出力 (Copilot agent参考用)
+      - name: Output environment info
+        run: |
+          echo "## GitHub Copilot Agent環境情報" >> $GITHUB_STEP_SUMMARY
+          echo "- Node.js: $(node --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- pnpm: $(pnpm --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- TypeScript: $(pnpm exec tsc --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- 依存関係の確認完了" >> $GITHUB_STEP_SUMMARY
+          echo "- テスト実行完了" >> $GITHUB_STEP_SUMMARY
+          echo "- ビルド実行完了" >> $GITHUB_STEP_SUMMARY
+
+  # Copilot agent用のコードカバレッジレポート
+  code-coverage:
+    name: コードカバレッジレポート
+    runs-on: ubuntu-latest
+    needs: setup-environment
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      # カバレッジ付きでテスト実行
+      - name: Run tests with coverage
+        run: pnpm test --coverage
+      
+      # カバレッジレポートのアップロード (将来的にCodecovなど)
+      - name: Upload coverage info
+        run: |
+          echo "## テストカバレッジ情報" >> $GITHUB_STEP_SUMMARY
+          echo "テストカバレッジの詳細は coverage/ ディレクトリを参照" >> $GITHUB_STEP_SUMMARY
+
+  # セキュリティチェック (Copilot agent用)
+  security-check:
+    name: セキュリティチェック
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+      
+      - name: Security audit
+        run: pnpm audit --audit-level moderate
+      
+      - name: Check for vulnerable dependencies
+        run: |
+          echo "## セキュリティ監査結果" >> $GITHUB_STEP_SUMMARY
+          echo "依存関係のセキュリティチェック完了" >> $GITHUB_STEP_SUMMARY

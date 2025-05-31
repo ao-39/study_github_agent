@@ -1,0 +1,118 @@
+{
+  "name": "GitHub Copilot Agent開発環境",
+  "description": "GitHub Copilot agentとの効率的な開発のための統合環境",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  
+  // VS Code設定
+  "customizations": {
+    "vscode": {
+      // GitHub Copilot開発に最適化された拡張機能
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-playwright.playwright",
+        "ms-vscode.vscode-json",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "ms-vscode.vscode-css-peek"
+      ],
+      
+      // ワークスペース設定
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "typescript.preferences.includePackageJsonAutoImports": "auto",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true,
+          "source.organizeImports": true
+        },
+        "eslint.workingDirectories": [
+          {
+            "pattern": "apps/*"
+          }
+        ],
+        "prettier.configPath": "./apps/app/.prettierrc",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        
+        // GitHub Copilot設定
+        "github.copilot.enable": {
+          "*": true,
+          "plaintext": false,
+          "markdown": true,
+          "typescript": true,
+          "typescriptreact": true,
+          "javascript": true,
+          "javascriptreact": true
+        },
+        "github.copilot.advanced": {
+          "debug.overrideEngine": "copilot-codex",
+          "debug.testOverrideProxyUrl": "",
+          "debug.overrideProxyUrl": ""
+        },
+        
+        // Playwright設定
+        "playwright.showTrace": true,
+        "playwright.reuseBrowser": true,
+        
+        // ファイル除外設定
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.pnpm-store": true,
+          "**/coverage": true
+        },
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/dist": true,
+          "**/.pnpm-store": true,
+          "**/coverage": true,
+          "**/pnpm-lock.yaml": true
+        }
+      }
+    }
+  },
+  
+  // 環境変数
+  "containerEnv": {
+    "NODE_ENV": "development",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "false"
+  },
+  
+  // フォワードするポート
+  "forwardPorts": [5173, 9323],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    },
+    "9323": {
+      "label": "Playwright UI",
+      "onAutoForward": "silent"
+    }
+  },
+  
+  // コンテナ起動後の処理
+  "postCreateCommand": "echo '🎉 GitHub Copilot Agent開発環境の準備完了！' && pnpm --version && node --version",
+  
+  // ライフサイクルコマンド
+  "postStartCommand": "echo '🚀 開発環境が起動しました。pnpm dev でアプリケーションを開始できます。'",
+  
+  // ユーザー設定
+  "remoteUser": "root",
+  "updateRemoteUserUID": false,
+  
+  // 機能設定
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    }
+  }
+}
