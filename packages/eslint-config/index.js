@@ -6,8 +6,7 @@ module.exports = {
     node: true
   },
   extends: [
-    'eslint:recommended',
-    '@typescript-eslint/recommended'
+    'eslint:recommended'
   ],
   ignorePatterns: [
     'dist',
@@ -24,19 +23,14 @@ module.exports = {
   },
   plugins: [
     '@typescript-eslint',
-    'react-hooks',
-    'react-refresh'
+    'react-hooks'
   ],
   rules: {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'warn',
     'no-console': 'warn',
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true }
-    ]
+    'react-hooks/exhaustive-deps': 'warn'
   },
   settings: {
     react: {
