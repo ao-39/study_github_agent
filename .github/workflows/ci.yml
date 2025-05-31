@@ -65,3 +65,9 @@ jobs:
 
       - name: テスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
+
+      - name: Playwrightブラウザのインストール
+        run: pnpm --filter app exec playwright install --with-deps chromium
+
+      - name: E2Eテスト実行
+        run: pnpm --filter app test:e2e:chromium

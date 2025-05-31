@@ -73,7 +73,7 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 packages/にそれぞれ設定ファイルを入れます。
 
 ### テスト
-- **E2Eテスト**: playwrightを利用してテストを作成していきます（標準装備）
+- **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
 - **モック**: mswを利用します
 
 ### ビルドツール
@@ -96,6 +96,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 5. **型チェック**: `pnpm type-check` (TypeScript)
 6. **ビルド**: `pnpm build` (Vite + TypeScript)
 7. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
+8. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
 
 #### パフォーマンス最適化
 - **pnpmキャッシュ**: 依存関係のインストール時間を大幅短縮
@@ -107,6 +108,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 - **TypeScriptエラー0件**: 型安全性の保証
 - **ビルド成功**: 本番環境への展開可能性確認
 - **テスト通過**: 全ての自動テストが正常に実行
+- **E2Eテスト通過**: ブラウザ実行環境での統合テストが正常に実行
 
 ## 環境要件
 
@@ -238,7 +240,7 @@ pnpm create-package <package-name>
 - ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
 - ✅ CI/CDパイプラインの構築完了（GitHub Actions）
 - 📋 共有ライブラリパッケージの作成（予定）
-- 📋 E2Eテスト環境の構築（予定）
+- 📋 E2Eテストの拡充（CI統合済み）
 
 ### 次のマイルストーン
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
