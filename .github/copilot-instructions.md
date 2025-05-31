@@ -284,7 +284,7 @@ packages/
 #### CI実行項目と順序
 1. **環境セットアップ**: Node.js 18 + pnpm 10.11.0の準備
 2. **キャッシュ復元**: pnpmストアとTurborepoキャッシュの活用
-3. **依存関係インストール**: `pnpm install --frozen-lockfile`
+3. **依存関係インストール**: `pnpm install
 4. **リンティング**: `pnpm lint` (ESLint)
 5. **フォーマットチェック**: Prettier + package.json順序チェック
 6. **型チェック**: `pnpm type-check` (TypeScript)
