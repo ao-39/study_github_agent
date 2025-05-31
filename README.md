@@ -91,7 +91,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 
 #### CI実行項目
 **通常のCI/CD環境**:
-1. **環境セットアップ**: Node.js 18 + pnpm 8.15.0
+1. **環境セットアップ**: Node.js 18 + pnpm 10.11.0
 2. **依存関係インストール**: `pnpm install --frozen-lockfile`
 3. **リンティング**: `pnpm lint` (ESLint)
 4. **フォーマットチェック**: Prettier + package.json順序チェック

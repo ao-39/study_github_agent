@@ -282,7 +282,7 @@ packages/
 - **手動実行**: 必要に応じて任意のタイミングでの実行
 
 #### CI実行項目と順序
-1. **環境セットアップ**: Node.js 18 + pnpm 8.15.0の準備
+1. **環境セットアップ**: Node.js 18 + pnpm 10.11.0の準備
 2. **キャッシュ復元**: pnpmストアとTurborepoキャッシュの活用
 3. **依存関係インストール**: `pnpm install --frozen-lockfile`
 4. **リンティング**: `pnpm lint` (ESLint)

@@ -23,7 +23,7 @@ jobs:
       - name: pnpmのセットアップ
         uses: pnpm/action-setup@v4
         with:
-          version: 8.15.0
+          version: 10.11.0
 
       - name: pnpmストアディレクトリの取得
         shell: bash
