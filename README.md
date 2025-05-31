@@ -155,6 +155,9 @@ pnpm lint
 # フォーマット
 pnpm format
 
+# package.jsonのフォーマット
+pnpm run format:package
+
 # スペルチェック
 pnpm spell-check
 
@@ -205,6 +208,12 @@ pnpm create-package <package-name>
 - **コミットメッセージ**: 日本語で記述
 - **コード**: 変数名・関数名は英語、コメントは日本語
 - **GitHub Copilot**: 積極的に活用し、学習記録を残す
+
+### package.jsonの管理規約
+- **パッケージバージョン**: `^`や`~`は使用せず、具体的なバージョンを指定
+- **プロパティ順序**: `sort-package-json`を使用して自動的に標準順序でソート
+- **フォーマット**: `pnpm run format`実行時にpackage.jsonも自動整列
+- **依存関係の追加**: 新しい依存関係追加後は必ず`pnpm run format:package`を実行
 
 ### 学習記録
 開発過程でのGitHub Copilot agentとのやり取りや学習内容を記録し、ナレッジを蓄積していきます。
