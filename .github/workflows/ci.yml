@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: 継続的インテグレーション
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.jsのセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: pnpmのセットアップ
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.0
+
+      - name: pnpmストアディレクトリの取得
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: pnpmキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Turborepoキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: 依存関係のインストール
+        run: pnpm install --frozen-lockfile
+
+      - name: リンティング
+        run: pnpm lint
+
+      - name: フォーマットチェック
+        run: |
+          pnpm exec turbo run lint:format
+          pnpm run format:package --check
+
+      - name: 型チェック
+        run: pnpm type-check
+
+      - name: ビルド
+        run: pnpm build
+
+      - name: テスト実行
+        run: pnpm exec turbo run test -- --passWithNoTests
