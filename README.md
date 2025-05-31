@@ -167,8 +167,19 @@ pnpm --filter app build
 # テスト実行
 pnpm --filter app test
 
-# E2Eテスト実行
+# E2Eテスト実行（Playwright）
 pnpm --filter app test:e2e
+
+# 特定のブラウザでのE2Eテスト実行
+pnpm --filter app test:e2e:chromium   # Chromiumのみ
+pnpm --filter app test:e2e:firefox    # Firefoxのみ
+pnpm --filter app test:e2e:webkit     # Safari（WebKit）のみ
+
+# Playwrightテスト（UIモード）
+pnpm --filter app test:e2e:ui
+
+# Playwrightテスト（ヘッド付きモード）
+pnpm --filter app test:e2e:headed
 ```
 
 ### 開発ツール
@@ -234,7 +245,7 @@ pnpm create-package <package-name>
 2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
 3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化
 4. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
-5. **テスト環境の構築** - Playwright E2E、Vitest単体テスト
+5. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 
 ## コントリビューション
 
