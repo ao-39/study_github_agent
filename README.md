@@ -82,10 +82,31 @@ packages/にそれぞれ設定ファイルを入れます。
 - **turbo**: monorepoのタスクランナーとして利用します
 
 ### CI/CD
-- **GitHub Actions**: 継続的インテグレーション・継続的デプロイメントを実現します
-- **自動実行**: Pull Request作成時とmainブランチへのpush時に自動実行
-- **実行項目**: lint、format、type-check、build、testの包括的チェック
-- **キャッシュ最適化**: pnpmストアとTurborepoキャッシュで高速実行
+GitHub Actionsを使用して包括的なCI/CDパイプラインを構築しています。
+
+#### 実行タイミング
+- **Pull Request作成時**: コードレビュー前の自動品質チェック
+- **mainブランチプッシュ時**: マージ後の最終確認と本番展開準備
+
+#### CI実行項目
+1. **環境セットアップ**: Node.js 18 + pnpm 8.15.0
+2. **依存関係インストール**: `pnpm install --frozen-lockfile`
+3. **リンティング**: `pnpm lint` (ESLint)
+4. **フォーマットチェック**: Prettier + package.json順序チェック
+5. **型チェック**: `pnpm type-check` (TypeScript)
+6. **ビルド**: `pnpm build` (Vite + TypeScript)
+7. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
+
+#### パフォーマンス最適化
+- **pnpmキャッシュ**: 依存関係のインストール時間を大幅短縮
+- **Turborepoキャッシュ**: ビルド・テスト結果をキャッシュして増分実行
+- **monorepo対応**: 変更されたパッケージのみ効率的に処理
+
+#### 品質ゲート
+- **ESLintエラー0件**: コーディング規約の完全遵守
+- **TypeScriptエラー0件**: 型安全性の保証
+- **ビルド成功**: 本番環境への展開可能性確認
+- **テスト通過**: 全ての自動テストが正常に実行
 
 ## 環境要件
 
@@ -166,6 +187,22 @@ pnpm spell-check
 
 # 型チェック
 pnpm type-check
+```
+
+### CI/CD関連コマンド
+```bash
+# CI全体の実行（ローカルでのCI環境再現）
+pnpm ci
+
+# フォーマットチェック（CIと同じ）
+pnpm exec turbo run lint:format
+pnpm run format:package --check
+
+# ビルドとテストの並列実行
+pnpm exec turbo run build test
+
+# 全パッケージでのテスト実行（テストファイル未存在でもOK）
+pnpm exec turbo run test -- --passWithNoTests
 ```
 
 ### monorepo操作
