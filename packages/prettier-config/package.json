@@ -1,0 +1,22 @@
+{
+  "name": "@study-github-agent/prettier-config",
+  "version": "0.1.0",
+  "description": "Prettier設定パッケージ",
+  "keywords": [
+    "prettier",
+    "config",
+    "formatting"
+  ],
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "echo 'No build step required for config package'",
+    "lint": "echo 'No lint step required for config package'"
+  },
+  "peerDependencies": {
+    "prettier": "^3.0.0"
+  }
+}

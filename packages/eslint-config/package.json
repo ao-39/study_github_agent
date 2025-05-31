@@ -1,0 +1,24 @@
+{
+  "name": "@study-github-agent/eslint-config",
+  "version": "0.1.0",
+  "description": "ESLint設定パッケージ",
+  "keywords": [
+    "eslint",
+    "config",
+    "typescript",
+    "react"
+  ],
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "echo 'No build step required for config package'",
+    "lint": "echo 'No lint step required for config package'"
+  },
+  "peerDependencies": {
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0"
+  }
+}
