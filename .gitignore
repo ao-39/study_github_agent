@@ -14,6 +14,10 @@ dist
 build
 *.tgz
 
+# Bundle analysis reports
+bundle-report.html
+stats.html
+
 # Runtime data
 pids
 *.pid
