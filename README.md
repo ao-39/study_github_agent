@@ -114,7 +114,11 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 
 ### テスト
 - **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
-- **単体テスト**: vitestを利用してReactコンポーネントのテストを実行
+  - **HTMLレポート**: テスト実行時に詳細なHTMLレポートを自動生成
+  - **スクリーンショット**: 失敗時の画面状態を自動キャプチャ
+  - **マルチブラウザ対応**: Chromium、Firefox、Safariでの動作確認
+- **ユニットテスト**: vitestを利用してReactコンポーネントやロジックをテスト
+  - **カバレッジレポート**: テストカバレッジの詳細HTMLレポート生成
 - **コードカバレッジ**: vitestで自動カバレッジ計測、HTMLレポート生成対応
 - **モック**: mswを利用します
 
@@ -140,6 +144,20 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 6. **ビルド**: `pnpm build` (Vite + TypeScript)
 7. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
 8. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
+
+#### テストレポートArtifacts
+Pull Request作成時には、テスト結果の詳細なHTMLレポートがGitHub ArtifactsとしてPRに自動添付されます。
+
+**保存されるレポート**:
+- **Vitestテストレポート**: ユニットテストの実行結果、カバレッジ情報、実行時間詳細
+- **Playwrightテストレポート**: E2Eテストの実行結果、スクリーンショット、各ブラウザでの動作確認結果
+
+**レポートの確認方法**:
+1. PRページでCIが完了後、自動コメントのリンクからGitHub Actionsページにアクセス
+2. ページ下部の「Artifacts」セクションからHTMLレポートをダウンロード
+3. ローカルでHTMLファイルを開いて詳細な結果を確認
+
+**保存期間**: 14日間
 
 #### パフォーマンス最適化
 - **pnpmキャッシュ**: 依存関係のインストール時間を大幅短縮
@@ -256,7 +274,15 @@ pnpm --filter app test:e2e:ui
 
 # Playwrightテスト（ヘッド付きモード）
 pnpm --filter app test:e2e:headed
+
+# PlaywrightのHTMLレポート表示（テスト実行後）
+pnpm --filter app exec playwright show-report
 ```
+
+**Playwrightテストレポートについて**:
+- テスト実行後、`apps/app/playwright-report/`にHTMLレポートが生成されます
+- レポートには実行結果、スクリーンショット、実行ログが含まれます
+- `playwright show-report`コマンドでブラウザでレポートを表示できます
 
 ### 開発ツール
 ```bash
