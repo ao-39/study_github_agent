@@ -4,24 +4,19 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
-# GitHub Pagesへのデプロイに必要な権限を設定
 permissions:
-  contents: read
   pages: write
   id-token: write
   pull-requests: write
 
 # 同時実行の制御（メインブランチのデプロイを優先）
 concurrency:
-  group: "pages-${{ github.ref }}"
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  # ビルドジョブ
   build:
-    name: GitHub Pages用ビルド
     runs-on: ubuntu-latest
     steps:
       - name: リポジトリのチェックアウト
@@ -62,61 +57,53 @@ jobs:
         run: pnpm install
 
       - name: GitHub Pages用ビルド実行
-        run: GITHUB_PAGES=true pnpm --filter app build
-
-      - name: GitHub Pagesの設定
-        uses: actions/configure-pages@v5
+        run: |
+          GITHUB_PAGES=true pnpm --filter app build
+          touch apps/app/dist/.nojekyll
 
       - name: ビルド成果物のアップロード
         uses: actions/upload-pages-artifact@v3
         with:
           path: apps/app/dist
 
-  # メインブランチの場合のみデプロイ
   deploy:
-    name: GitHub Pagesへのデプロイ
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
+    environment: github-pages
     if: github.ref == 'refs/heads/main'
     steps:
       - name: GitHub Pagesへのデプロイ
-        id: deployment
         uses: actions/deploy-pages@v4
 
-  # PRの場合はプレビューURLコメントを追加
+  # PRの場合はビルド確認コメントを追加
   preview-comment:
-    name: プレビューURLコメント
+    name: ビルド確認コメント
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'pull_request'
     steps:
-      - name: PRにプレビューURLをコメント
+      - name: PRにビルド確認をコメント
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ## 🌐 GitHub Pagesデプロイメント
+            ## ✅ GitHub Pagesビルド完了
 
             PR #${{ github.event.pull_request.number }} のGitHub Pagesビルドが完了しました！
-
-            ### 📱 プレビューについて
-            **注意**: このPRはプレビューのみビルドされます。実際のデプロイはメインブランチにマージ後に実行されます。
-
-            ### 🚀 本番デプロイメント
-            **本番URL**: https://ao-39.github.io/study_github_agent/
-
-            メインブランチにマージされると、上記URLで最新のアプリケーションが公開されます。
 
             ### 📦 ビルド成果物
             このPRのビルド成果物は [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) の「Artifacts」セクションからダウンロードできます。
 
+            ### 🚀 デプロイメントについて
+            **本番URL**: https://ao-39.github.io/study_github_agent/
+
+            メインブランチにマージされると、上記URLで最新のアプリケーションが自動デプロイされます。
+
             ### ⚙️ ビルド設定
-            - **ベースパス**: `/study_github_agent/`（GitHub Pages用）
+            - **ベースパス**: `/study_github_agent/`
             - **ビルドツール**: Vite
             - **フレームワーク**: React + TypeScript
+            - **SPA対応**: .nojekyll ファイル追加済み
 
             ---
-            *このコメントは自動で生成されました。メインブランチにマージすると本番環境にデプロイされます。*
+            *このコメントは自動で生成されました。*
