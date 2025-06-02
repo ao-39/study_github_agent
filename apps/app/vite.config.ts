@@ -13,6 +13,10 @@ export default defineConfig({
     sourcemap: true,
   },
   test: {
+    // テスト環境設定
+    environment: 'jsdom',
+    setupFiles: ['./src/test-setup.ts'],
+    globals: true,
     // Playwrightテストファイルを除外
     exclude: [
       '**/node_modules/**',
