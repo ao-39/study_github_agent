@@ -173,6 +173,22 @@ Pull Request作成時には、テスト結果の詳細なHTMLレポートがGitH
 - **テスト通過**: 全ての自動テストが正常に実行
 - **E2Eテスト通過**: ブラウザ実行環境での統合テストが正常に実行
 
+#### GitHub Pages自動デプロイ
+mainブランチへのプッシュ時に、apps/appのビルド成果物をGitHub Pagesに自動デプロイします。
+
+**デプロイ機能**:
+- **本番デプロイ**: mainブランチのマージ時に自動実行
+- **PRプレビュー**: Pull Request作成時にビルド確認とコメント投稿
+- **GitHub Pages用最適化**: ベースパス設定による正しいリソース参照
+- **自動URL通知**: PRコメントで本番デプロイメントURLを表示
+
+**デプロイメントURL**: https://ao-39.github.io/study_github_agent/
+
+**PRでの確認プロセス**:
+1. PR作成時にGitHub Pages用ビルドが実行される
+2. ビルド成功後、PRに自動コメントでデプロイメント情報が投稿される
+3. メインブランチにマージされると本番環境に自動デプロイされる
+
 #### リリース自動化
 mainブランチへのプッシュ時に、apps/appのビルド成果物と各種テストレポートを含むGitHub Releaseを自動作成します。
 
@@ -407,6 +423,7 @@ pnpm create-package <package-name>
 - ✅ リリース自動化の実装完了（GitHub Release Assets）
 - ✅ 共有ライブラリパッケージの作成完了（ESLint・Prettier設定）
 - ✅ E2Eテストの構築完了（CI統合済み）
+- ✅ GitHub Pages自動デプロイの実装完了（本番・PR対応）
 
 ### 次のマイルストーン
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
@@ -416,6 +433,7 @@ pnpm create-package <package-name>
 5. ✅ **リリース自動化** - mainブランチプッシュ時のGitHub Release Assets自動作成
 6. ✅ **共有ライブラリの作成** - packages/下に基本的なESLint・Prettier設定ライブラリ
 7. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
+8. ✅ **GitHub Pages自動デプロイ** - apps/appのビルド成果物の自動公開
 
 ## コントリビューション
 

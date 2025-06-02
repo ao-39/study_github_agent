@@ -4,6 +4,8 @@ import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // GitHub Pages用のベースパス設定
+  base: process.env.GITHUB_PAGES === 'true' ? '/study_github_agent/' : '/',
   plugins: [
     react(),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
