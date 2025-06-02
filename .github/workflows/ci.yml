@@ -76,18 +76,12 @@ jobs:
       - name: ビルド
         run: pnpm build
 
-      - name: ビルド成果物のzip化（PR時のみ）
-        if: github.event_name == 'pull_request'
-        run: |
-          cd apps/app
-          zip -r dist-${{ github.sha }}.zip dist/
-
       - name: ビルド成果物のArtifactsアップロード（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ github.sha }}
-          path: apps/app/dist-${{ github.sha }}.zip
+          name: build-artifacts-${{ github.event.pull_request.number }}
+          path: apps/app/dist/
           retention-days: 14
 
       - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ）
@@ -102,7 +96,7 @@ jobs:
 
             **📦 ダウンロードはこちら👉** [Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
 
-            - **ファイル名**: `dist-${{ github.sha }}`
+            - **ファイル名**: `build-artifacts-${{ github.event.pull_request.number }}`
             - **保存期間**: 14日間
             - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
 
