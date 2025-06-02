@@ -92,6 +92,22 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
           rm -f audit_output.json
 
+      - name: 古いパッケージ調査実行
+        if: github.event_name == 'pull_request'
+        id: outdated
+        run: |
+          # pnpm outdatedの実行とJSON結果の取得（全ワークスペースを対象）
+          pnpm outdated --format json --recursive > outdated_output.json 2>/dev/null || true
+          if [ -s outdated_output.json ] && jq empty outdated_output.json 2>/dev/null; then
+            outdated_result=$(cat outdated_output.json)
+          else
+            outdated_result='{}'
+          fi
+          echo "outdated_result<<EOF" >> $GITHUB_OUTPUT
+          echo "$outdated_result" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          rm -f outdated_output.json
+
       - name: バンドル分析レポート生成（PR時のみ）
         if: github.event_name == 'pull_request'
         run: cd apps/app && ANALYZE=true pnpm vite build
@@ -181,15 +197,36 @@ jobs:
           has_advisories=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r 'if .advisories == {} then "false" else "true" end')
           echo "has_advisories=$has_advisories" >> $GITHUB_OUTPUT
 
+      - name: 古いパッケージ結果を解析・準備
+        if: github.event_name == 'pull_request'
+        id: parse-outdated
+        run: |
+          # outdated結果が空でないかチェック
+          has_outdated=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'if . == {} then "false" else "true" end')
+          echo "has_outdated=$has_outdated" >> $GITHUB_OUTPUT
+          
+          if [ "$has_outdated" = "true" ]; then
+            # 古いパッケージの数をカウント
+            outdated_count=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'keys | length')
+            echo "outdated_count=$outdated_count" >> $GITHUB_OUTPUT
+            
+            # パッケージ名一覧を取得（表示用）
+            outdated_packages=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'keys | join(", ")')
+            echo "outdated_packages=$outdated_packages" >> $GITHUB_OUTPUT
+          else
+            echo "outdated_count=0" >> $GITHUB_OUTPUT
+            echo "outdated_packages=" >> $GITHUB_OUTPUT
+          fi
+
       - name: セキュリティ監査結果をPRにコメント（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ## 🔒 依存パッケージセキュリティ監査結果
+            ## 🔒 依存パッケージセキュリティ監査 & パッケージ更新状況
 
-            PR #${{ github.event.pull_request.number }} のセキュリティ監査が完了しました！
+            PR #${{ github.event.pull_request.number }} のセキュリティ監査と依存パッケージの更新状況確認が完了しました！
 
             ### 📊 監査サマリー
             **📦 調査対象**: ${{ steps.parse-audit.outputs.total_deps }}件の依存パッケージ
@@ -203,6 +240,33 @@ jobs:
             - ℹ️ **Info**: ${{ steps.parse-audit.outputs.info }}件
 
             ${{ steps.parse-audit.outputs.total_vulns == '0' && '✅ **セキュリティ問題は検出されませんでした！** 依存パッケージは安全です。' || '⚠️ **セキュリティ問題が検出されました。** 詳細は下記をご確認ください。' }}
+
+            ### 📈 パッケージ更新状況
+            **🔄 古いパッケージ**: ${{ steps.parse-outdated.outputs.outdated_count }}件
+
+            ${{ steps.parse-outdated.outputs.outdated_count == '0' && '✅ **すべてのパッケージが最新です！** 更新が必要なパッケージはありません。' || '📦 **更新可能なパッケージがあります：** ' }}${{ steps.parse-outdated.outputs.outdated_count != '0' && steps.parse-outdated.outputs.outdated_packages || '' }}
+
+            ${{ steps.parse-outdated.outputs.has_outdated == 'true' && '### 📋 古いパッケージの詳細
+
+            <details>
+            <summary>📄 詳細な更新情報（クリックで展開）</summary>
+
+            ```json
+            ' || '' }}${{ steps.parse-outdated.outputs.has_outdated == 'true' && steps.outdated.outputs.outdated_result || '' }}${{ steps.parse-outdated.outputs.has_outdated == 'true' && '```
+
+            </details>
+
+            ### 🛠️ パッケージ更新方法
+            ```bash
+            # 全パッケージの更新確認
+            pnpm outdated
+
+            # 特定のパッケージを更新
+            pnpm update <package-name>
+
+            # 全パッケージを安全に更新（セマンティックバージョニング範囲内）
+            pnpm update
+            ```' || '' }}
 
             ${{ steps.parse-audit.outputs.has_advisories == 'true' && '### 🔍 検出された脆弱性の詳細
 
@@ -223,14 +287,15 @@ jobs:
             pnpm audit --ignore <CVE-ID>
             ```' || '' }}
 
-            ### 💡 セキュリティ監査について
-            - **監査ツール**: pnpm audit
-            - **データソース**: npm security advisories
+            ### 💡 監査・更新チェックについて
+            - **セキュリティ監査ツール**: pnpm audit
+            - **パッケージ更新チェックツール**: pnpm outdated
+            - **データソース**: npm security advisories, npm registry
             - **実行タイミング**: PR作成・更新時
-            - **対象**: dependencies, devDependencies, optionalDependencies
+            - **対象**: dependencies, devDependencies, optionalDependencies（全ワークスペース）
 
             ---
-            *このセキュリティ監査結果は自動で生成されました。重要な脆弱性が検出された場合は適切に対処してください。*
+            *このセキュリティ監査・パッケージ更新状況レポートは自動で生成されました。重要な脆弱性が検出された場合は適切に対処し、古いパッケージがある場合は更新を検討してください。*
 
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
