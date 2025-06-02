@@ -19,6 +19,18 @@ pnpm add -D @study-github-agent/eslint-config
 
 ### 設定
 
+**ESLint 9.x（Flat Config）を使用する場合（推奨）：**
+
+`eslint.config.js`ファイルで以下のように設定してください：
+
+```javascript
+import config from '@study-github-agent/eslint-config'
+
+export default config
+```
+
+**ESLint 8.x（Legacy Config）を使用する場合：**
+
 `.eslintrc.cjs`ファイルで以下のように設定してください：
 
 ```javascript
@@ -26,6 +38,8 @@ module.exports = {
   extends: ['@study-github-agent/eslint-config']
 }
 ```
+
+**注意：** ESLint 9.x以降では、Flat Config形式が標準となっています。新規プロジェクトではFlat Config形式の使用を推奨します。
 
 ## 含まれるルール
 
@@ -37,8 +51,8 @@ module.exports = {
 
 ## 必要な依存関係
 
-- eslint ^8.0.0
-- @typescript-eslint/parser ^6.0.0
+- eslint ^9.0.0
+- @typescript-eslint/parser ^8.0.0
 
 Reactプロジェクトで使用する場合は追加で以下が必要です：
 
