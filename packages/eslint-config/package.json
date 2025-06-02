@@ -8,8 +8,8 @@
     "typescript",
     "react"
   ],
-  "main": "index.js",
   "type": "module",
+  "main": "index.js",
   "files": [
     "index.js",
     "README.md"
