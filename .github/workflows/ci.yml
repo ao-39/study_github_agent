@@ -175,13 +175,15 @@ jobs:
         if: github.event_name == 'pull_request'
         id: parse-audit
         run: |
-          # audit結果からメタデータ情報を抽出
-          total_deps=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.totalDependencies')
-          critical=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.critical')
-          high=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.high')
-          moderate=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.moderate')
-          low=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.low')
-          info=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.info')
+          # audit結果からメタデータ情報を抽出（安全なJSON処理）
+          echo '${{ steps.audit.outputs.audit_result }}' > audit_temp.json
+          
+          total_deps=$(jq -r '.metadata.totalDependencies' audit_temp.json)
+          critical=$(jq -r '.metadata.vulnerabilities.critical' audit_temp.json)
+          high=$(jq -r '.metadata.vulnerabilities.high' audit_temp.json)
+          moderate=$(jq -r '.metadata.vulnerabilities.moderate' audit_temp.json)
+          low=$(jq -r '.metadata.vulnerabilities.low' audit_temp.json)
+          info=$(jq -r '.metadata.vulnerabilities.info' audit_temp.json)
           
           total_vulns=$((critical + high + moderate + low + info))
           
@@ -194,29 +196,37 @@ jobs:
           echo "total_vulns=$total_vulns" >> $GITHUB_OUTPUT
           
           # advisoriesが空でないかチェック
-          has_advisories=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r 'if .advisories == {} then "false" else "true" end')
+          has_advisories=$(jq -r 'if .advisories == {} then "false" else "true" end' audit_temp.json)
           echo "has_advisories=$has_advisories" >> $GITHUB_OUTPUT
+          
+          # 一時ファイルを削除
+          rm -f audit_temp.json
 
       - name: 古いパッケージ結果を解析・準備
         if: github.event_name == 'pull_request'
         id: parse-outdated
         run: |
-          # outdated結果が空でないかチェック
-          has_outdated=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'if . == {} then "false" else "true" end')
+          # outdated結果が空でないかチェック（安全なJSON処理）
+          echo '${{ steps.outdated.outputs.outdated_result }}' > outdated_temp.json
+          
+          has_outdated=$(jq -r 'if . == {} then "false" else "true" end' outdated_temp.json)
           echo "has_outdated=$has_outdated" >> $GITHUB_OUTPUT
           
           if [ "$has_outdated" = "true" ]; then
             # 古いパッケージの数をカウント
-            outdated_count=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'keys | length')
+            outdated_count=$(jq -r 'keys | length' outdated_temp.json)
             echo "outdated_count=$outdated_count" >> $GITHUB_OUTPUT
             
             # パッケージ名一覧を取得（表示用）
-            outdated_packages=$(echo '${{ steps.outdated.outputs.outdated_result }}' | jq -r 'keys | join(", ")')
+            outdated_packages=$(jq -r 'keys | join(", ")' outdated_temp.json)
             echo "outdated_packages=$outdated_packages" >> $GITHUB_OUTPUT
           else
             echo "outdated_count=0" >> $GITHUB_OUTPUT
             echo "outdated_packages=" >> $GITHUB_OUTPUT
           fi
+          
+          # 一時ファイルを削除
+          rm -f outdated_temp.json
 
       - name: セキュリティ監査結果をPRにコメント（PR時のみ）
         if: github.event_name == 'pull_request'
