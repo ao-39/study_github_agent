@@ -174,9 +174,11 @@ jobs:
       - name: セキュリティ監査結果を解析・準備
         if: github.event_name == 'pull_request'
         id: parse-audit
+        env:
+          AUDIT_RESULT: ${{ steps.audit.outputs.audit_result }}
         run: |
-          # audit結果からメタデータ情報を抽出（安全なJSON処理）
-          echo '${{ steps.audit.outputs.audit_result }}' > audit_temp.json
+          # audit結果からメタデータ情報を抽出（環境変数経由で安全にJSON処理）
+          echo "$AUDIT_RESULT" > audit_temp.json
           
           total_deps=$(jq -r '.metadata.totalDependencies' audit_temp.json)
           critical=$(jq -r '.metadata.vulnerabilities.critical' audit_temp.json)
@@ -205,9 +207,11 @@ jobs:
       - name: 古いパッケージ結果を解析・準備
         if: github.event_name == 'pull_request'
         id: parse-outdated
+        env:
+          OUTDATED_RESULT: ${{ steps.outdated.outputs.outdated_result }}
         run: |
-          # outdated結果が空でないかチェック（安全なJSON処理）
-          echo '${{ steps.outdated.outputs.outdated_result }}' > outdated_temp.json
+          # outdated結果が空でないかチェック（環境変数経由で安全にJSON処理）
+          echo "$OUTDATED_RESULT" > outdated_temp.json
           
           has_outdated=$(jq -r 'if . == {} then "false" else "true" end' outdated_temp.json)
           echo "has_outdated=$has_outdated" >> $GITHUB_OUTPUT
