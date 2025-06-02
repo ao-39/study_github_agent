@@ -8,6 +8,8 @@ pnpm-lock.yaml
 coverage
 test-results
 playwright-report
+playwright-results
+*-results.json
 
 # Production
 dist
