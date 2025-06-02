@@ -126,7 +126,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 
 #### 実行タイミング
 - **Pull Request作成時**: コードレビュー前の自動品質チェック
-- **mainブランチプッシュ時**: マージ後の最終確認と本番展開準備
+- **mainブランチプッシュ時**: マージ後の最終確認と本番展開準備、リリース作成
 
 #### CI実行項目
 **通常のCI/CD環境**:
@@ -150,6 +150,21 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 - **ビルド成功**: 本番環境への展開可能性確認
 - **テスト通過**: 全ての自動テストが正常に実行
 - **E2Eテスト通過**: ブラウザ実行環境での統合テストが正常に実行
+
+#### リリース自動化
+mainブランチへのプッシュ時に、apps/appのビルド成果物を含むGitHub Releaseを自動作成します。
+
+**リリース機能**:
+- **自動タグ付け**: `v{run_number}` 形式でのタグ作成
+- **ビルド成果物添付**: apps/appのdistディレクトリをzipファイルとして添付
+- **リリースノート生成**: コミット履歴を基にした自動リリースノート作成
+- **永続的なダウンロードURL**: `/releases/latest` から常に最新版を取得可能
+
+**ダウンロード方法**:
+```bash
+# 最新のビルド成果物を取得
+curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/build-artifacts.zip -o build-artifacts.zip
+```
 
 #### GitHub Copilot Coding Agent 環境設定
 このリポジトリはGitHub Copilot coding agentに対応した開発環境設定を提供しています。
@@ -294,6 +309,7 @@ pnpm create-package <package-name>
 - ✅ Reactアプリケーションの実装完了（Vite + React + TypeScript）
 - ✅ CI/CDパイプラインの構築完了（GitHub Actions）
 - ✅ 共有設定パッケージの作成完了（ESLint・Prettier）
+- ✅ リリース自動化の実装完了（GitHub Release Assets）
 - 📋 共有ライブラリパッケージの作成（予定）
 - 📋 E2Eテストの拡充（CI統合済み）
 
@@ -302,8 +318,9 @@ pnpm create-package <package-name>
 2. ✅ **Reactアプリケーションの作成** - apps/appディレクトリにVite + Reactアプリケーション
 3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化
 4. ✅ **共有設定パッケージの作成** - ESLint・Prettierの設定パッケージ
-5. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
-6. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
+5. ✅ **リリース自動化** - mainブランチプッシュ時のGitHub Release Assets自動作成
+6. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
+7. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 
 ## コントリビューション
 
