@@ -11,7 +11,7 @@
 **重要**: プロジェクトの詳細なアーキテクチャと技術スタックについてはREADME.mdを必ず参照してください。
 
 ### 技術スタック
-- React アプリケーション（monorepo構成でapps/app配下に構築予定）
+- React アプリケーション（monorepo構成でapps/app配下に構築済み）
 - JavaScript/TypeScript
 
 ## コーディング規約
@@ -282,7 +282,7 @@ packages/
 - **手動実行**: 必要に応じて任意のタイミングでの実行
 
 #### CI実行項目と順序
-1. **環境セットアップ**: Node.js 18 + pnpm 10.11.0の準備
+1. **環境セットアップ**: Node.js 24 + pnpm 10.11.0の準備
 2. **キャッシュ復元**: pnpmストアとTurborepoキャッシュの活用
 3. **依存関係インストール**: `pnpm install
 4. **リンティング**: `pnpm lint` (ESLint)
