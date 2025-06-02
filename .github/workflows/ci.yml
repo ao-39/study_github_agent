@@ -116,6 +116,8 @@ jobs:
               - **内容**: Vitestユニットテストの詳細HTMLレポート
             - **📈 バンドル分析レポート**: `bundle-analysis-report-${{ github.event.pull_request.number }}`
               - **内容**: JavaScriptバンドルサイズの詳細分析（rollup-plugin-visualizer）
+            - **🎭 Playwrightテストレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテスト（Playwright）の詳細HTMLレポート
             - **保存期間**: 14日間
 
             **📋 ダウンロード手順：**
@@ -124,11 +126,8 @@ jobs:
             3. 必要なファイルをダウンロード
 
             **📊 テストレポートについて：**
-            Vitestテストレポートには以下の情報が含まれています：
-            - テスト実行結果の詳細
-            - テストカバレッジ情報
-            - 各テストケースの実行時間
-            - 失敗したテストの詳細情報
+            - **Vitestレポート**: ユニットテストの実行結果、カバレッジ情報、実行時間、失敗詳細
+            - **Playwrightレポート**: E2Eテストの実行結果、スクリーンショット、実行ログ、各ブラウザでの結果
 
             **📈 バンドル分析レポートについて：**
             バンドル分析レポートには以下の情報が含まれています：
@@ -157,3 +156,11 @@ jobs:
 
       - name: E2Eテスト実行
         run: pnpm --filter app test:e2e:chromium
+
+      - name: PlaywrightテストレポートのArtifactsアップロード（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ github.event.pull_request.number }}
+          path: apps/app/playwright-report/
+          retention-days: 14
