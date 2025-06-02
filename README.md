@@ -119,6 +119,7 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
   - **マルチブラウザ対応**: Chromium、Firefox、Safariでの動作確認
 - **ユニットテスト**: vitestを利用してReactコンポーネントやロジックをテスト
   - **カバレッジレポート**: テストカバレッジの詳細HTMLレポート生成
+- **コードカバレッジ**: vitestで自動カバレッジ計測、HTMLレポート生成対応
 - **モック**: mswを利用します
 
 ### ビルドツール
@@ -256,6 +257,9 @@ pnpm --filter app build
 
 # テスト実行
 pnpm --filter app test
+
+# テスト実行（コードカバレッジ付き）
+pnpm --filter app test:coverage
 
 # E2Eテスト実行（Playwright）
 pnpm --filter app test:e2e
