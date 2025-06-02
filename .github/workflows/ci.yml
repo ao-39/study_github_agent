@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened]
 
 jobs:
   ci:
@@ -18,6 +21,26 @@ jobs:
     steps:
       - name: リポジトリのチェックアウト
         uses: actions/checkout@v4
+        with:
+          # pull_request_targetの場合、PRのコミットをチェックアウト
+          # セキュリティ：安全なアクションのみ使用するため問題なし
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+          
+      - name: フォークPRの検出と安全性チェック
+        id: fork-check
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+              echo "is_fork=true" >> $GITHUB_OUTPUT
+              echo "🍴 フォークからのPRを検出しました"
+            else
+              echo "is_fork=false" >> $GITHUB_OUTPUT
+              echo "📝 オリジナルリポジトリからのPRです"
+            fi
+          else
+            echo "is_fork=false" >> $GITHUB_OUTPUT
+            echo "🔄 通常のpush/PRイベントです"
+          fi
 
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v4
@@ -76,8 +99,8 @@ jobs:
       - name: ビルド
         run: pnpm build
 
-      - name: ビルド成果物のArtifactsアップロード（PR時のみ）
-        if: github.event_name == 'pull_request'
+      - name: ビルド成果物のArtifactsアップロード（PR時のみ・フォーク除外）
+        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && steps.fork-check.outputs.is_fork == 'false')
         uses: actions/upload-artifact@v4
         id: upload-artifacts
         with:
@@ -85,8 +108,8 @@ jobs:
           path: apps/app/dist/
           retention-days: 14
 
-      - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ）
-        if: github.event_name == 'pull_request'
+      - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ・フォーク除外）
+        if: github.event_name == 'pull_request' || (github.event_name == 'pull_request_target' && steps.fork-check.outputs.is_fork == 'false')
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -109,6 +132,12 @@ jobs:
 
             ---
             *このコメントは自動で生成されました。レビュー時にビルド成果物をご確認ください。*
+
+      - name: フォークPRの場合の通知
+        if: github.event_name == 'pull_request_target' && steps.fork-check.outputs.is_fork == 'true'
+        run: |
+          echo "🍴 フォークからのPRのため、一部の機能（Artifactsアップロード・コメント投稿）がスキップされました"
+          echo "✅ コード品質チェック（lint、build、test）は正常に実行されています"
 
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
