@@ -174,18 +174,34 @@ Pull Request作成時には、テスト結果の詳細なHTMLレポートがGitH
 - **E2Eテスト通過**: ブラウザ実行環境での統合テストが正常に実行
 
 #### リリース自動化
-mainブランチへのプッシュ時に、apps/appのビルド成果物を含むGitHub Releaseを自動作成します。
+mainブランチへのプッシュ時に、apps/appのビルド成果物と各種テストレポートを含むGitHub Releaseを自動作成します。
 
 **リリース機能**:
 - **自動タグ付け**: `v{run_number}` 形式でのタグ作成
 - **ビルド成果物添付**: apps/appのdistディレクトリをzipファイルとして添付
+- **テストレポート添付**: Vitest、Playwright、バンドル分析レポートを添付
 - **リリースノート生成**: コミット履歴を基にした自動リリースノート作成
 - **永続的なダウンロードURL**: `/releases/latest` から常に最新版を取得可能
+
+**含まれるファイル**:
+- **study-github-agent-app-v{run_number}.zip**: アプリケーションのビルド成果物
+- **vitest-report-v{run_number}.zip**: Vitestユニットテストの詳細HTMLレポート
+- **playwright-report-v{run_number}.zip**: Playwright E2Eテストの詳細HTMLレポート
+- **bundle-analysis-report-v{run_number}.zip**: JavaScriptバンドルサイズ分析レポート
 
 **ダウンロード方法**:
 ```bash
 # 最新のビルド成果物を取得
-curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/build-artifacts.zip -o build-artifacts.zip
+curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/study-github-agent-app-v*.zip -o study-github-agent-app.zip
+
+# 最新のVitestレポートを取得
+curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/vitest-report-v*.zip -o vitest-report.zip
+
+# 最新のPlaywrightレポートを取得
+curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/playwright-report-v*.zip -o playwright-report.zip
+
+# 最新のバンドル分析レポートを取得
+curl -L https://github.com/ao-39/study_github_agent/releases/latest/download/bundle-analysis-report-v*.zip -o bundle-analysis-report.zip
 ```
 
 #### GitHub Copilot Coding Agent 環境設定

@@ -54,33 +54,80 @@ jobs:
       - name: apps/appのビルド
         run: pnpm --filter app build
 
+      - name: Vitestテスト実行とレポート生成
+        run: pnpm exec turbo run test -- --passWithNoTests
+
+      - name: バンドル分析レポート生成
+        run: cd apps/app && ANALYZE=true pnpm vite build
+
+      - name: Playwrightブラウザのインストール
+        run: pnpm --filter app exec playwright install --with-deps chromium
+
+      - name: Playwrightテスト実行とレポート生成
+        run: pnpm --filter app test:e2e:chromium
+        continue-on-error: true
+
+      - name: Playwrightレポートディレクトリの作成（失敗時対応）
+        run: |
+          cd apps/app
+          if [ ! -d "playwright-report" ]; then
+            mkdir -p playwright-report
+            echo "<html><body><h1>Playwrightテストが実行されませんでした</h1><p>テストが失敗した可能性があります。</p></body></html>" > playwright-report/index.html
+          fi
+
       - name: ビルド成果物の圧縮
         run: |
           cd apps/app
-          zip -r ../../build-artifacts.zip dist/
+          zip -r ../../study-github-agent-app-v${{ github.run_number }}.zip dist/
+
+      - name: Vitestテストレポートの圧縮
+        run: |
+          cd apps/app
+          zip -r ../../vitest-report-v${{ github.run_number }}.zip test-results/
+
+      - name: Playwrightテストレポートの圧縮
+        run: |
+          cd apps/app
+          zip -r ../../playwright-report-v${{ github.run_number }}.zip playwright-report/
+
+      - name: バンドル分析レポートの圧縮
+        run: |
+          cd apps/app
+          zip ../../bundle-analysis-report-v${{ github.run_number }}.zip bundle-report.html
 
       - name: GitHub Release の作成とアセット添付
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ github.run_number }}
           name: "Build ${{ github.run_number }}"
-          artifacts: "build-artifacts.zip"
+          artifacts: |
+            study-github-agent-app-v${{ github.run_number }}.zip
+            vitest-report-v${{ github.run_number }}.zip
+            playwright-report-v${{ github.run_number }}.zip
+            bundle-analysis-report-v${{ github.run_number }}.zip
           generateReleaseNotes: true
           body: |
             ## 🚀 Study GitHub Agent - Release Build ${{ github.run_number }}
 
-            このリリースには、mainブランチの最新コミット（${{ github.sha }}）に基づいたapps/appのビルド成果物が含まれています。
+            このリリースには、mainブランチの最新コミット（${{ github.sha }}）に基づいたapps/appのビルド成果物と各種テストレポートが含まれています。
 
             ### 📦 含まれるファイル
-            - **build-artifacts.zip**: apps/appのVite + Reactビルド成果物
+            - **study-github-agent-app-v${{ github.run_number }}.zip**: apps/appのVite + Reactビルド成果物
               - index.html
               - CSS、JavaScriptファイル
               - 静的アセット
+            - **vitest-report-v${{ github.run_number }}.zip**: Vitestユニットテストの詳細HTMLレポート
+              - テスト実行結果、カバレッジ情報、実行時間詳細
+            - **playwright-report-v${{ github.run_number }}.zip**: Playwright E2Eテストの詳細HTMLレポート
+              - E2Eテスト実行結果、スクリーンショット、各ブラウザでの動作確認結果
+            - **bundle-analysis-report-v${{ github.run_number }}.zip**: JavaScriptバンドルサイズ分析レポート
+              - rollup-plugin-visualizerによる詳細なサイズ分析とツリーマップ表示
 
             ### 📋 使用方法
-            1. 下記の「Assets」セクションから `build-artifacts.zip` をダウンロード
+            1. 下記の「Assets」セクションから必要なファイルをダウンロード
             2. ZIPファイルを展開
-            3. Webサーバーにファイルを配置して公開
+            3. **アプリケーション**: Webサーバーにファイルを配置して公開
+            4. **レポート**: HTMLファイルをブラウザで開いて詳細を確認
 
             ### 🔗 関連情報
             - **コミット**: ${{ github.sha }}
