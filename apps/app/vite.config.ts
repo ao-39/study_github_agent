@@ -18,9 +18,24 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
     // レポーター設定
-    reporter: process.env.CI ? ['default', 'html'] : 'default',
+    reporter: process.env.CI ? ['default', 'html'] : ['default', 'html'],
     outputFile: {
       html: './test-results/index.html',
+    },
+    // コードカバレッジ設定
+    coverage: {
+      enabled: true,
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      reportsDirectory: './test-results/coverage',
+      exclude: [
+        'coverage/**',
+        'dist/**',
+        '**/node_modules/**',
+        '**/src/e2e/**', // E2Eテストディレクトリを除外
+        '**/*.config.*',
+        '**/test-setup.ts',
+      ],
     },
     // Playwrightテストファイルを除外
     exclude: [
