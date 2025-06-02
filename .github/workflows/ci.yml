@@ -340,13 +340,12 @@ jobs:
           path: apps/app/playwright-report/
           retention-days: 14
 
-  # GitHub Pagesデプロイ（mainブランチのみ）
+  # GitHub Pagesデプロイ（全CI実行時）
   deploy:
     name: GitHub Pagesデプロイ
     needs: ci
     runs-on: ubuntu-latest
     environment: github-pages
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: GitHub Pagesへのデプロイ
         uses: actions/deploy-pages@v4
@@ -375,7 +374,7 @@ jobs:
             ### 🚀 デプロイメントについて
             **本番URL**: https://ao-39.github.io/study_github_agent/
 
-            メインブランチにマージされると、上記URLで最新のアプリケーションが自動デプロイされます。
+            このPRがマージされると、上記URLで最新のアプリケーションが自動デプロイされます。
 
             ### ⚙️ ビルド設定
             - **ベースパス**: `/study_github_agent/`
