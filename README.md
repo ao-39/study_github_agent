@@ -23,6 +23,9 @@ study_github_agent/
 │   └── copilot-instructions.md # GitHub Copilotの動作設定
 ├── apps/                       # アプリケーションパッケージ
 │   └── app/                    # Reactアプリケーション（Vite + React + TypeScript）
+├── docs/                       # プロジェクトドキュメント
+│   ├── github-pages-setup.md  # GitHub Pages設定ガイド
+│   └── cloudflare-pages-setup.md # Cloudflare Pages設定ガイド
 ├── packages/                   # 共有ライブラリパッケージ（予定）
 ├── package.json                # monorepo設定とTurborepo
 ├── pnpm-workspace.yaml         # pnpm workspace設定
@@ -47,6 +50,11 @@ appsのパッケージから利用される共有ライブラリパッケージ�
 現在の共有パッケージ：
 - `eslint-config/`: ESLint設定パッケージ（@study-github-agent/eslint-config）
 - `prettier-config/`: Prettier設定パッケージ（@study-github-agent/prettier-config）
+
+#### `docs/`
+プロジェクトの設定ガイドやドキュメントを格納するディレクトリです。
+- `github-pages-setup.md`: GitHub Pages自動デプロイの設定ガイド
+- `cloudflare-pages-setup.md`: Cloudflare Pages自動デプロイの設定ガイド
 
 ## アーキテクチャ
 
@@ -188,6 +196,32 @@ mainブランチへのプッシュ時に、apps/appのビルド成果物をGitHu
 1. PR作成時にGitHub Pages用ビルドが実行される
 2. ビルド成功後、PRに自動コメントでデプロイメント情報が投稿される
 3. メインブランチにマージされると本番環境に自動デプロイされる
+
+#### Cloudflare Pages自動デプロイ
+Pull Request作成時とmainブランチマージ時に、apps/appのビルド成果物をCloudflare Pagesに自動デプロイします。
+
+**デプロイ機能**:
+- **PRプレビューデプロイ**: Pull Request作成・更新時に自動的にプレビュー環境を構築
+- **本番デプロイ**: mainブランチマージ時に本番環境へ自動デプロイ
+- **自動コメント**: PRにプレビューURLとデプロイ情報を自動投稿
+- **ブランチ別環境**: PRごとに独立したプレビュー環境を提供
+- **高速CDN**: Cloudflareのグローバルネットワークによる高速配信
+
+**デプロイメントURL**:
+- **本番環境**: https://study-github-agent.pages.dev
+- **プレビュー環境**: https://{branch-name}--study-github-agent.pages.dev
+
+**PRでの確認プロセス**:
+1. PR作成時にCloudflare Pagesワークフローが自動実行される
+2. アプリケーションがビルドされ、Cloudflare Pagesにデプロイされる
+3. PRに自動コメントでプレビューURLとデプロイ情報が投稿される
+4. プレビューURLから即座にアプリケーションを確認可能
+5. メインブランチにマージされると本番環境に自動デプロイされる
+
+**設定要件**:
+- Cloudflare API Token (GitHub Secrets: `CLOUDFLARE_API_TOKEN`)
+- Cloudflare Account ID (GitHub Secrets: `CLOUDFLARE_ACCOUNT_ID`)
+- 詳細な設定手順: [Cloudflare Pages設定ガイド](docs/cloudflare-pages-setup.md)
 
 #### リリース自動化
 mainブランチへのプッシュ時に、apps/appのビルド成果物と各種テストレポートを含むGitHub Releaseを自動作成します。
