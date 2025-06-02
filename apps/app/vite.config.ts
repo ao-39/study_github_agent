@@ -17,6 +17,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
+    // レポーター設定
+    reporter: process.env.CI ? ['default', 'html'] : 'default',
+    outputFile: {
+      html: './test-results/index.html',
+    },
     // Playwrightテストファイルを除外
     exclude: [
       '**/node_modules/**',

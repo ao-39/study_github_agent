@@ -98,20 +98,37 @@ jobs:
             **📦 ダウンロードはこちら👉** [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             **Artifactsセクションから以下のファイルをダウンロードできます：**
-            - **ファイル名**: `build-artifacts-${{ github.event.pull_request.number }}`
+            - **ビルド成果物**: `build-artifacts-${{ github.event.pull_request.number }}`
+              - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
+            - **📊 Vitestテストレポート**: `vitest-html-report-${{ github.event.pull_request.number }}`
+              - **内容**: Vitestユニットテストの詳細HTMLレポート
             - **保存期間**: 14日間
-            - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
 
             **📋 ダウンロード手順：**
             1. 上記のリンクをクリックしてActions実行ページを開く
             2. ページ下部の「Artifacts」セクションを確認
-            3. `build-artifacts-${{ github.event.pull_request.number }}` ファイルをダウンロード
+            3. 必要なファイルをダウンロード
+
+            **📊 テストレポートについて：**
+            Vitestテストレポートには以下の情報が含まれています：
+            - テスト実行結果の詳細
+            - テストカバレッジ情報
+            - 各テストケースの実行時間
+            - 失敗したテストの詳細情報
 
             ---
-            *このコメントは自動で生成されました。レビュー時にビルド成果物をご確認ください。*
+            *このコメントは自動で生成されました。レビュー時にビルド成果物やテストレポートをご確認ください。*
 
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
+
+      - name: Vitestテストレポートの成果物アップロード（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-html-report-${{ github.event.pull_request.number }}
+          path: apps/app/test-results/
+          retention-days: 14
 
       - name: Playwrightブラウザのインストール
         if: steps.playwright-cache.outputs.cache-hit != 'true'

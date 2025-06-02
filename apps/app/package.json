@@ -38,6 +38,7 @@
     "@types/react-dom": "19.1.5",
     "@typescript-eslint/parser": "8.33.0",
     "@vitejs/plugin-react": "4.5.0",
+    "@vitest/ui": "^3.1.4",
     "eslint": "9.28.0",
     "jsdom": "26.1.0",
     "prettier": "3.5.3",
