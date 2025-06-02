@@ -72,7 +72,7 @@ jobs:
       - name: ビルド
         run: pnpm build
 
-      - name: テスト実行
+      - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
 
       - name: Playwrightブラウザのインストール

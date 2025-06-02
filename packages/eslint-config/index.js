@@ -90,5 +90,63 @@ export default [
         version: 'detect'
       }
     }
+  },
+  
+  // テストファイル用の設定
+  {
+    files: [
+      '**/*.test.{js,jsx,ts,tsx}',
+      '**/*.spec.{js,jsx,ts,tsx}',
+      '**/test-setup.{js,ts}'
+    ],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true
+        }
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
+        describe: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+        vitest: 'readonly'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh
+    },
+    rules: {
+      // ESLint basic rules
+      'no-unused-vars': 'off',
+      'no-console': 'warn',
+      
+      // TypeScript rules
+      '@typescript-eslint/no-unused-vars': 'warn',
+      
+      // React Hooks rules
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
+      
+      // React Refresh rules
+      'react-refresh/only-export-components': 'warn'
+    },
+    settings: {
+      react: {
+        version: 'detect'
+      }
+    }
   }
 ]
