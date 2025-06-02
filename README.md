@@ -126,6 +126,7 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 - **vite**: ビルドツールとして利用します
 - **vitest**: テストランナーとして利用します
 - **turbo**: monorepoのタスクランナーとして利用します
+- **rollup-plugin-visualizer**: バンドルサイズ分析とレポート生成に利用します
 
 ### CI/CD
 GitHub Actionsを使用して包括的なCI/CDパイプラインを構築しています。
@@ -142,8 +143,9 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 4. **フォーマットチェック**: Prettier + package.json順序チェック
 5. **型チェック**: `pnpm type-check` (TypeScript)
 6. **ビルド**: `pnpm build` (Vite + TypeScript)
-7. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
-8. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
+7. **バンドル分析レポート生成**: `pnpm build:analyze` (rollup-plugin-visualizer, PR時のみ)
+8. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
+9. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
 
 #### テストレポートArtifacts
 Pull Request作成時には、テスト結果の詳細なHTMLレポートがGitHub ArtifactsとしてPRに自動添付されます。
@@ -198,6 +200,27 @@ Copilot agentは独自の一時的な開発環境でコードの探索、変更�
 この環境は通常のCI/CDとは独立して動作し、最新の技術スタックを使用して効率的な開発をサポートします。
 
 **手動テスト**: リポジトリの「Actions」タブから `Copilot Setup Steps` ワークフローを手動実行してセットアップをテストできます。
+
+#### バンドル分析機能
+PR作成時にJavaScriptバンドルのサイズ分析を自動実行し、詳細なレポートを提供します。
+
+**機能内容**:
+- **バンドル分析レポート**: rollup-plugin-visualizerによる詳細なサイズ分析
+- **自動レポート生成**: PR作成時にCI環境で自動実行
+- **Artifactsダウンロード**: GitHub ActionsからHTMLレポートをダウンロード可能
+- **ツリーマップ表示**: 依存関係とファイルサイズの視覚的な表示
+
+**CI/CDでの実行フロー**:
+1. PR作成時にバンドル分析ビルドを実行
+2. `bundle-report.html` ファイルを生成
+3. GitHub Artifactsにレポートをアップロード
+4. PRコメントでダウンロードリンクと分析結果の説明を自動投稿
+
+**レポート内容**:
+- JavaScriptバンドルサイズの詳細内訳
+- 依存関係ライブラリのサイズ貢献度
+- gzip・brotli圧縮後のサイズ比較
+- パフォーマンス最適化の指針
 
 ## 環境要件
 
@@ -255,6 +278,9 @@ pnpm --filter app dev
 # ビルド
 pnpm --filter app build
 
+# バンドル分析付きビルド
+pnpm --filter app build:analyze
+
 # テスト実行
 pnpm --filter app test
 
@@ -301,6 +327,28 @@ pnpm spell-check
 # 型チェック
 pnpm type-check
 ```
+
+### バンドル分析
+バンドルサイズの分析には`rollup-plugin-visualizer`を使用しています。
+
+```bash
+# バンドル分析付きビルド実行
+pnpm --filter app build:analyze
+
+# 生成されたレポートを確認
+# apps/app/bundle-report.html をブラウザで開く
+```
+
+**バンドル分析レポートの内容：**
+- **ツリーマップ表示**: ファイルサイズの視覚的な表示
+- **依存関係の詳細**: 各ライブラリのサイズ内訳
+- **圧縮サイズ比較**: gzip・brotli圧縮後のサイズ
+- **最適化の指針**: 大きなファイルの特定と最適化箇所の発見
+
+**CI/CDでの活用：**
+- PR作成時に自動でバンドル分析レポートを生成
+- GitHub ArtifactsからHTMLレポートをダウンロード可能
+- バンドルサイズの変化をレビュー時に確認可能
 
 ### CI/CD関連コマンド
 ```bash
