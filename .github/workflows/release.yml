@@ -1,0 +1,91 @@
+name: Release (main)
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    name: リリース作成とアセット添付
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.jsのセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: pnpmのセットアップ
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11.0
+
+      - name: pnpmストアディレクトリの取得
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: pnpmキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Turborepoキャッシュの設定
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: 依存関係のインストール
+        run: pnpm install
+
+      - name: apps/appのビルド
+        run: pnpm --filter app build
+
+      - name: ビルド成果物の圧縮
+        run: |
+          cd apps/app
+          zip -r ../../build-artifacts.zip dist/
+
+      - name: GitHub Release の作成とアセット添付
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ github.run_number }}
+          name: "Build ${{ github.run_number }}"
+          artifacts: "build-artifacts.zip"
+          generateReleaseNotes: true
+          body: |
+            ## 🚀 Study GitHub Agent - Release Build ${{ github.run_number }}
+
+            このリリースには、mainブランチの最新コミット（${{ github.sha }}）に基づいたapps/appのビルド成果物が含まれています。
+
+            ### 📦 含まれるファイル
+            - **build-artifacts.zip**: apps/appのVite + Reactビルド成果物
+              - index.html
+              - CSS、JavaScriptファイル
+              - 静的アセット
+
+            ### 📋 使用方法
+            1. 下記の「Assets」セクションから `build-artifacts.zip` をダウンロード
+            2. ZIPファイルを展開
+            3. Webサーバーにファイルを配置して公開
+
+            ### 🔗 関連情報
+            - **コミット**: ${{ github.sha }}
+            - **ブランチ**: main
+            - **ビルド日時**: ${{ github.run_started_at }}
+
+            ---
+            *このリリースはGitHub Actionsによって自動生成されました。*
