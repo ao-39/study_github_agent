@@ -23,7 +23,7 @@ describe('GitHub Pages デプロイメント設定', () => {
 
     // index.htmlを確認
     const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8')
-    
+
     // 通常のビルドでは / ベースパス
     expect(indexHtml).toContain('href="/vite.svg"')
     expect(indexHtml).toContain('src="/assets/')
@@ -37,7 +37,7 @@ describe('GitHub Pages デプロイメント設定', () => {
 
     // index.htmlを確認
     const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8')
-    
+
     // GitHub Pages用ビルドでは /study_github_agent/ ベースパス
     expect(indexHtml).toContain('href="/study_github_agent/vite.svg"')
     expect(indexHtml).toContain('src="/study_github_agent/assets/')
@@ -51,10 +51,12 @@ describe('GitHub Pages デプロイメント設定', () => {
 
     // 必要なファイルの存在確認
     const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8')
-    
+
     expect(indexHtml).toContain('<!doctype html>')
     expect(indexHtml).toContain('<title>Study GitHub Agent</title>')
-    expect(indexHtml).toContain('GitHub Copilot agentを学習するためのReactアプリケーション')
+    expect(indexHtml).toContain(
+      'GitHub Copilot agentを学習するためのReactアプリケーション'
+    )
     expect(indexHtml).toContain('<div id="root"></div>')
   })
 })
