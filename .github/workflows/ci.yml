@@ -340,14 +340,16 @@ jobs:
           path: apps/app/playwright-report/
           retention-days: 14
 
-  # GitHub Pagesデプロイ（全CI実行時）
+  # GitHub Pagesデプロイ（mainブランチのみ）
   deploy:
     name: GitHub Pagesデプロイ
     needs: ci
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: github-pages
     permissions:
       pages: write
+      id-token: write
     steps:
       - name: GitHub Pagesへのデプロイ
         uses: actions/deploy-pages@v4
