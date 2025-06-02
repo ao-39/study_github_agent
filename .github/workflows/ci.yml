@@ -72,6 +72,20 @@ jobs:
       - name: ビルド
         run: pnpm build
 
+      - name: ビルド成果物のzip化（PR時のみ）
+        if: github.event_name == 'pull_request'
+        run: |
+          cd apps/app
+          zip -r dist-${{ github.sha }}.zip dist/
+
+      - name: ビルド成果物のArtifactsアップロード（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: apps/app/dist-${{ github.sha }}.zip
+          retention-days: 14
+
       - name: テスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
 
