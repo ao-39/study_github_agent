@@ -114,6 +114,8 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 
 ### テスト
 - **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
+- **単体テスト**: vitestを利用してReactコンポーネントのテストを実行
+- **コードカバレッジ**: vitestで自動カバレッジ計測、HTMLレポート生成対応
 - **モック**: mswを利用します
 
 ### ビルドツール
@@ -237,6 +239,9 @@ pnpm --filter app build
 
 # テスト実行
 pnpm --filter app test
+
+# テスト実行（コードカバレッジ付き）
+pnpm --filter app test:coverage
 
 # E2Eテスト実行（Playwright）
 pnpm --filter app test:e2e
