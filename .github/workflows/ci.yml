@@ -6,11 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-# 同時実行の制御（GitHub Pagesデプロイを含むため）
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   ci:
     name: 継続的インテグレーション
@@ -19,8 +14,6 @@ jobs:
       issues: write
       pull-requests: write
       contents: read
-      pages: write
-      id-token: write
 
     steps:
       - name: リポジトリのチェックアウト
@@ -82,16 +75,6 @@ jobs:
 
       - name: ビルド
         run: pnpm build
-
-      - name: GitHub Pages用ビルド実行
-        run: |
-          GITHUB_PAGES=true pnpm --filter app build
-          touch apps/app/dist/.nojekyll
-
-      - name: ビルド成果物のアップロード（GitHub Pages）
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: apps/app/dist
 
       - name: セキュリティ監査実行
         if: github.event_name == 'pull_request'
@@ -339,52 +322,3 @@ jobs:
           name: playwright-html-report-${{ github.event.pull_request.number }}
           path: apps/app/playwright-report/
           retention-days: 14
-
-  # GitHub Pagesデプロイ（mainブランチのみ）
-  deploy:
-    name: GitHub Pagesデプロイ
-    needs: ci
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: github-pages
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - name: GitHub Pagesへのデプロイ
-        uses: actions/deploy-pages@v4
-
-  # PRの場合はGitHub Pagesビルド確認コメントを追加
-  pages-preview-comment:
-    name: GitHub Pagesビルド確認コメント
-    runs-on: ubuntu-latest
-    needs: ci
-    if: github.event_name == 'pull_request'
-    permissions:
-      pull-requests: write
-    steps:
-      - name: PRにGitHub Pagesビルド確認をコメント
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            ## ✅ GitHub Pagesビルド完了
-
-            PR #${{ github.event.pull_request.number }} のGitHub Pagesビルドが完了しました！
-
-            ### 📦 ビルド成果物
-            このPRのビルド成果物は [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) の「Artifacts」セクションからダウンロードできます。
-
-            ### 🚀 デプロイメントについて
-            **本番URL**: https://ao-39.github.io/study_github_agent/
-
-            このPRがマージされると、上記URLで最新のアプリケーションが自動デプロイされます。
-
-            ### ⚙️ ビルド設定
-            - **ベースパス**: `/study_github_agent/`
-            - **ビルドツール**: Vite
-            - **フレームワーク**: React + TypeScript
-            - **SPA対応**: .nojekyll ファイル追加済み
-
-            ---
-            *このコメントは自動で生成されました。*
