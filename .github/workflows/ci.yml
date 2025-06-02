@@ -201,7 +201,7 @@ jobs:
           low=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.low')
           info=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.info')
           
-          total_vulns=$((critical + high + moderate + low + info))
+          total_vulns=$((${critical:-0} + ${high:-0} + ${moderate:-0} + ${low:-0} + ${info:-0}))
           
           echo "total_deps=$total_deps" >> $GITHUB_OUTPUT
           echo "critical=$critical" >> $GITHUB_OUTPUT
@@ -389,7 +389,7 @@ jobs:
           playwright_failed=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.failed // 0')
           playwright_flaky=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.flaky // 0')
           playwright_skipped=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.skipped // 0')
-          playwright_total=$((playwright_passed + playwright_failed + playwright_flaky + playwright_skipped))
+          playwright_total=$((${playwright_passed:-0} + ${playwright_failed:-0} + ${playwright_flaky:-0} + ${playwright_skipped:-0}))
           
           # 失敗したE2Eテストの詳細を取得
           playwright_failed_tests=""
