@@ -1,0 +1,142 @@
+# GitHub Dependabot設定ファイル
+# monorepo環境用の依存関係自動更新設定
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # ルートレベルの依存関係（monorepo管理用パッケージ）
+  # turbo、sort-package-json等のmonorepo運用ツールを管理
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    # 同時に開けるPRの上限（管理性を重視）
+    open-pull-requests-limit: 5
+    # 全ての依存関係タイプを更新対象とする
+    allow:
+      - dependency-type: "all"
+    # mainブランチに対してPRを作成
+    target-branch: "main"
+    # 日本語対応のラベル設定
+    labels:
+      - "dependencies"
+      - "monorepo-root"
+    # 日本語を含むコミットメッセージ設定
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # パッケージグループ化（関連パッケージを一括更新）
+    groups:
+      turbo:
+        patterns:
+          - "turbo*"
+      build-tools:
+        patterns:
+          - "sort-package-json"
+
+  # apps/app の依存関係（React アプリケーション）
+  # React、Vite、TypeScript、テストライブラリ等のフロントエンド依存関係を管理
+  - package-ecosystem: "npm"
+    directory: "/apps/app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "all"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "app"
+    commit-message:
+      prefix: "chore(deps-app)"
+      include: "scope"
+    # 関連パッケージのグループ化
+    groups:
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+      vite:
+        patterns:
+          - "vite*"
+          - "@vitejs/*"
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - "vitest*"
+          - "@vitest/*"
+          - "playwright*"
+          - "@playwright/*"
+          - "jsdom"
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "@typescript-eslint/*"
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@eslint/*"
+
+  # packages/eslint-config の依存関係（ESLint設定パッケージ）
+  # ESLint、TypeScript ESLint、React関連のルール等のlinting依存関係を管理
+  - package-ecosystem: "npm"
+    directory: "/packages/eslint-config"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    # 設定パッケージのため制限をやや抑制
+    open-pull-requests-limit: 3
+    allow:
+      - dependency-type: "all"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "eslint-config"
+    commit-message:
+      prefix: "chore(deps-eslint)"
+      include: "scope"
+    # ESLint関連パッケージのグループ化
+    groups:
+      eslint-core:
+        patterns:
+          - "@eslint/*"
+          - "eslint*"
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
+      react-eslint:
+        patterns:
+          - "eslint-plugin-react*"
+      globals:
+        patterns:
+          - "globals"
+
+  # packages/prettier-config の依存関係（Prettier設定パッケージ）
+  # Prettier関連の依存関係を管理（現在はpeer dependenciesのみ）
+  - package-ecosystem: "npm"
+    directory: "/packages/prettier-config"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:30"
+      timezone: "Asia/Tokyo"
+    # 設定パッケージのため制限をやや抑制
+    open-pull-requests-limit: 3
+    allow:
+      - dependency-type: "all"
+    target-branch: "main"
+    labels:
+      - "dependencies"
+      - "prettier-config"
+    commit-message:
+      prefix: "chore(deps-prettier)"
+      include: "scope"
