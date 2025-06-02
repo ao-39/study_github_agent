@@ -23,7 +23,10 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   // レポート設定
-  reporter: 'html',
+  reporter: [['html', { outputFolder: 'playwright-report' }]],
+
+  // テスト成果物の出力ディレクトリ
+  outputDir: 'playwright-results',
 
   // 全てのテストで使用する設定
   use: {
