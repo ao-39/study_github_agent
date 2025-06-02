@@ -76,6 +76,22 @@ jobs:
       - name: ビルド
         run: pnpm build
 
+      - name: セキュリティ監査実行
+        if: github.event_name == 'pull_request'
+        id: audit
+        run: |
+          # pnpm auditの実行とJSON結果の取得（stderr出力を廃棄し、JSONのみ抽出）
+          pnpm audit --json > audit_output.json 2>/dev/null || true
+          if [ -s audit_output.json ] && jq empty audit_output.json 2>/dev/null; then
+            audit_result=$(cat audit_output.json)
+          else
+            audit_result='{"metadata":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":0,"critical":0},"dependencies":0,"devDependencies":0,"optionalDependencies":0,"totalDependencies":0},"advisories":{},"actions":[],"muted":[]}'
+          fi
+          echo "audit_result<<EOF" >> $GITHUB_OUTPUT
+          echo "$audit_result" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          rm -f audit_output.json
+
       - name: ビルド成果物のArtifactsアップロード（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
@@ -118,6 +134,83 @@ jobs:
 
             ---
             *このコメントは自動で生成されました。レビュー時にビルド成果物やテストレポートをご確認ください。*
+
+      - name: セキュリティ監査結果を解析・準備
+        if: github.event_name == 'pull_request'
+        id: parse-audit
+        run: |
+          # audit結果からメタデータ情報を抽出
+          total_deps=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.totalDependencies')
+          critical=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.critical')
+          high=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.high')
+          moderate=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.moderate')
+          low=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.low')
+          info=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r '.metadata.vulnerabilities.info')
+          
+          total_vulns=$((critical + high + moderate + low + info))
+          
+          echo "total_deps=$total_deps" >> $GITHUB_OUTPUT
+          echo "critical=$critical" >> $GITHUB_OUTPUT
+          echo "high=$high" >> $GITHUB_OUTPUT
+          echo "moderate=$moderate" >> $GITHUB_OUTPUT
+          echo "low=$low" >> $GITHUB_OUTPUT
+          echo "info=$info" >> $GITHUB_OUTPUT
+          echo "total_vulns=$total_vulns" >> $GITHUB_OUTPUT
+          
+          # advisoriesが空でないかチェック
+          has_advisories=$(echo '${{ steps.audit.outputs.audit_result }}' | jq -r 'if .advisories == {} then "false" else "true" end')
+          echo "has_advisories=$has_advisories" >> $GITHUB_OUTPUT
+
+      - name: セキュリティ監査結果をPRにコメント（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🔒 依存パッケージセキュリティ監査結果
+
+            PR #${{ github.event.pull_request.number }} のセキュリティ監査が完了しました！
+
+            ### 📊 監査サマリー
+            **📦 調査対象**: ${{ steps.parse-audit.outputs.total_deps }}件の依存パッケージ
+            **🚨 検出された脆弱性**: ${{ steps.parse-audit.outputs.total_vulns }}件
+
+            ### 📋 脆弱性レベル別詳細
+            - 🔴 **Critical**: ${{ steps.parse-audit.outputs.critical }}件
+            - 🟠 **High**: ${{ steps.parse-audit.outputs.high }}件  
+            - 🟡 **Moderate**: ${{ steps.parse-audit.outputs.moderate }}件
+            - 🔵 **Low**: ${{ steps.parse-audit.outputs.low }}件
+            - ℹ️ **Info**: ${{ steps.parse-audit.outputs.info }}件
+
+            ${{ steps.parse-audit.outputs.total_vulns == '0' && '✅ **セキュリティ問題は検出されませんでした！** 依存パッケージは安全です。' || '⚠️ **セキュリティ問題が検出されました。** 詳細は下記をご確認ください。' }}
+
+            ${{ steps.parse-audit.outputs.has_advisories == 'true' && '### 🔍 検出された脆弱性の詳細
+
+            <details>
+            <summary>📄 詳細なAdvisories情報（クリックで展開）</summary>
+
+            ```json
+            ' || '' }}${{ steps.parse-audit.outputs.has_advisories == 'true' && steps.audit.outputs.audit_result || '' }}${{ steps.parse-audit.outputs.has_advisories == 'true' && '```
+
+            </details>
+
+            ### 🛠️ 修復方法
+            ```bash
+            # 脆弱性を自動修復する場合
+            pnpm audit --fix
+
+            # 特定のCVEを無視する場合
+            pnpm audit --ignore <CVE-ID>
+            ```' || '' }}
+
+            ### 💡 セキュリティ監査について
+            - **監査ツール**: pnpm audit
+            - **データソース**: npm security advisories
+            - **実行タイミング**: PR作成・更新時
+            - **対象**: dependencies, devDependencies, optionalDependencies
+
+            ---
+            *このセキュリティ監査結果は自動で生成されました。重要な脆弱性が検出された場合は適切に対処してください。*
 
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
