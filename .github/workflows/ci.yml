@@ -92,6 +92,10 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
           rm -f audit_output.json
 
+      - name: バンドル分析レポート生成（PR時のみ）
+        if: github.event_name == 'pull_request'
+        run: cd apps/app && ANALYZE=true pnpm vite build
+
       - name: ビルド成果物のArtifactsアップロード（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
@@ -99,6 +103,14 @@ jobs:
         with:
           name: build-artifacts-${{ github.event.pull_request.number }}
           path: apps/app/dist/
+          retention-days: 14
+
+      - name: バンドル分析レポートのArtifactsアップロード（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis-report-${{ github.event.pull_request.number }}
+          path: apps/app/bundle-report.html
           retention-days: 14
 
       - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ）
@@ -118,6 +130,10 @@ jobs:
               - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
             - **📊 Vitestテストレポート**: `vitest-html-report-${{ github.event.pull_request.number }}`
               - **内容**: Vitestユニットテストの詳細HTMLレポート
+            - **📈 バンドル分析レポート**: `bundle-analysis-report-${{ github.event.pull_request.number }}`
+              - **内容**: JavaScriptバンドルサイズの詳細分析（rollup-plugin-visualizer）
+            - **🎭 Playwrightテストレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテスト（Playwright）の詳細HTMLレポート
             - **保存期間**: 14日間
 
             **📋 ダウンロード手順：**
@@ -126,14 +142,18 @@ jobs:
             3. 必要なファイルをダウンロード
 
             **📊 テストレポートについて：**
-            Vitestテストレポートには以下の情報が含まれています：
-            - テスト実行結果の詳細
-            - テストカバレッジ情報
-            - 各テストケースの実行時間
-            - 失敗したテストの詳細情報
+            - **Vitestレポート**: ユニットテストの実行結果、カバレッジ情報、実行時間、失敗詳細
+            - **Playwrightレポート**: E2Eテストの実行結果、スクリーンショット、実行ログ、各ブラウザでの結果
+
+            **📈 バンドル分析レポートについて：**
+            バンドル分析レポートには以下の情報が含まれています：
+            - JavaScriptファイルサイズの詳細分析
+            - 依存関係のサイズ内訳（ライブラリ別）
+            - ツリーマップによる視覚的なサイズ表示
+            - gzip・brotli圧縮サイズの比較
 
             ---
-            *このコメントは自動で生成されました。レビュー時にビルド成果物やテストレポートをご確認ください。*
+            *このコメントは自動で生成されました。レビュー時にビルド成果物、テストレポート、バンドル分析レポートをご確認ください。*
 
       - name: セキュリティ監査結果を解析・準備
         if: github.event_name == 'pull_request'
@@ -229,3 +249,11 @@ jobs:
 
       - name: E2Eテスト実行
         run: pnpm --filter app test:e2e:chromium
+
+      - name: PlaywrightテストレポートのArtifactsアップロード（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report-${{ github.event.pull_request.number }}
+          path: apps/app/playwright-report/
+          retention-days: 14

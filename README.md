@@ -114,7 +114,11 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 
 ### テスト
 - **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
-- **単体テスト**: vitestを利用してReactコンポーネントのテストを実行
+  - **HTMLレポート**: テスト実行時に詳細なHTMLレポートを自動生成
+  - **スクリーンショット**: 失敗時の画面状態を自動キャプチャ
+  - **マルチブラウザ対応**: Chromium、Firefox、Safariでの動作確認
+- **ユニットテスト**: vitestを利用してReactコンポーネントやロジックをテスト
+  - **カバレッジレポート**: テストカバレッジの詳細HTMLレポート生成
 - **コードカバレッジ**: vitestで自動カバレッジ計測、HTMLレポート生成対応
 - **モック**: mswを利用します
 
@@ -122,6 +126,7 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 - **vite**: ビルドツールとして利用します
 - **vitest**: テストランナーとして利用します
 - **turbo**: monorepoのタスクランナーとして利用します
+- **rollup-plugin-visualizer**: バンドルサイズ分析とレポート生成に利用します
 
 ### CI/CD
 GitHub Actionsを使用して包括的なCI/CDパイプラインを構築しています。
@@ -138,8 +143,23 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 4. **フォーマットチェック**: Prettier + package.json順序チェック
 5. **型チェック**: `pnpm type-check` (TypeScript)
 6. **ビルド**: `pnpm build` (Vite + TypeScript)
-7. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
-8. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
+7. **バンドル分析レポート生成**: `pnpm build:analyze` (rollup-plugin-visualizer, PR時のみ)
+8. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
+9. **E2Eテスト実行**: `pnpm test:e2e:chromium` (Playwright)
+
+#### テストレポートArtifacts
+Pull Request作成時には、テスト結果の詳細なHTMLレポートがGitHub ArtifactsとしてPRに自動添付されます。
+
+**保存されるレポート**:
+- **Vitestテストレポート**: ユニットテストの実行結果、カバレッジ情報、実行時間詳細
+- **Playwrightテストレポート**: E2Eテストの実行結果、スクリーンショット、各ブラウザでの動作確認結果
+
+**レポートの確認方法**:
+1. PRページでCIが完了後、自動コメントのリンクからGitHub Actionsページにアクセス
+2. ページ下部の「Artifacts」セクションからHTMLレポートをダウンロード
+3. ローカルでHTMLファイルを開いて詳細な結果を確認
+
+**保存期間**: 14日間
 
 #### パフォーマンス最適化
 - **pnpmキャッシュ**: 依存関係のインストール時間を大幅短縮
@@ -180,6 +200,27 @@ Copilot agentは独自の一時的な開発環境でコードの探索、変更�
 この環境は通常のCI/CDとは独立して動作し、最新の技術スタックを使用して効率的な開発をサポートします。
 
 **手動テスト**: リポジトリの「Actions」タブから `Copilot Setup Steps` ワークフローを手動実行してセットアップをテストできます。
+
+#### バンドル分析機能
+PR作成時にJavaScriptバンドルのサイズ分析を自動実行し、詳細なレポートを提供します。
+
+**機能内容**:
+- **バンドル分析レポート**: rollup-plugin-visualizerによる詳細なサイズ分析
+- **自動レポート生成**: PR作成時にCI環境で自動実行
+- **Artifactsダウンロード**: GitHub ActionsからHTMLレポートをダウンロード可能
+- **ツリーマップ表示**: 依存関係とファイルサイズの視覚的な表示
+
+**CI/CDでの実行フロー**:
+1. PR作成時にバンドル分析ビルドを実行
+2. `bundle-report.html` ファイルを生成
+3. GitHub Artifactsにレポートをアップロード
+4. PRコメントでダウンロードリンクと分析結果の説明を自動投稿
+
+**レポート内容**:
+- JavaScriptバンドルサイズの詳細内訳
+- 依存関係ライブラリのサイズ貢献度
+- gzip・brotli圧縮後のサイズ比較
+- パフォーマンス最適化の指針
 
 ## 環境要件
 
@@ -237,6 +278,9 @@ pnpm --filter app dev
 # ビルド
 pnpm --filter app build
 
+# バンドル分析付きビルド
+pnpm --filter app build:analyze
+
 # テスト実行
 pnpm --filter app test
 
@@ -256,7 +300,15 @@ pnpm --filter app test:e2e:ui
 
 # Playwrightテスト（ヘッド付きモード）
 pnpm --filter app test:e2e:headed
+
+# PlaywrightのHTMLレポート表示（テスト実行後）
+pnpm --filter app exec playwright show-report
 ```
+
+**Playwrightテストレポートについて**:
+- テスト実行後、`apps/app/playwright-report/`にHTMLレポートが生成されます
+- レポートには実行結果、スクリーンショット、実行ログが含まれます
+- `playwright show-report`コマンドでブラウザでレポートを表示できます
 
 ### 開発ツール
 ```bash
@@ -275,6 +327,28 @@ pnpm spell-check
 # 型チェック
 pnpm type-check
 ```
+
+### バンドル分析
+バンドルサイズの分析には`rollup-plugin-visualizer`を使用しています。
+
+```bash
+# バンドル分析付きビルド実行
+pnpm --filter app build:analyze
+
+# 生成されたレポートを確認
+# apps/app/bundle-report.html をブラウザで開く
+```
+
+**バンドル分析レポートの内容：**
+- **ツリーマップ表示**: ファイルサイズの視覚的な表示
+- **依存関係の詳細**: 各ライブラリのサイズ内訳
+- **圧縮サイズ比較**: gzip・brotli圧縮後のサイズ
+- **最適化の指針**: 大きなファイルの特定と最適化箇所の発見
+
+**CI/CDでの活用：**
+- PR作成時に自動でバンドル分析レポートを生成
+- GitHub ArtifactsからHTMLレポートをダウンロード可能
+- バンドルサイズの変化をレビュー時に確認可能
 
 ### CI/CD関連コマンド
 ```bash
