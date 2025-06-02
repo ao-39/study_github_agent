@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+# 同時実行の制御（GitHub Pagesデプロイを含むため）
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: リリース作成とアセット添付
@@ -12,6 +17,8 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      pages: write
+      id-token: write
 
     steps:
       - name: リポジトリのチェックアウト
@@ -95,6 +102,16 @@ jobs:
           cd apps/app
           zip ../../bundle-analysis-report-v${{ github.run_number }}.zip bundle-report.html
 
+      - name: GitHub Pages用ビルド実行
+        run: |
+          GITHUB_PAGES=true pnpm --filter app build
+          touch apps/app/dist/.nojekyll
+
+      - name: GitHub Pagesビルド成果物のアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/app/dist
+
       - name: GitHub Release の作成とアセット添付
         uses: ncipollo/release-action@v1
         with:
@@ -110,6 +127,11 @@ jobs:
             ## 🚀 Study GitHub Agent - Release Build ${{ github.run_number }}
 
             このリリースには、mainブランチの最新コミット（${{ github.sha }}）に基づいたapps/appのビルド成果物と各種テストレポートが含まれています。
+
+            ### 🌐 デプロイメント
+            **リリースURL**: https://ao-39.github.io/study_github_agent/
+
+            このリリースは自動的にGitHub Pagesにデプロイされました。上記URLで最新バージョンのアプリケーションをご確認いただけます。
 
             ### 📦 含まれるファイル
             - **study-github-agent-app-v${{ github.run_number }}.zip**: apps/appのVite + Reactビルド成果物
@@ -136,3 +158,16 @@ jobs:
 
             ---
             *このリリースはGitHub Actionsによって自動生成されました。*
+
+  # GitHub Pagesデプロイ
+  deploy:
+    name: GitHub Pagesデプロイ
+    needs: release
+    runs-on: ubuntu-latest
+    environment: github-pages
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: GitHub Pagesへのデプロイ
+        uses: actions/deploy-pages@v4
