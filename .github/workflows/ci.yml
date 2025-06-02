@@ -10,6 +10,10 @@ jobs:
   ci:
     name: 継続的インテグレーション
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
 
     steps:
       - name: リポジトリのチェックアウト
@@ -71,6 +75,40 @@ jobs:
 
       - name: ビルド
         run: pnpm build
+
+      - name: ビルド成果物のArtifactsアップロード（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        id: upload-artifacts
+        with:
+          name: build-artifacts-${{ github.event.pull_request.number }}
+          path: apps/app/dist/
+          retention-days: 14
+
+      - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🚀 ビルド成果物をダウンロード
+
+            PR #${{ github.event.pull_request.number }} のビルド成果物が準備できました！
+
+            **📦 ダウンロードはこちら👉** [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            **Artifactsセクションから以下のファイルをダウンロードできます：**
+            - **ファイル名**: `build-artifacts-${{ github.event.pull_request.number }}`
+            - **保存期間**: 14日間
+            - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
+
+            **📋 ダウンロード手順：**
+            1. 上記のリンクをクリックしてActions実行ページを開く
+            2. ページ下部の「Artifacts」セクションを確認
+            3. `build-artifacts-${{ github.event.pull_request.number }}` ファイルをダウンロード
+
+            ---
+            *このコメントは自動で生成されました。レビュー時にビルド成果物をご確認ください。*
 
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
