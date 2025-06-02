@@ -86,6 +86,25 @@ jobs:
           path: apps/app/dist-${{ github.sha }}.zip
           retention-days: 14
 
+      - name: PRにArtifactsダウンロードリンクをコメント（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🚀 ビルド成果物をダウンロード
+
+            PR #${{ github.event.pull_request.number }} のビルド成果物が準備できました！
+
+            **📦 ダウンロードはこちら👉** [Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts)
+
+            - **ファイル名**: `dist-${{ github.sha }}`
+            - **保存期間**: 14日間
+            - **内容**: apps/appのビルド成果物（HTML、CSS、JavaScript）
+
+            ---
+            *このコメントは自動で生成されました。レビュー時にビルド成果物をご確認ください。*
+
       - name: テスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
 
