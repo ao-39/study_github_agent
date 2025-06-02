@@ -76,6 +76,24 @@ jobs:
       - name: ビルド
         run: pnpm build
 
+      - name: ビルドファイル情報取得（PR時のみ）
+        if: github.event_name == 'pull_request'
+        id: build-info
+        run: |
+          cd apps/app
+          # ビルドファイルの数を取得
+          file_count=$(find dist -type f | wc -l)
+          # 総サイズを取得
+          total_size=$(du -sh dist/ | cut -f1)
+          # 個別ファイルサイズを取得（サイズ順）
+          file_details=$(find dist -type f -exec ls -lh {} \; | awk '{print $5 " " $9}' | sort -hr | head -10)
+          
+          echo "file_count=$file_count" >> $GITHUB_OUTPUT
+          echo "total_size=$total_size" >> $GITHUB_OUTPUT
+          echo "file_details<<EOF" >> $GITHUB_OUTPUT
+          echo "$file_details" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: セキュリティ監査実行
         if: github.event_name == 'pull_request'
         id: audit
@@ -300,6 +318,23 @@ jobs:
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
 
+      - name: VitestテストJSON結果生成（PR時のみ）
+        if: github.event_name == 'pull_request'
+        id: vitest-json
+        run: |
+          cd apps/app
+          # JSON結果を生成（カバレッジを無効にしてJSONのみ出力）
+          pnpm exec vitest --reporter=json --run --silent --coverage=false > vitest-results.json 2>/dev/null || true
+          if [ -s vitest-results.json ] && jq empty vitest-results.json 2>/dev/null; then
+            vitest_result=$(cat vitest-results.json)
+          else
+            vitest_result='{"numTotalTests":0,"numPassedTests":0,"numFailedTests":0,"success":false,"testResults":[]}'
+          fi
+          echo "vitest_result<<EOF" >> $GITHUB_OUTPUT
+          echo "$vitest_result" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          rm -f vitest-results.json
+
       - name: Vitestテストレポートの成果物アップロード（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
@@ -314,6 +349,121 @@ jobs:
 
       - name: E2Eテスト実行
         run: pnpm --filter app test:e2e:chromium
+
+      - name: PlaywrightテストJSON結果生成（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        id: playwright-json
+        run: |
+          cd apps/app
+          # JSON結果を生成（エラーでも継続）
+          timeout 120 pnpm exec playwright test --project=chromium --reporter=json > playwright-results.json 2>/dev/null || true
+          if [ -s playwright-results.json ] && jq empty playwright-results.json 2>/dev/null; then
+            playwright_result=$(cat playwright-results.json)
+          else
+            # Playwrightが失敗した場合のデフォルト結果
+            playwright_result='{"stats":{"passed":0,"failed":0,"flaky":0,"skipped":0,"interrupted":0,"expected":0,"unexpected":0,"duration":0},"suites":[]}'
+          fi
+          echo "playwright_result<<EOF" >> $GITHUB_OUTPUT
+          echo "$playwright_result" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          rm -f playwright-results.json
+
+      - name: テスト結果サマリー解析（PR時のみ）
+        if: github.event_name == 'pull_request'
+        id: test-summary
+        run: |
+          # Vitestテスト結果の解析
+          vitest_total=$(echo '${{ steps.vitest-json.outputs.vitest_result }}' | jq -r '.numTotalTests // 0')
+          vitest_passed=$(echo '${{ steps.vitest-json.outputs.vitest_result }}' | jq -r '.numPassedTests // 0')
+          vitest_failed=$(echo '${{ steps.vitest-json.outputs.vitest_result }}' | jq -r '.numFailedTests // 0')
+          vitest_success=$(echo '${{ steps.vitest-json.outputs.vitest_result }}' | jq -r '.success // false')
+          
+          # 失敗したテストの詳細を取得
+          vitest_failed_tests=""
+          if [ "$vitest_failed" -gt 0 ]; then
+            vitest_failed_tests=$(echo '${{ steps.vitest-json.outputs.vitest_result }}' | jq -r '.testResults[] | select(.status == "failed") | .assertionResults[] | select(.status == "failed") | "- " + .fullName')
+          fi
+          
+          # Playwrightテスト結果の解析
+          playwright_passed=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.passed // 0')
+          playwright_failed=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.failed // 0')
+          playwright_flaky=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.flaky // 0')
+          playwright_skipped=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.stats.skipped // 0')
+          playwright_total=$((playwright_passed + playwright_failed + playwright_flaky + playwright_skipped))
+          
+          # 失敗したE2Eテストの詳細を取得
+          playwright_failed_tests=""
+          if [ "$playwright_failed" -gt 0 ]; then
+            playwright_failed_tests=$(echo '${{ steps.playwright-json.outputs.playwright_result }}' | jq -r '.suites[]?.specs[]?.tests[]? | select(.status == "failed") | "- " + .title')
+          fi
+          
+          echo "vitest_total=$vitest_total" >> $GITHUB_OUTPUT
+          echo "vitest_passed=$vitest_passed" >> $GITHUB_OUTPUT
+          echo "vitest_failed=$vitest_failed" >> $GITHUB_OUTPUT
+          echo "vitest_success=$vitest_success" >> $GITHUB_OUTPUT
+          echo "playwright_total=$playwright_total" >> $GITHUB_OUTPUT
+          echo "playwright_passed=$playwright_passed" >> $GITHUB_OUTPUT
+          echo "playwright_failed=$playwright_failed" >> $GITHUB_OUTPUT
+          echo "playwright_flaky=$playwright_flaky" >> $GITHUB_OUTPUT
+          echo "playwright_skipped=$playwright_skipped" >> $GITHUB_OUTPUT
+          
+          echo "vitest_failed_tests<<EOF" >> $GITHUB_OUTPUT
+          echo "$vitest_failed_tests" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "playwright_failed_tests<<EOF" >> $GITHUB_OUTPUT
+          echo "$playwright_failed_tests" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: テスト結果サマリーをPRにコメント（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🧪 テスト結果サマリー
+
+            PR #${{ github.event.pull_request.number }} のテスト実行が完了しました！
+
+            ### 📊 単体テスト（Vitest）
+            **📝 実行結果**: ${{ steps.test-summary.outputs.vitest_total }}件のテストを実行
+            - ✅ **成功**: ${{ steps.test-summary.outputs.vitest_passed }}件
+            - ❌ **失敗**: ${{ steps.test-summary.outputs.vitest_failed }}件
+            - 🎯 **全体**: ${{ steps.test-summary.outputs.vitest_success == 'true' && '✅ すべてのテストが成功しました！' || '❌ 一部のテストが失敗しています' }}
+
+            ${{ steps.test-summary.outputs.vitest_failed != '0' && '#### ❌ 失敗した単体テスト:
+            ' || '' }}${{ steps.test-summary.outputs.vitest_failed != '0' && steps.test-summary.outputs.vitest_failed_tests || '' }}
+
+            ### 🎭 E2Eテスト（Playwright）
+            **📝 実行結果**: ${{ steps.test-summary.outputs.playwright_total }}件のテストを実行
+            - ✅ **成功**: ${{ steps.test-summary.outputs.playwright_passed }}件
+            - ❌ **失敗**: ${{ steps.test-summary.outputs.playwright_failed }}件
+            - 🔄 **Flaky**: ${{ steps.test-summary.outputs.playwright_flaky }}件
+            - ⏭️ **スキップ**: ${{ steps.test-summary.outputs.playwright_skipped }}件
+            - 🎯 **全体**: ${{ steps.test-summary.outputs.playwright_failed == '0' && '✅ すべてのE2Eテストが成功しました！' || '❌ 一部のE2Eテストが失敗しています' }}
+
+            ${{ steps.test-summary.outputs.playwright_failed != '0' && '#### ❌ 失敗したE2Eテスト:
+            ' || '' }}${{ steps.test-summary.outputs.playwright_failed != '0' && steps.test-summary.outputs.playwright_failed_tests || '' }}
+
+            ### 📦 ビルドファイル情報
+            **📁 ファイル数**: ${{ steps.build-info.outputs.file_count }}件
+            **📏 総サイズ**: ${{ steps.build-info.outputs.total_size }}
+
+            #### 📄 ファイル詳細（サイズ順）
+            ```
+            ${{ steps.build-info.outputs.file_details }}
+            ```
+
+            ### 📋 詳細レポート
+            詳細なテストレポートは以下からダウンロードできます：
+            - **📊 Vitestテストレポート**: `vitest-html-report-${{ github.event.pull_request.number }}`
+            - **🎭 Playwrightテストレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
+            - **📦 ビルド成果物**: `build-artifacts-${{ github.event.pull_request.number }}`
+
+            **📥 ダウンロード方法**: [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) の「Artifacts」セクションから各レポートをダウンロードしてください。
+
+            ---
+            *このテスト結果サマリーは自動で生成されました。*
 
       - name: PlaywrightテストレポートのArtifactsアップロード（PR時のみ）
         if: always() && github.event_name == 'pull_request'
