@@ -3,6 +3,8 @@ dist/
 build/
 coverage/
 test-results/
+bundle-report.html
+playwright-report/
 
 # Dependencies
 node_modules/
