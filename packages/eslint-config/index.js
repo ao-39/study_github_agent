@@ -36,5 +36,29 @@ module.exports = {
     react: {
       version: 'detect'
     }
-  }
+  },
+  // テストファイル用の設定
+  overrides: [
+    {
+      files: [
+        '**/*.test.{js,jsx,ts,tsx}',
+        '**/*.spec.{js,jsx,ts,tsx}',
+        '**/test-setup.{js,ts}'
+      ],
+      env: {
+        jest: true
+      },
+      globals: {
+        describe: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+        vitest: 'readonly'
+      }
+    }
+  ]
 }
