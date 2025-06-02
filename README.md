@@ -130,7 +130,7 @@ GitHub Actionsを使用して包括的なCI/CDパイプラインを構築して�
 
 #### CI実行項目
 **通常のCI/CD環境**:
-1. **環境セットアップ**: Node.js 18 + pnpm 10.11.0
+1. **環境セットアップ**: Node.js 24 + pnpm 10.11.0
 2. **依存関係インストール**: `pnpm install`
 3. **リンティング**: `pnpm lint` (ESLint)
 4. **フォーマットチェック**: Prettier + package.json順序チェック
@@ -310,8 +310,8 @@ pnpm create-package <package-name>
 - ✅ CI/CDパイプラインの構築完了（GitHub Actions）
 - ✅ 共有設定パッケージの作成完了（ESLint・Prettier）
 - ✅ リリース自動化の実装完了（GitHub Release Assets）
-- 📋 共有ライブラリパッケージの作成（予定）
-- 📋 E2Eテストの拡充（CI統合済み）
+- ✅ 共有ライブラリパッケージの作成完了（ESLint・Prettier設定）
+- ✅ E2Eテストの構築完了（CI統合済み）
 
 ### 次のマイルストーン
 1. ✅ **開発環境のセットアップ** - pnpm、ESLint、Prettierの設定
@@ -319,7 +319,7 @@ pnpm create-package <package-name>
 3. ✅ **CI/CDパイプライン** - GitHub Actionsでの自動化
 4. ✅ **共有設定パッケージの作成** - ESLint・Prettierの設定パッケージ
 5. ✅ **リリース自動化** - mainブランチプッシュ時のGitHub Release Assets自動作成
-6. **共有ライブラリの作成** - packages/下に基本的なユーティリティライブラリ
+6. ✅ **共有ライブラリの作成** - packages/下に基本的なESLint・Prettier設定ライブラリ
 7. ✅ **テスト環境の構築** - Playwright E2E、Vitest単体テスト
 
 ## コントリビューション
