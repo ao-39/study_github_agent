@@ -446,6 +446,141 @@ jobs:
       - name: E2Eテスト実行
         run: pnpm --filter app test:e2e:chromium
 
+      - name: Playwrightテスト結果を解析・準備（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        id: parse-playwright
+        run: |
+          # apps/appのplaywright-results/results.jsonから結果を解析
+          if [ -f "apps/app/playwright-results/results.json" ]; then
+            json_file="apps/app/playwright-results/results.json"
+            
+            # 基本統計情報の抽出
+            total_suites=$(jq -r '.suites | length' "$json_file")
+            total_tests=$(jq -r '[.suites[].specs[].tests] | flatten | length' "$json_file")
+            
+            # テスト結果の集計
+            passed_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "passed")] | length' "$json_file")
+            failed_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "failed")] | length' "$json_file")
+            flaky_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "flaky")] | length' "$json_file")
+            skipped_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "skipped")] | length' "$json_file")
+            
+            # 実行時間の計算（ミリ秒から秒に変換）
+            duration_ms=$(jq -r '[.suites[].specs[].tests[].results[].duration] | add' "$json_file")
+            duration_sec=$((duration_ms / 1000))
+            
+            # 成功率の計算
+            if [ "$total_tests" -gt 0 ]; then
+              success_rate=$(echo "scale=1; $passed_tests * 100 / $total_tests" | bc -l)
+            else
+              success_rate="0.0"
+            fi
+            
+            # 失敗したテストの詳細情報（存在する場合）
+            failed_test_details=""
+            if [ "$failed_tests" -gt 0 ]; then
+              failed_test_details=$(jq -r '
+                .suites[] |
+                .specs[] |
+                select(.tests[].results[0].status == "failed") |
+                "### ❌ 失敗したテストファイル: **\(.file | split("/") | last)**\n" +
+                "- **\(.title)**: `\(.tests[].results[0].error.message // "詳細はレポートを確認してください")`\n"
+              ' "$json_file" | head -20)  # Limit output length
+            fi
+            
+            # ブラウザ別の実行状況（chrominumのみ実行の場合）
+            browser_info="chromium"
+            
+            # GitHub Actions出力に設定
+            echo "total_suites=$total_suites" >> $GITHUB_OUTPUT
+            echo "total_tests=$total_tests" >> $GITHUB_OUTPUT
+            echo "passed_tests=$passed_tests" >> $GITHUB_OUTPUT
+            echo "failed_tests=$failed_tests" >> $GITHUB_OUTPUT
+            echo "flaky_tests=$flaky_tests" >> $GITHUB_OUTPUT
+            echo "skipped_tests=$skipped_tests" >> $GITHUB_OUTPUT
+            echo "duration_sec=$duration_sec" >> $GITHUB_OUTPUT
+            echo "success_rate=$success_rate" >> $GITHUB_OUTPUT
+            echo "browser_info=$browser_info" >> $GITHUB_OUTPUT
+            
+            # 失敗したテストの詳細をマルチライン出力として設定
+            if [ -n "$failed_test_details" ]; then
+              echo "failed_test_details<<EOF" >> $GITHUB_OUTPUT
+              echo "$failed_test_details" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "failed_test_details=" >> $GITHUB_OUTPUT
+            fi
+            
+            # 全体の成功状況
+            if [ "$failed_tests" -eq 0 ]; then
+              echo "overall_success=true" >> $GITHUB_OUTPUT
+            else
+              echo "overall_success=false" >> $GITHUB_OUTPUT
+            fi
+            
+            echo "json_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "json_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Playwrightテスト結果をPRにコメント（PR時のみ）
+        if: always() && github.event_name == 'pull_request' && steps.parse-playwright.outputs.json_exists == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🎭 Playwrightテスト結果サマリー
+
+            PR #${{ github.event.pull_request.number }} のPlaywright E2Eテスト実行が完了しました！
+
+            ### 📊 テスト実行結果
+            ${{ steps.parse-playwright.outputs.overall_success == 'true' && '✅ **全てのテストが成功しました！**' || '❌ **テストに失敗があります**' }}
+
+            **📈 テスト統計情報:**
+            - 🧪 **実行テスト数**: ${{ steps.parse-playwright.outputs.total_tests }}件
+            - ✅ **成功**: ${{ steps.parse-playwright.outputs.passed_tests }}件
+            - ❌ **失敗**: ${{ steps.parse-playwright.outputs.failed_tests }}件
+            - 🔄 **不安定（Flaky）**: ${{ steps.parse-playwright.outputs.flaky_tests }}件
+            - ⏭️ **スキップ**: ${{ steps.parse-playwright.outputs.skipped_tests }}件
+            - 📊 **成功率**: ${{ steps.parse-playwright.outputs.success_rate }}%
+
+            **⏱️ 実行時間**: ${{ steps.parse-playwright.outputs.duration_sec }}秒
+
+            ${{ steps.parse-playwright.outputs.failed_tests != '0' && '### 🔍 失敗したテストの詳細' || '' }}
+            ${{ steps.parse-playwright.outputs.failed_test_details }}
+
+            <details>
+            <summary><strong>📂 テストスイート情報</strong></summary>
+
+            - 📁 **テストファイル数**: ${{ steps.parse-playwright.outputs.total_suites }}件
+            - 🌐 **実行ブラウザ**: ${{ steps.parse-playwright.outputs.browser_info }}
+
+            </details>
+
+            <details>
+            <summary><strong>📋 詳細レポート</strong></summary>
+
+            **📊 詳細なテストレポートはこちら👉** [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            **Artifactsセクションから以下のファイルをダウンロードできます：**
+            - **🎭 PlaywrightHTMLレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテストの詳細HTMLレポート、スクリーンショット、実行ログ、各ブラウザでの結果
+
+            </details>
+
+            <details>
+            <summary><strong>💡 E2Eテストについて</strong></summary>
+
+            - **テストランナー**: Playwright
+            - **実行ブラウザ**: Chromium（CI環境）
+            - **テスト環境**: Vite開発サーバー (http://localhost:3000)
+            - **実行タイミング**: PR作成・更新時
+            - **テスト内容**: UI機能、レスポンシブ対応、ユーザーインタラクション
+
+            </details>
+
+            ---
+            *このテスト結果レポートは自動で生成されました。失敗したテストがある場合は修正をお願いします。*
+
       - name: PlaywrightテストレポートのArtifactsアップロード（PR時のみ）
         if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
