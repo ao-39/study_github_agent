@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # プレコミットチェック: lint, format:check, build, spell-check を並行実行
 pnpm run lint &
 pnpm run format:check &
