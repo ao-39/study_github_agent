@@ -23,6 +23,9 @@ jobs:
     
     steps:
       - name: プルリクエスト情報を取得
+        env:
+          GITHUB_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         uses: actions/github-script@v7
         id: pr-info
         with:
@@ -37,8 +40,8 @@ jobs:
               core.setOutput('commit_sha', context.payload.pull_request.head.sha);
             } else if (context.eventName === 'workflow_run') {
               // workflow_runイベントの場合
-              const sha = '${{ github.event.workflow_run.head_sha }}';
-              const branch = '${{ github.event.workflow_run.head_branch }}';
+              const sha = process.env.GITHUB_HEAD_SHA;
+              const branch = process.env.GITHUB_HEAD_BRANCH;
               
               // SHAからプルリクエストを検索
               const { data: pulls } = await github.rest.pulls.list({
