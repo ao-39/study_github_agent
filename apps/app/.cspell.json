@@ -61,7 +61,7 @@
   "ignorePaths": [
     "node_modules/**",
     "dist/**",
-    ".git/**",  
+    ".git/**",
     ".turbo/**",
     "coverage/**",
     "test-results/**",
@@ -90,9 +90,7 @@
     },
     {
       "filename": "**/*.json",
-      "ignoreRegExpList": [
-        "/\"[^\"]*\"/g"
-      ]
+      "ignoreRegExpList": ["/\"[^\"]*\"/g"]
     }
   ]
 }

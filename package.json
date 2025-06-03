@@ -25,7 +25,7 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
+    "husky": "9.1.7",
     "sort-package-json": "3.2.1",
     "turbo": "2.5.4",
     "wrangler": "4.18.0"

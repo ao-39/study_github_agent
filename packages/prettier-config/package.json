@@ -19,6 +19,6 @@
     "spell-check": "echo 'No spell-check step required for config package'"
   },
   "peerDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "3.0.0"
   }
 }
