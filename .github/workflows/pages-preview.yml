@@ -2,23 +2,69 @@
 name: Cloudflare Pages Preview
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main]
-  push:
+  pull_request:
     branches: [main]
 
 jobs:
   preview:
     name: Cloudflare Pagesプレビューデプロイ
     runs-on: ubuntu-latest
+    # workflow_runの場合はCIが成功した場合のみ実行、pull_requestの場合は常に実行
+    if: ${{ github.event_name == 'pull_request' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       deployments: write
       pull-requests: write
     
     steps:
+      - name: プルリクエスト情報を取得
+        uses: actions/github-script@v7
+        id: pr-info
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            
+            if (context.eventName === 'pull_request') {
+              // pull_requestイベントの場合
+              core.setOutput('pr_number', context.payload.pull_request.number);
+              core.setOutput('pr_head_ref', context.payload.pull_request.head.ref);
+              core.setOutput('is_pr', 'true');
+              core.setOutput('commit_sha', context.payload.pull_request.head.sha);
+            } else if (context.eventName === 'workflow_run') {
+              // workflow_runイベントの場合
+              const sha = '${{ github.event.workflow_run.head_sha }}';
+              const branch = '${{ github.event.workflow_run.head_branch }}';
+              
+              // SHAからプルリクエストを検索
+              const { data: pulls } = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: 'open',
+                head: `${owner}:${branch}`
+              });
+              
+              if (pulls.length > 0) {
+                const pr = pulls[0];
+                core.setOutput('pr_number', pr.number);
+                core.setOutput('pr_head_ref', pr.head.ref);
+                core.setOutput('is_pr', 'true');
+                core.setOutput('commit_sha', sha);
+              } else {
+                core.setOutput('is_pr', 'false');
+                core.setOutput('pr_head_ref', branch);
+                core.setOutput('commit_sha', sha);
+              }
+            }
+
       - name: リポジトリのチェックアウト
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr-info.outputs.commit_sha }}
 
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v4
@@ -55,23 +101,25 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/app/dist --project-name=study-github-agent --branch=${{ github.head_ref || github.ref_name }}
+          command: pages deploy apps/app/dist --project-name=study-github-agent --branch=${{ steps.pr-info.outputs.pr_head_ref }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PRにデプロイ結果をコメント（PR時のみ）
-        if: github.event_name == 'pull_request'
+        if: steps.pr-info.outputs.is_pr == 'true'
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ steps.pr-info.outputs.pr_number }}
           body: |
-            ## 🚀 Cloudflare Pages デプロイ完了
+            ## 🚀 Cloudflare Pages デプロイ完了${{ github.event_name == 'workflow_run' && '（CI成功後）' || '' }}
 
-            PR #${{ github.event.pull_request.number }} のCloudflare Pagesプレビューデプロイが完了しました！
+            PR #${{ steps.pr-info.outputs.pr_number }} のCloudflare Pagesプレビューデプロイが完了しました！
+            
+            ${{ github.event_name == 'workflow_run' && '**✅ CI成功後に自動デプロイが実行されました**' || '**🔄 PRイベントによる直接デプロイが実行されました**' }}
 
             ### 📋 デプロイ情報
             - **プレビューURL**: ${{ steps.deploy.outputs.deployment-url }}
-            - **ブランチ**: `${{ github.head_ref }}`
-            - **コミット**: `${{ github.sha }}`
+            - **ブランチ**: `${{ steps.pr-info.outputs.pr_head_ref }}`
+            - **コミット**: `${{ steps.pr-info.outputs.commit_sha }}`
             - **デプロイID**: ${{ steps.deploy.outputs.deployment-id }}
 
             ### 🔗 アクセス方法
@@ -84,6 +132,7 @@ jobs:
             - **デプロイ先**: Cloudflare Pages
             - **ビルドコマンド**: `pnpm --filter app build`
             - **出力ディレクトリ**: `apps/app/dist`
+            - **トリガー**: ${{ github.event_name == 'workflow_run' && 'CI成功後の自動デプロイ' || 'PRイベントによる直接デプロイ' }}
 
             ---
-            *このコメントはCloudflare Pages自動デプロイワークフローによって生成されました。*
+            *このコメントは${{ github.event_name == 'workflow_run' && 'CI成功後の' || '' }}Cloudflare Pages自動デプロイワークフローによって生成されました。*
