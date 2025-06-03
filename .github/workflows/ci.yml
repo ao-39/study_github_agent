@@ -314,6 +314,123 @@ jobs:
       - name: Vitestユニットテスト実行
         run: pnpm exec turbo run test -- --passWithNoTests
 
+      - name: Vitestテスト結果を解析・準備（PR時のみ）
+        if: github.event_name == 'pull_request'
+        id: parse-vitest
+        run: |
+          # apps/appのtest-results/results.jsonから結果を解析
+          if [ -f "apps/app/test-results/results.json" ]; then
+            json_file="apps/app/test-results/results.json"
+            
+            # 基本統計情報の抽出
+            total_tests=$(jq -r '.numTotalTests' "$json_file")
+            passed_tests=$(jq -r '.numPassedTests' "$json_file")
+            failed_tests=$(jq -r '.numFailedTests' "$json_file")
+            pending_tests=$(jq -r '.numPendingTests' "$json_file")
+            todo_tests=$(jq -r '.numTodoTests' "$json_file")
+            success=$(jq -r '.success' "$json_file")
+            start_time=$(jq -r '.startTime' "$json_file")
+            
+            # テストスイート情報の抽出
+            total_suites=$(jq -r '.numTotalTestSuites' "$json_file")
+            passed_suites=$(jq -r '.numPassedTestSuites' "$json_file")
+            failed_suites=$(jq -r '.numFailedTestSuites' "$json_file")
+            
+            # 実行時間の計算（最新テスト結果の終了時間から開始時間を引く）
+            if [ "$(jq -r '.testResults | length' "$json_file")" -gt 0 ]; then
+              latest_end=$(jq -r '[.testResults[].endTime] | max | floor' "$json_file")
+              duration_ms=$((latest_end - start_time))
+              duration_sec=$((duration_ms / 1000))
+            else
+              duration_sec=0
+            fi
+            
+            # 失敗したテストの詳細情報（存在する場合）
+            failed_test_details=""
+            if [ "$failed_tests" -gt 0 ]; then
+              failed_test_details=$(jq -r '
+                .testResults[] |
+                select(.status == "failed") |
+                "### ❌ 失敗したテストファイル: **\(.name | split("/") | last)**\n" +
+                (.assertionResults[] |
+                  select(.status == "failed") |
+                  "- **\(.title)**: `\(.failureMessages[0] | split("\n")[0])`"
+                ) + "\n"
+              ' "$json_file" | head -20)  # Limit output length
+            fi
+            
+            # GitHub Actions出力に設定
+            echo "total_tests=$total_tests" >> $GITHUB_OUTPUT
+            echo "passed_tests=$passed_tests" >> $GITHUB_OUTPUT
+            echo "failed_tests=$failed_tests" >> $GITHUB_OUTPUT
+            echo "pending_tests=$pending_tests" >> $GITHUB_OUTPUT
+            echo "todo_tests=$todo_tests" >> $GITHUB_OUTPUT
+            echo "success=$success" >> $GITHUB_OUTPUT
+            echo "duration_sec=$duration_sec" >> $GITHUB_OUTPUT
+            echo "total_suites=$total_suites" >> $GITHUB_OUTPUT
+            echo "passed_suites=$passed_suites" >> $GITHUB_OUTPUT
+            echo "failed_suites=$failed_suites" >> $GITHUB_OUTPUT
+            
+            # 失敗したテストの詳細をマルチライン出力として設定
+            if [ -n "$failed_test_details" ]; then
+              echo "failed_test_details<<EOF" >> $GITHUB_OUTPUT
+              echo "$failed_test_details" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "failed_test_details=" >> $GITHUB_OUTPUT
+            fi
+            
+            echo "json_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "json_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Vitestテスト結果をPRにコメント（PR時のみ）
+        if: github.event_name == 'pull_request' && steps.parse-vitest.outputs.json_exists == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 🧪 Vitestテスト結果サマリー
+
+            PR #${{ github.event.pull_request.number }} のVitestユニットテスト実行が完了しました！
+
+            ### 📊 テスト実行結果
+            ${{ steps.parse-vitest.outputs.success == 'true' && '✅ **全てのテストが成功しました！**' || '❌ **テストに失敗があります**' }}
+
+            **📈 テスト統計情報:**
+            - 🧪 **実行テスト数**: ${{ steps.parse-vitest.outputs.total_tests }}件
+            - ✅ **成功**: ${{ steps.parse-vitest.outputs.passed_tests }}件
+            - ❌ **失敗**: ${{ steps.parse-vitest.outputs.failed_tests }}件
+            - ⏳ **保留**: ${{ steps.parse-vitest.outputs.pending_tests }}件
+            - 📝 **TODO**: ${{ steps.parse-vitest.outputs.todo_tests }}件
+
+            **📂 テストスイート情報:**
+            - 📁 **テストファイル数**: ${{ steps.parse-vitest.outputs.total_suites }}件
+            - ✅ **成功ファイル**: ${{ steps.parse-vitest.outputs.passed_suites }}件
+            - ❌ **失敗ファイル**: ${{ steps.parse-vitest.outputs.failed_suites }}件
+
+            **⏱️ 実行時間**: ${{ steps.parse-vitest.outputs.duration_sec }}秒
+
+            ${{ steps.parse-vitest.outputs.failed_tests != '0' && '### 🔍 失敗したテストの詳細' || '' }}
+            ${{ steps.parse-vitest.outputs.failed_test_details }}
+
+            ### 📋 詳細レポート
+            **📊 詳細なテストレポートはこちら👉** [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            **Artifactsセクションから以下のファイルをダウンロードできます：**
+            - **📈 VitestHTMLレポート**: `vitest-html-report-${{ github.event.pull_request.number }}`
+              - **内容**: テスト結果の詳細HTMLレポート、カバレッジ情報、実行時間詳細
+
+            ### 💡 テストについて
+            - **テストランナー**: Vitest v3.2.0
+            - **カバレッジプロバイダー**: V8
+            - **テスト環境**: jsdom
+            - **実行タイミング**: PR作成・更新時
+
+            ---
+            *このテスト結果レポートは自動で生成されました。失敗したテストがある場合は修正をお願いします。*
+
       - name: Vitestテストレポートの成果物アップロード（PR時のみ）
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
