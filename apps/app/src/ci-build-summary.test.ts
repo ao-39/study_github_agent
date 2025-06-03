@@ -32,9 +32,10 @@ describe('CI ビルドサマリー機能', () => {
     expect(buildAnalysisStep.run).toContain('find . -type f | sort')
     expect(buildAnalysisStep.run).toContain('total_files=')
     expect(buildAnalysisStep.run).toContain('ext_counts=')
-    expect(buildAnalysisStep.run).toContain('max_size=')
-    expect(buildAnalysisStep.run).toContain('total_size=')
+    expect(buildAnalysisStep.run).toContain('max_size_formatted=')
+    expect(buildAnalysisStep.run).toContain('total_size_formatted=')
     expect(buildAnalysisStep.run).toContain('files_table=')
+    expect(buildAnalysisStep.run).toContain('format_size()')
   })
 
   it('PRコメントステップにビルドサマリーが含まれている', () => {
@@ -56,13 +57,13 @@ describe('CI ビルドサマリー機能', () => {
       '${{ steps.build-analysis.outputs.total_files }}'
     )
     expect(commentStep.with.body).toContain(
-      '${{ steps.build-analysis.outputs.total_size }}'
+      '${{ steps.build-analysis.outputs.total_size_formatted }}'
     )
     expect(commentStep.with.body).toContain(
       '${{ steps.build-analysis.outputs.max_file }}'
     )
     expect(commentStep.with.body).toContain(
-      '${{ steps.build-analysis.outputs.max_size }}'
+      '${{ steps.build-analysis.outputs.max_size_formatted }}'
     )
     expect(commentStep.with.body).toContain(
       '${{ steps.build-analysis.outputs.ext_counts }}'
@@ -103,14 +104,16 @@ describe('CI ビルドサマリー機能', () => {
 
     // 出力変数がすべてGITHUB_OUTPUTに設定されている
     expect(buildAnalysisStep.run).toContain('total_files=')
+    expect(buildAnalysisStep.run).toContain('total_size_formatted=')
+    expect(buildAnalysisStep.run).toContain('max_size_formatted=')
     expect(buildAnalysisStep.run).toContain('>> $GITHUB_OUTPUT')
 
     // PRコメントで正しい参照形式が使用されている
     const requiredOutputs = [
       'steps.build-analysis.outputs.total_files',
-      'steps.build-analysis.outputs.total_size',
+      'steps.build-analysis.outputs.total_size_formatted',
       'steps.build-analysis.outputs.max_file',
-      'steps.build-analysis.outputs.max_size',
+      'steps.build-analysis.outputs.max_size_formatted',
       'steps.build-analysis.outputs.ext_counts',
       'steps.build-analysis.outputs.files_table',
     ]
