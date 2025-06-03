@@ -16,7 +16,9 @@
   ],
   "scripts": {
     "build": "echo 'No build step required for config package'",
-    "lint": "echo 'No lint step required for config package'"
+    "format:check": "echo 'No format check step required for config package'",
+    "lint": "echo 'No lint step required for config package'",
+    "spell-check": "echo 'No spell-check step required for config package'"
   },
   "dependencies": {
     "@eslint/js": "9.28.0",
@@ -26,7 +28,7 @@
     "globals": "16.2.0"
   },
   "peerDependencies": {
-    "@typescript-eslint/parser": "^8.0.0",
-    "eslint": "^9.0.0"
+    "@typescript-eslint/parser": "8.33.1",
+    "eslint": "9.0.0"
   }
 }

@@ -115,10 +115,63 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 - **lint**: eslintを利用します
 - **format**: prettierを利用します  
 - **スペルチェック**: cspellを利用します
+- **プレコミットフック**: huskyを利用して、コミット前に自動的に品質チェックを実行します
 
 **共有設定パッケージ**：ESLintとPrettierの設定は`packages/`ディレクトリに共有パッケージとして配置されています。
 - `@study-github-agent/eslint-config`: TypeScript + React対応のESLint設定
 - `@study-github-agent/prettier-config`: プロジェクト統一のPrettier設定
+
+### プレコミットフック（husky）
+huskyを利用してプレコミットフック機能を実装しています。コミット前に以下のチェックが自動実行されます：
+
+#### 実行されるチェック
+1. **リンティング（lint）**: ESLintによるコード品質チェック
+2. **フォーマットチェック（format:check）**: Prettierによるコードスタイルチェック
+3. **ビルド（build）**: TypeScriptコンパイルとViteビルドの成功確認
+4. **スペルチェック（spell-check）**: cspellによる英語スペリングチェック
+
+#### 並行実行による高速化
+**Turborepoの並行実行機能**を活用して、複数のチェックを効率的に実行：
+- パッケージ間の依存関係に基づいた最適なタスクスケジューリング
+- 変更されていないパッケージはキャッシュから高速実行
+- 利用可能なCPUコアを最大限活用した並行処理
+
+#### クロスプラットフォーム対応
+**Windows、Linux、macOSのすべてで動作**するように設計：
+- bashスクリプトの代わりにpnpmスクリプトとTurborepoコマンドを使用
+- プラットフォーム固有のシェル機能（&、wait等）を使用しない
+- pnpmとTurborepoのクロスプラットフォーム機能を活用
+
+#### 実行例
+```bash
+> pnpm run pre-commit
+• Packages in scope: @study-github-agent/app, @study-github-agent/eslint-config, @study-github-agent/prettier-config
+• Running lint, format:check, build in 3 packages
+✓ 9 tasks successful (58ms >>> FULL TURBO)
+> cspell "**/*.{ts,tsx,js,jsx,md,json}" --no-progress
+CSpell: Files checked: 26, Issues found: 0 in 0 files.
+✅ All pre-commit checks passed!
+```
+
+#### チェック失敗時の対応
+プレコミットフックが失敗した場合、コミットは実行されません：
+- **リンティングエラー**: `pnpm lint --fix` で自動修正可能なエラーを修正
+- **フォーマットエラー**: `pnpm format` でコードスタイルを自動修正
+- **ビルドエラー**: TypeScriptエラーやコンパイルエラーを手動修正
+- **スペルエラー**: `.cspell.json` への追加または英語スペリング修正
+
+#### 手動実行
+プレコミットチェックは手動でも実行できます：
+```bash
+# プレコミットチェック全体の実行
+pnpm run pre-commit
+
+# 個別チェックの実行
+pnpm run lint           # リンティング
+pnpm run format:check   # フォーマットチェック
+pnpm run build          # ビルド
+pnpm run spell-check    # スペルチェック
+```
 
 ### テスト
 - **E2Eテスト**: playwrightを利用してテストを作成し、CI/CDパイプラインで自動実行しています（標準装備）
@@ -384,6 +437,9 @@ pnpm lint
 # フォーマット
 pnpm format
 
+# フォーマットチェック（修正なし）
+pnpm run format:check
+
 # package.jsonのフォーマット
 pnpm run format:package
 
@@ -392,6 +448,9 @@ pnpm spell-check
 
 # 型チェック
 pnpm type-check
+
+# プレコミットチェック（全てのチェックを並行実行）
+pnpm run pre-commit
 ```
 
 ### バンドル分析

@@ -1,0 +1,5 @@
+# プレコミットチェック: Turborepoによる並行実行
+# Windows/Linux/macOS対応のクロスプラットフォーム実装
+pnpm run pre-commit
+
+echo "✅ All pre-commit checks passed!"
