@@ -13,50 +13,24 @@ describe('App コンポーネント', () => {
 
     // メインタイトルが表示されることを確認
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      '🚀 Study GitHub Agent'
+      'Study-Github-Agent'
     )
 
-    // 説明文が表示されることを確認
+    // メッセージ表示ボタンが表示されることを確認
     expect(
-      screen.getByText(
-        'GitHub Copilot agentを学習するためのReactアプリケーション'
-      )
+      screen.getByRole('button', { name: 'メッセージを表示する' })
     ).toBeInTheDocument()
   })
 
-  test('4つの機能カードが表示される', () => {
+  test('メッセージ表示ボタンが正しく表示される', () => {
     render(<App />)
 
-    // Viteカード
-    expect(screen.getByText('⚡ Vite')).toBeInTheDocument()
-    expect(
-      screen.getByText('高速な開発サーバーとビルドツール')
-    ).toBeInTheDocument()
-
-    // Reactカード
-    expect(screen.getByText('⚛️ React')).toBeInTheDocument()
-    expect(screen.getByText('モダンなUIライブラリ')).toBeInTheDocument()
-
-    // Monorepoカード
-    expect(screen.getByText('📦 Monorepo')).toBeInTheDocument()
-    expect(
-      screen.getByText('pnpm + Turborepoによる効率的な管理')
-    ).toBeInTheDocument()
-
-    // GitHub Copilotカード
-    expect(screen.getByText('🤖 GitHub Copilot')).toBeInTheDocument()
-    expect(screen.getByText('AIアシスタントとの協力開発')).toBeInTheDocument()
-  })
-
-  test('学習開始ボタンが表示される', () => {
-    render(<App />)
-
-    const button = screen.getByRole('button', { name: '学習を開始' })
+    const button = screen.getByRole('button', { name: 'メッセージを表示する' })
     expect(button).toBeInTheDocument()
-    expect(button).toHaveClass('primary-button')
+    expect(button).toHaveClass('message-button')
   })
 
-  test('学習開始ボタンをクリックするとアラートが表示される', async () => {
+  test('メッセージ表示ボタンをクリックするとアラートが表示される', async () => {
     const user = userEvent.setup()
 
     // window.alertをモック化
@@ -64,7 +38,7 @@ describe('App コンポーネント', () => {
 
     render(<App />)
 
-    const button = screen.getByRole('button', { name: '学習を開始' })
+    const button = screen.getByRole('button', { name: 'メッセージを表示する' })
     await user.click(button)
 
     // アラートが正しいメッセージで呼ばれることを確認
@@ -74,17 +48,5 @@ describe('App コンポーネント', () => {
 
     // モックをクリーンアップ
     alertSpy.mockRestore()
-  })
-
-  test('機能カードのCSSクラスが正しく適用される', () => {
-    render(<App />)
-
-    const featureCards = screen.getAllByText(/^(⚡|⚛️|📦|🤖)/)
-
-    featureCards.forEach(card => {
-      // h3要素の親（feature-card）のクラスを確認
-      const featureCard = card.closest('.feature-card')
-      expect(featureCard).toBeInTheDocument()
-    })
   })
 })
