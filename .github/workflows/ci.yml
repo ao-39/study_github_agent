@@ -89,24 +89,38 @@ jobs:
           total_files=$(wc -l < /tmp/build_files.txt)
           echo "total_files=$total_files" >> $GITHUB_OUTPUT
           
-          # 拡張子別ファイル数を算出
-          declare -A ext_counts
-          while IFS= read -r file; do
-            # ファイル名から拡張子を抽出（ドットから始まる）
-            if [[ "$file" =~ \.[^./]+$ ]]; then
-              ext="${BASH_REMATCH[0]}"
-            else
-              ext="（拡張子なし）"
-            fi
-            ((ext_counts["$ext"]++))
-          done < /tmp/build_files.txt
-          
-          # 拡張子別の結果を文字列形式で生成（表示用）
+          # 拡張子別ファイル数を算出（シンプルなアプローチ）
           ext_summary=""
-          for ext in "${!ext_counts[@]}"; do
+          
+          # 各拡張子のファイル数をカウント
+          js_count=$(grep -c '\.js$' /tmp/build_files.txt || echo "0")
+          css_count=$(grep -c '\.css$' /tmp/build_files.txt || echo "0")
+          html_count=$(grep -c '\.html$' /tmp/build_files.txt || echo "0")
+          svg_count=$(grep -c '\.svg$' /tmp/build_files.txt || echo "0")
+          map_count=$(grep -c '\.map$' /tmp/build_files.txt || echo "0")
+          
+          # 拡張子別の結果を文字列形式で生成
+          if [ $js_count -gt 0 ]; then
             if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+="$ext: ${ext_counts[$ext]}件"
-          done
+            ext_summary+=".js: ${js_count}件"
+          fi
+          if [ $css_count -gt 0 ]; then
+            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
+            ext_summary+=".css: ${css_count}件"
+          fi
+          if [ $html_count -gt 0 ]; then
+            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
+            ext_summary+=".html: ${html_count}件"
+          fi
+          if [ $svg_count -gt 0 ]; then
+            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
+            ext_summary+=".svg: ${svg_count}件"
+          fi
+          if [ $map_count -gt 0 ]; then
+            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
+            ext_summary+=".map: ${map_count}件"
+          fi
+          
           echo "ext_counts=$ext_summary" >> $GITHUB_OUTPUT
           
           # ファイルサイズ情報を取得
