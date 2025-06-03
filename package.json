@@ -18,6 +18,7 @@
     "format:check": "turbo run format:check && pnpm run format:package --check",
     "format:package": "sort-package-json package.json apps/*/package.json packages/*/package.json",
     "lint": "turbo run lint",
+    "pre-commit": "turbo run lint format:check build && pnpm run spell-check",
     "prepare": "husky",
     "spell-check": "cspell \"**/*.{ts,tsx,js,jsx,md,json}\" --no-progress",
     "test": "turbo run test",

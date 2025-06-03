@@ -1,10 +1,5 @@
-# プレコミットチェック: lint, format:check, build, spell-check を並行実行
-pnpm run lint &
-pnpm run format:check &
-pnpm run build &
-pnpm run spell-check &
-
-# 全てのジョブが完了するまで待機
-wait
+# プレコミットチェック: Turborepoによる並行実行
+# Windows/Linux/macOS対応のクロスプラットフォーム実装
+pnpm run pre-commit
 
 echo "✅ All pre-commit checks passed!"
