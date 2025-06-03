@@ -24,9 +24,9 @@ describe('Cloudflare Pages デプロイワークフロー設定', () => {
 
     // 基本設定の確認
     expect(workflow.name).toBe('Cloudflare Pages Preview')
-    expect(workflow.on).toHaveProperty('pull_request')
+    expect(workflow.on).not.toHaveProperty('pull_request')
     expect(workflow.on).toHaveProperty('workflow_run')
-    
+
     // workflow_runの設定確認
     expect(workflow.on.workflow_run.workflows).toContain('CI')
     expect(workflow.on.workflow_run.types).toContain('completed')
@@ -37,8 +37,10 @@ describe('Cloudflare Pages デプロイワークフロー設定', () => {
     const job = workflow.jobs.preview
 
     // CI成功時のみ実行する条件の確認
-    expect(job.if).toContain('github.event_name == \'pull_request\'')
-    expect(job.if).toContain('github.event.workflow_run.conclusion == \'success\'')
+    expect(job.if).not.toContain("github.event_name == 'pull_request'")
+    expect(job.if).toContain(
+      "github.event.workflow_run.conclusion == 'success'"
+    )
 
     // 権限設定の確認
     expect(job.permissions).toHaveProperty('contents', 'read')
@@ -81,7 +83,9 @@ describe('Cloudflare Pages デプロイワークフロー設定', () => {
       '--project-name=study-github-agent'
     )
     expect(deployStep.with.command).toContain('apps/app/dist')
-    expect(deployStep.with.command).toContain('${{ steps.pr-info.outputs.pr_head_ref }}')
+    expect(deployStep.with.command).toContain(
+      '${{ steps.pr-info.outputs.pr_head_ref }}'
+    )
   })
 
   it('PRコメントステップが正しく条件付きである', () => {
@@ -100,9 +104,11 @@ describe('Cloudflare Pages デプロイワークフロー設定', () => {
     expect(commentStep.with.body).toContain(
       '${{ steps.deploy.outputs.deployment-url }}'
     )
-    
+
     // issue-numberが動的に設定されていることを確認
-    expect(commentStep.with['issue-number']).toBe('${{ steps.pr-info.outputs.pr_number }}')
+    expect(commentStep.with['issue-number']).toBe(
+      '${{ steps.pr-info.outputs.pr_number }}'
+    )
   })
 
   it('プルリクエスト情報取得ステップが正しく設定されている', () => {
@@ -116,9 +122,9 @@ describe('Cloudflare Pages デプロイワークフロー設定', () => {
     expect(prInfoStep).toBeDefined()
     expect(prInfoStep.uses).toBe('actions/github-script@v7')
     expect(prInfoStep.id).toBe('pr-info')
-    
-    // スクリプトがpull_requestとworkflow_runの両方に対応していることを確認
-    expect(prInfoStep.with.script).toContain('pull_request')
+
+    // スクリプトがworkflow_runイベントのみに対応していることを確認
+    expect(prInfoStep.with.script).not.toContain('pull_request')
     expect(prInfoStep.with.script).toContain('workflow_run')
   })
 })
