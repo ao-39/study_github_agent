@@ -26,7 +26,13 @@
     "format": {
       "outputs": []
     },
+    "format:check": {
+      "outputs": []
+    },
     "type-check": {
+      "outputs": []
+    },
+    "spell-check": {
       "outputs": []
     },
     "clean": {
