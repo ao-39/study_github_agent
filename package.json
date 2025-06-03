@@ -15,12 +15,17 @@
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "format": "turbo run format && pnpm run format:package",
+    "format:check": "turbo run format:check && pnpm run format:package --check",
     "format:package": "sort-package-json package.json apps/*/package.json packages/*/package.json",
     "lint": "turbo run lint",
+    "prepare": "husky",
+    "spell-check": "cspell \"**/*.{ts,tsx,js,jsx,md,json}\" --no-progress",
     "test": "turbo run test",
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
+    "cspell": "^9.0.2",
+    "husky": "^9.1.7",
     "sort-package-json": "3.2.1",
     "turbo": "2.5.4",
     "wrangler": "4.18.0"
