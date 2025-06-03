@@ -3,9 +3,20 @@
 
 .app {
   min-height: 100vh;
-  background: #FFFFFF;
-  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  background: #ffffff;
+  font-family:
+    'Noto Sans JP',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,8 +50,8 @@
   justify-content: center;
   gap: 4px;
   padding: 0px 16px;
-  background: #0017C1;
-  color: #FFFFFF;
+  background: #0017c1;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   font-family: 'Noto Sans JP', sans-serif;
