@@ -76,6 +76,80 @@ jobs:
       - name: ビルド
         run: pnpm build
 
+      - name: ビルド結果分析（PR時のみ）
+        if: github.event_name == 'pull_request'
+        id: build-analysis
+        run: |
+          cd apps/app/dist
+          
+          # ファイルリストを取得（隠しファイルも含む）
+          find . -type f | sort > /tmp/build_files.txt
+          
+          # 総ファイル数
+          total_files=$(wc -l < /tmp/build_files.txt)
+          echo "total_files=$total_files" >> $GITHUB_OUTPUT
+          
+          # 拡張子別ファイル数を算出
+          declare -A ext_counts
+          while IFS= read -r file; do
+            # ファイル名から拡張子を抽出（ドットから始まる）
+            if [[ "$file" =~ \.[^./]+$ ]]; then
+              ext="${BASH_REMATCH[0]}"
+            else
+              ext="（拡張子なし）"
+            fi
+            ((ext_counts["$ext"]++))
+          done < /tmp/build_files.txt
+          
+          # 拡張子別の結果を文字列形式で生成（表示用）
+          ext_summary=""
+          for ext in "${!ext_counts[@]}"; do
+            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
+            ext_summary+="$ext: ${ext_counts[$ext]}件"
+          done
+          echo "ext_counts=$ext_summary" >> $GITHUB_OUTPUT
+          
+          # ファイルサイズ情報を取得
+          max_size=0
+          total_size=0
+          max_file=""
+          files_table=""
+          
+          while IFS= read -r file; do
+            if [ -f "$file" ]; then
+              # macOSとLinux対応のファイルサイズ取得
+              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
+              # ファイル名とパスを整理
+              filename=$(basename "$file")
+              filepath=${file#./}  # ./を除去
+              
+              # テーブル行を追加
+              if [ "$files_table" != "" ]; then files_table+="\n"; fi
+              files_table+="| $filename | $size | $filepath |"
+              
+              # 最大サイズとファイル名を更新
+              if [ $size -gt $max_size ]; then
+                max_size=$size
+                max_file="$filename"
+              fi
+              
+              # 総サイズに加算
+              total_size=$((total_size + size))
+            fi
+          done < /tmp/build_files.txt
+          
+          echo "max_size=$max_size" >> $GITHUB_OUTPUT
+          echo "max_file=$max_file" >> $GITHUB_OUTPUT
+          echo "total_size=$total_size" >> $GITHUB_OUTPUT
+          
+          # ファイル詳細をマークダウンテーブル形式で出力
+          echo "files_table<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$files_table" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          # 一時ファイルを削除
+          rm -f /tmp/build_files.txt
+
       - name: セキュリティ監査実行
         if: github.event_name == 'pull_request'
         id: audit
@@ -167,6 +241,25 @@ jobs:
             - 依存関係のサイズ内訳（ライブラリ別）
             - ツリーマップによる視覚的なサイズ表示
             - gzip・brotli圧縮サイズの比較
+
+            ## 📊 ビルド結果サマリー
+
+            **📦 ビルドファイル統計**
+            - **総ファイル数**: ${{ steps.build-analysis.outputs.total_files }}件
+            - **総サイズ**: ${{ steps.build-analysis.outputs.total_size }}バイト
+            - **最大ファイル**: ${{ steps.build-analysis.outputs.max_file }} (${{ steps.build-analysis.outputs.max_size }}バイト)
+
+            **📋 拡張子別ファイル数**
+            ${{ steps.build-analysis.outputs.ext_counts }}
+
+            <details>
+            <summary>📄 ビルドファイル詳細一覧（クリックで展開）</summary>
+
+            | ファイル名 | サイズ (バイト) | パス |
+            |-----------|----------------|------|
+            ${{ steps.build-analysis.outputs.files_table }}
+
+            </details>
 
             ---
             *このコメントは自動で生成されました。レビュー時にビルド成果物、テストレポート、バンドル分析レポートをご確認ください。*
