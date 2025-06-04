@@ -125,10 +125,12 @@ pnpmのバージョン管理もいずれはvoltaを利用する予定です。
 huskyを利用してプレコミットフック機能を実装しています。コミット前に以下のチェックが自動実行されます：
 
 #### 実行されるチェック
+`pnpm fullcheck`コマンドを実行し、以下のチェックが包括的に行われます：
 1. **リンティング（lint）**: ESLintによるコード品質チェック
 2. **フォーマットチェック（format:check）**: Prettierによるコードスタイルチェック
-3. **ビルド（build）**: TypeScriptコンパイルとViteビルドの成功確認
-4. **スペルチェック（spell-check）**: cspellによる英語スペリングチェック
+3. **スペルチェック（spell-check）**: cspellによる英語スペリングチェック
+4. **ビルド（build）**: TypeScriptコンパイルとViteビルドの成功確認
+5. **単体テスト（test）**: Vitestによる単体テストの実行
 
 #### 並行実行による高速化
 **Turborepoの並行実行機能**を活用して、複数のチェックを効率的に実行：
@@ -163,14 +165,22 @@ CSpell: Files checked: 26, Issues found: 0 in 0 files.
 #### 手動実行
 プレコミットチェックは手動でも実行できます：
 ```bash
-# プレコミットチェック全体の実行
+# プレコミットチェック全体の実行（フルチェック）
 pnpm run pre-commit
+
+# または直接フルチェックを実行
+pnpm fullcheck
+
+# E2Eテスト込みの完全チェック
+pnpm fullcheck:e2e
 
 # 個別チェックの実行
 pnpm run lint           # リンティング
 pnpm run format:check   # フォーマットチェック
 pnpm run build          # ビルド
 pnpm run spell-check    # スペルチェック
+pnpm run test           # 単体テスト
+pnpm run test:e2e       # E2Eテスト
 ```
 
 ### テスト
@@ -449,9 +459,20 @@ pnpm spell-check
 # 型チェック
 pnpm type-check
 
-# プレコミットチェック（全てのチェックを並行実行）
+# フルチェック（リント、フォーマット、スペルチェック、ビルド、単体テスト）
+pnpm fullcheck
+
+# フルチェック（E2Eテスト含む）
+pnpm fullcheck:e2e
+
+# プレコミットチェック（fullcheckと同じ）
 pnpm run pre-commit
 ```
+
+**フルチェックコマンドについて**:
+- `pnpm fullcheck`: 日常的な開発で使用する包括的なチェックコマンド
+- `pnpm fullcheck:e2e`: E2Eテストも含む完全なチェック（時間がかかる）
+- プレコミットフックでは`pnpm fullcheck`が自動実行されます
 
 ### バンドル分析
 バンドルサイズの分析には`rollup-plugin-visualizer`を使用しています。
