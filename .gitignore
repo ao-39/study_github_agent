@@ -8,6 +8,7 @@ pnpm-lock.yaml
 coverage
 test-results
 playwright-report
+playwright-results
 
 # Production
 dist
