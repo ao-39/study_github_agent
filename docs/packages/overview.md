@@ -86,14 +86,14 @@ pnpm --filter app build:analyze
 
 #### @types/* パッケージ
 - **@types/react (19.1.6)**: React型定義
-- **@types/react-dom (19.1.5)**: React DOM型定義  
+ - **@types/react-dom (19.1.6)**: React DOM型定義
 - **@types/node (22.15.29)**: Node.js型定義
 
 **目的**: TypeScript開発で必要な型情報提供
 
 ### テストフレームワーク
 
-#### Vitest (3.2.0)
+#### Vitest (3.2.2)
 **目的**: 高速なユニットテストランナー  
 **選定理由**: 
 - Viteとのネイティブ統合
@@ -111,14 +111,14 @@ test: {
 }
 ```
 
-#### @vitest/coverage-v8 (3.2.0)
+#### @vitest/coverage-v8 (3.2.2)
 **目的**: コードカバレッジ計測  
 **利用方法**:
 ```bash
 pnpm --filter app test:coverage
 ```
 
-#### @vitest/ui (3.2.0)
+#### @vitest/ui (3.2.2)
 **目的**: テスト実行のUIインターフェース  
 **利用方法**:
 ```bash
@@ -218,7 +218,7 @@ export default config
 }
 ```
 
-#### TypeDoc (0.27.8)
+#### TypeDoc (0.28.5)
 **目的**: TypeScriptソースコードからAPIドキュメントを自動生成  
 **選定理由**: 
 - TSDocコメントからHTMLドキュメント生成
@@ -310,7 +310,7 @@ import YAML from 'yaml'
 const data = YAML.parse(yamlString)
 ```
 
-#### wrangler (4.18.0)
+#### wrangler (4.19.1)
 **目的**: Cloudflare開発ツール  
 **利用**: Cloudflare Pages デプロイ用（将来的な使用想定）
 
