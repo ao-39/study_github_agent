@@ -79,166 +79,17 @@ jobs:
       - name: ビルド結果分析（PR時のみ）
         if: github.event_name == 'pull_request'
         id: build-analysis
-        run: |
-          cd apps/app/dist
-          
-          # ファイルサイズを適切な単位でフォーマットする関数
-          format_size() {
-            local size=$1
-            if [ $size -lt 1024 ]; then
-              printf "%s B" "$(printf '%d' $size | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')"
-            elif [ $size -lt 1048576 ]; then
-              local kb=$((size * 100 / 1024))
-              local kb_int=$((kb / 100))
-              local kb_frac=$((kb % 100))
-              if [ $kb_frac -eq 0 ]; then
-                printf "%s KB" "$(printf '%d' $kb_int | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')"
-              else
-                printf "%d.%02d KB" $kb_int $kb_frac
-              fi
-            elif [ $size -lt 1073741824 ]; then
-              local mb=$((size * 100 / 1048576))
-              local mb_int=$((mb / 100))
-              local mb_frac=$((mb % 100))
-              if [ $mb_frac -eq 0 ]; then
-                printf "%s MB" "$(printf '%d' $mb_int | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')"
-              else
-                printf "%d.%02d MB" $mb_int $mb_frac
-              fi
-            else
-              local gb=$((size * 100 / 1073741824))
-              local gb_int=$((gb / 100))
-              local gb_frac=$((gb % 100))
-              if [ $gb_frac -eq 0 ]; then
-                printf "%s GB" "$(printf '%d' $gb_int | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')"
-              else
-                printf "%d.%02d GB" $gb_int $gb_frac
-              fi
-            fi
-          }
-          
-          # 数値に桁区切りを追加する関数
-          add_commas() {
-            printf '%d' "$1" | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta'
-          }
-          
-          # ファイルリストを取得（隠しファイルも含む）
-          find . -type f | sort > /tmp/build_files.txt
-          
-          # 総ファイル数
-          total_files=$(wc -l < /tmp/build_files.txt)
-          echo "total_files=$(add_commas $total_files)" >> $GITHUB_OUTPUT
-          
-          # 拡張子別ファイル数を算出（シンプルなアプローチ）
-          ext_summary=""
-          
-          # 各拡張子のファイル数をカウント
-          js_count=$(grep -c '\.js$' /tmp/build_files.txt || echo "0")
-          css_count=$(grep -c '\.css$' /tmp/build_files.txt || echo "0")
-          html_count=$(grep -c '\.html$' /tmp/build_files.txt || echo "0")
-          svg_count=$(grep -c '\.svg$' /tmp/build_files.txt || echo "0")
-          map_count=$(grep -c '\.map$' /tmp/build_files.txt || echo "0")
-          
-          # 拡張子別の結果を文字列形式で生成
-          if [ $js_count -gt 0 ]; then
-            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+=".js: $(add_commas $js_count)件"
-          fi
-          if [ $css_count -gt 0 ]; then
-            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+=".css: $(add_commas $css_count)件"
-          fi
-          if [ $html_count -gt 0 ]; then
-            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+=".html: $(add_commas $html_count)件"
-          fi
-          if [ $svg_count -gt 0 ]; then
-            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+=".svg: $(add_commas $svg_count)件"
-          fi
-          if [ $map_count -gt 0 ]; then
-            if [ "$ext_summary" != "" ]; then ext_summary+=", "; fi
-            ext_summary+=".map: $(add_commas $map_count)件"
-          fi
-          
-          echo "ext_counts=$ext_summary" >> $GITHUB_OUTPUT
-          
-          # ファイルサイズ情報を取得
-          max_size=0
-          total_size=0
-          max_file=""
-          files_table=""
-          
-          while IFS= read -r file; do
-            if [ -f "$file" ]; then
-              # macOSとLinux対応のファイルサイズ取得
-              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
-              # ファイル名とパスを整理
-              filename=$(basename "$file")
-              filepath=${file#./}  # ./を除去
-              
-              # ファイルサイズをフォーマット
-              formatted_size=$(format_size $size)
-              
-              # テーブル行を追加
-              if [ "$files_table" != "" ]; then files_table+="\n"; fi
-              files_table+="| $filename | $formatted_size | $filepath |"
-              
-              # 最大サイズとファイル名を更新
-              if [ $size -gt $max_size ]; then
-                max_size=$size
-                max_file="$filename"
-              fi
-              
-              # 総サイズに加算
-              total_size=$((total_size + size))
-            fi
-          done < /tmp/build_files.txt
-          
-          # フォーマットされたサイズ情報を出力
-          echo "max_size_formatted=$(format_size $max_size)" >> $GITHUB_OUTPUT
-          echo "max_file=$max_file" >> $GITHUB_OUTPUT
-          echo "total_size_formatted=$(format_size $total_size)" >> $GITHUB_OUTPUT
-          
-          # ファイル詳細をマークダウンテーブル形式で出力
-          echo "files_table<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$files_table" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          # 一時ファイルを削除
-          rm -f /tmp/build_files.txt
+        run: bash .github/scripts/build-analysis.sh
 
       - name: セキュリティ監査実行
         if: github.event_name == 'pull_request'
         id: audit
-        run: |
-          # pnpm auditの実行とJSON結果の取得（stderr出力を廃棄し、JSONのみ抽出）
-          pnpm audit --json > audit_output.json 2>/dev/null || true
-          if [ -s audit_output.json ] && jq empty audit_output.json 2>/dev/null; then
-            audit_result=$(cat audit_output.json)
-          else
-            audit_result='{"metadata":{"vulnerabilities":{"info":0,"low":0,"moderate":0,"high":0,"critical":0},"dependencies":0,"devDependencies":0,"optionalDependencies":0,"totalDependencies":0},"advisories":{},"actions":[],"muted":[]}'
-          fi
-          echo "audit_result<<EOF" >> $GITHUB_OUTPUT
-          echo "$audit_result" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          rm -f audit_output.json
+        run: bash .github/scripts/audit.sh
 
       - name: 古いパッケージ調査実行
         if: github.event_name == 'pull_request'
         id: outdated
-        run: |
-          # pnpm outdatedの実行とJSON結果の取得（全ワークスペースを対象）
-          pnpm outdated --format json --recursive > outdated_output.json 2>/dev/null || true
-          if [ -s outdated_output.json ] && jq empty outdated_output.json 2>/dev/null; then
-            outdated_result=$(cat outdated_output.json)
-          else
-            outdated_result='{}'
-          fi
-          echo "outdated_result<<EOF" >> $GITHUB_OUTPUT
-          echo "$outdated_result" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          rm -f outdated_output.json
+        run: bash .github/scripts/outdated.sh
 
       - name: バンドル分析レポート生成（PR時のみ）
         if: github.event_name == 'pull_request'
@@ -340,61 +191,14 @@ jobs:
         id: parse-audit
         env:
           AUDIT_RESULT: ${{ steps.audit.outputs.audit_result }}
-        run: |
-          # audit結果からメタデータ情報を抽出（環境変数経由で安全にJSON処理）
-          echo "$AUDIT_RESULT" > audit_temp.json
-          
-          total_deps=$(jq -r '.metadata.totalDependencies' audit_temp.json)
-          critical=$(jq -r '.metadata.vulnerabilities.critical' audit_temp.json)
-          high=$(jq -r '.metadata.vulnerabilities.high' audit_temp.json)
-          moderate=$(jq -r '.metadata.vulnerabilities.moderate' audit_temp.json)
-          low=$(jq -r '.metadata.vulnerabilities.low' audit_temp.json)
-          info=$(jq -r '.metadata.vulnerabilities.info' audit_temp.json)
-          
-          total_vulns=$((critical + high + moderate + low + info))
-          
-          echo "total_deps=$total_deps" >> $GITHUB_OUTPUT
-          echo "critical=$critical" >> $GITHUB_OUTPUT
-          echo "high=$high" >> $GITHUB_OUTPUT
-          echo "moderate=$moderate" >> $GITHUB_OUTPUT
-          echo "low=$low" >> $GITHUB_OUTPUT
-          echo "info=$info" >> $GITHUB_OUTPUT
-          echo "total_vulns=$total_vulns" >> $GITHUB_OUTPUT
-          
-          # advisoriesが空でないかチェック
-          has_advisories=$(jq -r 'if .advisories == {} then "false" else "true" end' audit_temp.json)
-          echo "has_advisories=$has_advisories" >> $GITHUB_OUTPUT
-          
-          # 一時ファイルを削除
-          rm -f audit_temp.json
+        run: bash .github/scripts/parse-audit.sh
 
       - name: 古いパッケージ結果を解析・準備
         if: github.event_name == 'pull_request'
         id: parse-outdated
         env:
           OUTDATED_RESULT: ${{ steps.outdated.outputs.outdated_result }}
-        run: |
-          # outdated結果が空でないかチェック（環境変数経由で安全にJSON処理）
-          echo "$OUTDATED_RESULT" > outdated_temp.json
-          
-          has_outdated=$(jq -r 'if . == {} then "false" else "true" end' outdated_temp.json)
-          echo "has_outdated=$has_outdated" >> $GITHUB_OUTPUT
-          
-          if [ "$has_outdated" = "true" ]; then
-            # 古いパッケージの数をカウント
-            outdated_count=$(jq -r 'keys | length' outdated_temp.json)
-            echo "outdated_count=$outdated_count" >> $GITHUB_OUTPUT
-            
-            # パッケージ名一覧を取得（表示用）
-            outdated_packages=$(jq -r 'keys | join(", ")' outdated_temp.json)
-            echo "outdated_packages=$outdated_packages" >> $GITHUB_OUTPUT
-          else
-            echo "outdated_count=0" >> $GITHUB_OUTPUT
-            echo "outdated_packages=" >> $GITHUB_OUTPUT
-          fi
-          
-          # 一時ファイルを削除
-          rm -f outdated_temp.json
+        run: bash .github/scripts/parse-outdated.sh
 
       - name: セキュリティ監査結果をPRにコメント（PR時のみ）
         if: github.event_name == 'pull_request'
@@ -481,73 +285,7 @@ jobs:
       - name: Vitestテスト結果を解析・準備（PR時のみ）
         if: github.event_name == 'pull_request'
         id: parse-vitest
-        run: |
-          # apps/appのtest-results/results.jsonから結果を解析
-          if [ -f "apps/app/test-results/results.json" ]; then
-            json_file="apps/app/test-results/results.json"
-            
-            # 基本統計情報の抽出
-            total_tests=$(jq -r '.numTotalTests' "$json_file")
-            passed_tests=$(jq -r '.numPassedTests' "$json_file")
-            failed_tests=$(jq -r '.numFailedTests' "$json_file")
-            pending_tests=$(jq -r '.numPendingTests' "$json_file")
-            todo_tests=$(jq -r '.numTodoTests' "$json_file")
-            success=$(jq -r '.success' "$json_file")
-            start_time=$(jq -r '.startTime' "$json_file")
-            
-            # テストスイート情報の抽出
-            total_suites=$(jq -r '.numTotalTestSuites' "$json_file")
-            passed_suites=$(jq -r '.numPassedTestSuites' "$json_file")
-            failed_suites=$(jq -r '.numFailedTestSuites' "$json_file")
-            
-            # 実行時間の計算（最新テスト結果の終了時間から開始時間を引く）
-            if [ "$(jq -r '.testResults | length' "$json_file")" -gt 0 ]; then
-              latest_end=$(jq -r '[.testResults[].endTime] | max | floor' "$json_file")
-              duration_ms=$((latest_end - start_time))
-              duration_sec=$((duration_ms / 1000))
-            else
-              duration_sec=0
-            fi
-            
-            # 失敗したテストの詳細情報（存在する場合）
-            failed_test_details=""
-            if [ "$failed_tests" -gt 0 ]; then
-              failed_test_details=$(jq -r '
-                .testResults[] |
-                select(.status == "failed") |
-                "### ❌ 失敗したテストファイル: **\(.name | split("/") | last)**\n" +
-                (.assertionResults[] |
-                  select(.status == "failed") |
-                  "- **\(.title)**: `\(.failureMessages[0] | split("\n")[0])`"
-                ) + "\n"
-              ' "$json_file" | head -20)  # Limit output length
-            fi
-            
-            # GitHub Actions出力に設定
-            echo "total_tests=$total_tests" >> $GITHUB_OUTPUT
-            echo "passed_tests=$passed_tests" >> $GITHUB_OUTPUT
-            echo "failed_tests=$failed_tests" >> $GITHUB_OUTPUT
-            echo "pending_tests=$pending_tests" >> $GITHUB_OUTPUT
-            echo "todo_tests=$todo_tests" >> $GITHUB_OUTPUT
-            echo "success=$success" >> $GITHUB_OUTPUT
-            echo "duration_sec=$duration_sec" >> $GITHUB_OUTPUT
-            echo "total_suites=$total_suites" >> $GITHUB_OUTPUT
-            echo "passed_suites=$passed_suites" >> $GITHUB_OUTPUT
-            echo "failed_suites=$failed_suites" >> $GITHUB_OUTPUT
-            
-            # 失敗したテストの詳細をマルチライン出力として設定
-            if [ -n "$failed_test_details" ]; then
-              echo "failed_test_details<<EOF" >> $GITHUB_OUTPUT
-              echo "$failed_test_details" >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
-            else
-              echo "failed_test_details=" >> $GITHUB_OUTPUT
-            fi
-            
-            echo "json_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "json_exists=false" >> $GITHUB_OUTPUT
-          fi
+        run: bash .github/scripts/parse-vitest.sh
 
       - name: Vitestテスト結果をPRにコメント（PR時のみ）
         if: github.event_name == 'pull_request' && steps.parse-vitest.outputs.json_exists == 'true'
@@ -628,78 +366,7 @@ jobs:
       - name: Playwrightテスト結果を解析・準備（PR時のみ）
         if: always() && github.event_name == 'pull_request'
         id: parse-playwright
-        run: |
-          # apps/appのplaywright-results/results.jsonから結果を解析
-          if [ -f "apps/app/playwright-results/results.json" ]; then
-            json_file="apps/app/playwright-results/results.json"
-            
-            # 基本統計情報の抽出
-            total_suites=$(jq -r '.suites | length' "$json_file")
-            total_tests=$(jq -r '[.suites[].specs[].tests] | flatten | length' "$json_file")
-            
-            # テスト結果の集計
-            passed_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "passed")] | length' "$json_file")
-            failed_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "failed")] | length' "$json_file")
-            flaky_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "flaky")] | length' "$json_file")
-            skipped_tests=$(jq -r '[.suites[].specs[].tests[] | select(.results[0].status == "skipped")] | length' "$json_file")
-            
-            # 実行時間の計算（ミリ秒から秒に変換）
-            duration_ms=$(jq -r '[.suites[].specs[].tests[].results[].duration] | add' "$json_file")
-            duration_sec=$((duration_ms / 1000))
-            
-            # 成功率の計算
-            if [ "$total_tests" -gt 0 ]; then
-              success_rate=$(echo "scale=1; $passed_tests * 100 / $total_tests" | bc -l)
-            else
-              success_rate="0.0"
-            fi
-            
-            # 失敗したテストの詳細情報（存在する場合）
-            failed_test_details=""
-            if [ "$failed_tests" -gt 0 ]; then
-              failed_test_details=$(jq -r '
-                .suites[] |
-                .specs[] |
-                select(.tests[].results[0].status == "failed") |
-                "### ❌ 失敗したテストファイル: **\(.file | split("/") | last)**\n" +
-                "- **\(.title)**: `\(.tests[].results[0].error.message // "詳細はレポートを確認してください")`\n"
-              ' "$json_file" | head -20)  # Limit output length
-            fi
-            
-            # ブラウザ別の実行状況（chrominumのみ実行の場合）
-            browser_info="chromium"
-            
-            # GitHub Actions出力に設定
-            echo "total_suites=$total_suites" >> $GITHUB_OUTPUT
-            echo "total_tests=$total_tests" >> $GITHUB_OUTPUT
-            echo "passed_tests=$passed_tests" >> $GITHUB_OUTPUT
-            echo "failed_tests=$failed_tests" >> $GITHUB_OUTPUT
-            echo "flaky_tests=$flaky_tests" >> $GITHUB_OUTPUT
-            echo "skipped_tests=$skipped_tests" >> $GITHUB_OUTPUT
-            echo "duration_sec=$duration_sec" >> $GITHUB_OUTPUT
-            echo "success_rate=$success_rate" >> $GITHUB_OUTPUT
-            echo "browser_info=$browser_info" >> $GITHUB_OUTPUT
-            
-            # 失敗したテストの詳細をマルチライン出力として設定
-            if [ -n "$failed_test_details" ]; then
-              echo "failed_test_details<<EOF" >> $GITHUB_OUTPUT
-              echo "$failed_test_details" >> $GITHUB_OUTPUT
-              echo "EOF" >> $GITHUB_OUTPUT
-            else
-              echo "failed_test_details=" >> $GITHUB_OUTPUT
-            fi
-            
-            # 全体の成功状況
-            if [ "$failed_tests" -eq 0 ]; then
-              echo "overall_success=true" >> $GITHUB_OUTPUT
-            else
-              echo "overall_success=false" >> $GITHUB_OUTPUT
-            fi
-            
-            echo "json_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "json_exists=false" >> $GITHUB_OUTPUT
-          fi
+        run: bash .github/scripts/parse-playwright.sh
 
       - name: Playwrightテスト結果をPRにコメント（PR時のみ）
         if: always() && github.event_name == 'pull_request' && steps.parse-playwright.outputs.json_exists == 'true'
