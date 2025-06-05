@@ -1,0 +1,29 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Study GitHub Agent App API Documentation",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs-api",
+  "exclude": ["**/*.test.*", "**/*.d.ts", "test-setup.ts", "e2e/"],
+  "plugin": [],
+  "theme": "default",
+  "readme": "none",
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "includeVersion": true,
+  "sort": ["source-order"],
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "treatWarningsAsErrors": false,
+  "intentionallyNotExported": [],
+  "categorizeByGroup": true,
+  "defaultCategory": "Other",
+  "categoryOrder": ["*"],
+  "groupOrder": ["*"],
+  "searchInComments": true,
+  "cleanOutputDir": true
+}

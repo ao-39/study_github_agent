@@ -15,6 +15,7 @@
     "typescript",
     "husky",
     "cspell",
+    "typedoc",
     "jsdom",
     "playwright",
     "rollup",
@@ -52,6 +53,8 @@
     "beforeinstall",
     "postinstall",
     "precommit",
+    "fileoverview",
+    "tsdoc",
     "dist"
   ],
   "flagWords": [],
@@ -74,7 +77,8 @@
     "apps/*/dist/**",
     "apps/*/test-results/**",
     "apps/*/playwright-report/**",
-    "apps/*/playwright-results/**"
+    "apps/*/playwright-results/**",
+    "docs-api/**"
   ],
   "ignoreRegExpList": [
     "/\\b[A-Z]{2,}\\b/g",

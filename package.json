@@ -25,7 +25,8 @@
     "spell-check": "turbo run spell-check",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
-    "type-check": "turbo run type-check"
+    "type-check": "turbo run type-check",
+    "typedoc": "turbo run typedoc"
   },
   "devDependencies": {
     "husky": "9.1.7",
