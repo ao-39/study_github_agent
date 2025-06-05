@@ -1,85 +1,89 @@
+/* Figmaデザインに基づいたスタイリング */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap');
+
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #ffffff;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    'Noto Sans JP',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    'Roboto',
+    'Oxygen',
+    'Ubuntu',
+    'Cantarell',
+    'Fira Sans',
+    'Droid Sans',
+    'Helvetica Neue',
+    sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.app-header {
-  padding: 2rem;
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 90%;
+  max-width: 1440px;
+  height: auto;
+  max-height: 100vh;
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    width: 95%;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    padding: 16px;
+  }
+}
+
+.app-title {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 45px;
+  line-height: 1.4em;
+  color: #333333;
+  margin: 0;
   text-align: center;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
-.app-header h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.app-header p {
-  font-size: 1.2rem;
-  margin-bottom: 3rem;
-  opacity: 0.9;
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.feature-card p {
-  opacity: 0.8;
-  line-height: 1.6;
-}
-
-.action-section {
-  margin-top: 2rem;
-}
-
-.primary-button {
-  background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-  color: white;
+.message-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0px 16px;
+  background: #0017c1;
+  color: #ffffff;
   border: none;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 50px;
+  border-radius: 8px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1em;
+  letter-spacing: 0.02em;
+  text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+  height: 48px; /* ボタンの適切な高さを設定 */
 }
 
-.primary-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+.message-button:hover {
+  background: #0013a3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 23, 193, 0.3);
 }
 
-.primary-button:active {
+.message-button:active {
   transform: translateY(0);
+  background: #000f85;
 }
