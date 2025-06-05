@@ -4,6 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * Playwright設定ファイル
  * chromium、firefox、safariでのE2Eテストを実行します。
+ * テスト終了後はアプリケーションが自動終了するように設定されています。
  * @see https://playwright.dev/docs/test-configuration
  */
 export default defineConfig({
@@ -22,13 +23,17 @@ export default defineConfig({
   // 並列実行するワーカー数（CI環境では1つに制限）
   workers: process.env.CI ? 1 : undefined,
 
-  // レポート設定
+  // レポート設定（テスト結果をコンソールに表示して自動終了）
   reporter: process.env.CI
     ? [
-        ['html', { outputFolder: 'playwright-report' }],
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
         ['json', { outputFile: 'playwright-results/results.json' }],
+        ['list'], // CI環境ではコンソールにリスト形式で結果を表示
       ]
-    : [['html', { outputFolder: 'playwright-report' }]],
+    : [
+        ['list'], // ローカル環境でもコンソールに結果を表示して自動終了
+        ['html', { outputFolder: 'playwright-report', open: 'never' }],
+      ],
 
   // テスト成果物の出力ディレクトリ
   outputDir: 'playwright-results',
@@ -76,11 +81,13 @@ export default defineConfig({
     // },
   ],
 
-  // テスト実行前にローカルサーバーを起動
+  // テスト実行前にローカルサーバーを起動（テスト終了後に自動停止）
   webServer: {
     command: 'pnpm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true, // 常に既存のサーバーを再利用
+    reuseExistingServer: !process.env.CI, // CI環境では新しいサーバーを起動
     timeout: 30 * 1000, // 30秒でタイムアウト
+    stdout: 'pipe', // サーバーログをパイプして表示を制御
+    stderr: 'pipe', // エラーログをパイプして表示を制御
   },
 })

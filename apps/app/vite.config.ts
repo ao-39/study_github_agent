@@ -1,5 +1,6 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 
@@ -15,6 +16,7 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === 'true' ? '/study_github_agent/' : '/',
   plugins: [
     react(),
+    tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['vite.svg'],
@@ -60,9 +62,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
+    // Watchモードを無効化してテスト完了後に終了
+    watch: false,
     testTimeout: 20000,
     // レポーター設定
-    reporter: process.env.CI
+    reporters: process.env.CI
       ? ['default', 'html', 'json']
       : ['default', 'html'],
     outputFile: {
