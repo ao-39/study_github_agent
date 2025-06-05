@@ -5,14 +5,28 @@
 - コミュニケーションは日本語で行います
 - コメントやドキュメントは日本語で記述してください
 
+# GitHub Copilot インストラクション
+
+## 開発者情報
+- 開発者は日本人です
+- コミュニケーションは日本語で行います
+- コメントやドキュメントは日本語で記述してください
+
 ## プロジェクト情報
 このプロジェクトはGitHub Copilot agentを学習するためのリポジトリです。
 
-**重要**: プロジェクトの詳細なアーキテクチャと技術スタックについてはREADME.mdを必ず参照してください。
+**重要**: プロジェクトの詳細な技術情報については、以下のドキュメントを参照してください：
+- **[README.md](../README.md)**: プロジェクト概要と基本情報
+- **[アーキテクチャ概要](../docs/architecture/overview.md)**: 全体設計と技術スタック
+- **[開発ガイド](../docs/development/)**: 環境セットアップと開発ルール
+- **[GitHub Copilot活用ガイド](../docs/guides/github-copilot.md)**: 効果的なCopilot活用方法
 
 ### 技術スタック
-- React アプリケーション（monorepo構成でapps/app配下に構築済み）
-- JavaScript/TypeScript
+- **フロントエンド**: React 19.1.0 + TypeScript 5.8.3 + Vite 6.3.5
+- **monorepo**: pnpm + Turborepo
+- **テスト**: Vitest (ユニット) + Playwright (E2E)
+- **品質管理**: ESLint (Flat Config) + Prettier + cspell
+- **CI/CD**: GitHub Actions + GitHub Pages + Cloudflare Pages
 
 ## コーディング規約
 - 変数名や関数名は英語で記述
@@ -21,12 +35,44 @@
 - エラーメッセージやログは日本語で記述
 - コミットメッセージは日本語で記述
 
+**詳細**: [コーディング規約ドキュメント](../docs/development/coding-standards.md)
+
 ## GitHub Copilotへの指示
 - 提案や説明は日本語で行ってください
 - コードの解説やコメントは日本語で記述してください
 - 日本の開発慣習や文化を考慮してください
 - 開発者が元気になり、モチベーションが向上するような前向きで励ましの言葉を使ってください
 - 問題解決時には達成感を感じられるような表現を心がけてください
+
+## プロジェクト構造理解
+
+### monorepo構成
+```
+study_github_agent/
+├── apps/app/                   # メインReactアプリケーション
+├── packages/                   # 共有ライブラリパッケージ
+│   ├── eslint-config/          # ESLint設定パッケージ
+│   └── prettier-config/        # Prettier設定パッケージ
+└── docs/                       # プロジェクトドキュメント
+    ├── development/            # 開発ガイド
+    ├── architecture/           # アーキテクチャドキュメント
+    ├── packages/               # パッケージドキュメント
+    ├── deployment/             # デプロイメント関連
+    └── guides/                 # 各種ガイド
+```
+
+### 重要な設定ファイル
+- `package.json`: monorepo設定とTurborepo設定
+- `pnpm-workspace.yaml`: pnpmワークスペース設定
+- `turbo.json`: Turborepoタスク設定
+- `apps/app/vite.config.ts`: Vite設定（テスト含む）
+- `apps/app/playwright.config.ts`: E2Eテスト設定
+
+### 開発フロー
+1. `pnpm install`: 依存関係インストール
+2. `pnpm --filter app dev`: 開発サーバー起動
+3. `pnpm fullcheck`: 包括的品質チェック
+4. `pnpm fullcheck:e2e`: E2Eテスト込み完全チェック
 
 ## GitHub Copilot学習指針
 
