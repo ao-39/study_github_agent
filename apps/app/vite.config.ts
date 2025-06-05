@@ -1,7 +1,14 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
+
+/**
+ * Viteの設定を定義します。
+ *
+ * PWA対応のため `vite-plugin-pwa` を利用しています。
+ */
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,6 +17,25 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['vite.svg'],
+      manifest: {
+        name: 'Study GitHub Agent',
+        short_name: 'SGA',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#ffffff',
+        icons: [
+          {
+            src: 'vite.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+          },
+        ],
+        description: 'GitHub Copilot agent学習用PWAアプリケーション',
+      },
+    }),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
     ...(process.env.ANALYZE === 'true'
       ? [
@@ -38,6 +64,7 @@ export default defineConfig({
     globals: true,
     // Watchモードを無効化してテスト完了後に終了
     watch: false,
+    testTimeout: 20000,
     // レポーター設定
     reporters: process.env.CI
       ? ['default', 'html', 'json']

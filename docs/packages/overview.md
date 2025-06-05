@@ -51,7 +51,7 @@ export default defineConfig({
 ```
 
 #### Rollup Plugin Visualizer (6.0.1)
-**目的**: バンドルサイズ分析とビジュアライゼーション  
+**目的**: バンドルサイズ分析とビジュアライゼーション
 **選定理由**: 
 - バンドルサイズの詳細分析
 - 依存関係の可視化
@@ -61,6 +61,18 @@ export default defineConfig({
 ```bash
 pnpm --filter app build:analyze
 # bundle-report.html が生成される
+```
+
+#### Vite Plugin PWA (1.0.0)
+**目的**: PWA対応のためのService WorkerとWeb Manifest自動生成
+**選定理由**:
+- オフラインでの利用を可能にするキャッシュ機構
+- Viteとの統合により簡易な設定で導入可能
+
+**利用方法**:
+```bash
+pnpm --filter app build
+# Service Worker と manifest が生成される
 ```
 
 ### 言語・型システム

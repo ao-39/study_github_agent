@@ -63,6 +63,7 @@ pnpm fullcheck  # 包括的な品質チェック
 - **[コーディング規約](docs/development/coding-standards.md)** - プロジェクトの開発ルール
 - **[開発コマンド](docs/development/commands.md)** - 利用可能なコマンド一覧
 - **[テスト戦略](docs/development/testing.md)** - テストの書き方とベストプラクティス
+- **[PWA対応ガイド](docs/development/pwa.md)** - PWA機能の概要と設定方法
 
 ### 🏗️ アーキテクチャ
 - **[アーキテクチャ概要](docs/architecture/overview.md)** - プロジェクト全体の設計方針

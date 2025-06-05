@@ -27,6 +27,7 @@
 - **テスト**: Vitest (ユニット) + Playwright (E2E)
 - **品質管理**: ESLint (Flat Config) + Prettier + cspell
 - **CI/CD**: GitHub Actions + GitHub Pages + Cloudflare Pages
+- **PWA対応**: vite-plugin-pwa によるオフライン対応
 
 ## コーディング規約
 - 変数名や関数名は英語で記述
