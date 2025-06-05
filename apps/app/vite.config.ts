@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { visualizer } from 'rollup-plugin-visualizer'
@@ -36,8 +36,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
+    // Watchモードを無効化してテスト完了後に終了
+    watch: false,
     // レポーター設定
-    reporter: process.env.CI
+    reporters: process.env.CI
       ? ['default', 'html', 'json']
       : ['default', 'html'],
     outputFile: {

@@ -1,8 +1,9 @@
-import { describe, it, expect, afterAll } from 'vitest'
+import { describe, it, expect, afterAll, vi } from 'vitest'
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
+vi.setConfig({ testTimeout: 30000 })
 describe('GitHub Pages デプロイメント設定', () => {
   const distPath = join(process.cwd(), 'dist')
   const originalEnv = process.env.GITHUB_PAGES

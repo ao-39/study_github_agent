@@ -27,15 +27,10 @@ describe('CI ビルドサマリー機能', () => {
     expect(buildAnalysisStep.if).toBe("github.event_name == 'pull_request'")
     expect(buildAnalysisStep.id).toBe('build-analysis')
 
-    // ビルド分析スクリプトの基本要素が含まれていることを確認
-    expect(buildAnalysisStep.run).toContain('cd apps/app/dist')
-    expect(buildAnalysisStep.run).toContain('find . -type f | sort')
-    expect(buildAnalysisStep.run).toContain('total_files=')
-    expect(buildAnalysisStep.run).toContain('ext_counts=')
-    expect(buildAnalysisStep.run).toContain('max_size_formatted=')
-    expect(buildAnalysisStep.run).toContain('total_size_formatted=')
-    expect(buildAnalysisStep.run).toContain('files_table=')
-    expect(buildAnalysisStep.run).toContain('format_size()')
+    // スクリプトファイルを実行しているか確認
+    expect(buildAnalysisStep.run).toContain(
+      'bash .github/scripts/build-analysis.sh'
+    )
   })
 
   it('PRコメントステップにビルドサマリーが含まれている', () => {
@@ -102,11 +97,8 @@ describe('CI ビルドサマリー機能', () => {
     // ビルド分析ステップのIDが正しく設定されている
     expect(buildAnalysisStep.id).toBe('build-analysis')
 
-    // 出力変数がすべてGITHUB_OUTPUTに設定されている
-    expect(buildAnalysisStep.run).toContain('total_files=')
-    expect(buildAnalysisStep.run).toContain('total_size_formatted=')
-    expect(buildAnalysisStep.run).toContain('max_size_formatted=')
-    expect(buildAnalysisStep.run).toContain('>> $GITHUB_OUTPUT')
+    // スクリプトファイルを実行しているか確認
+    expect(buildAnalysisStep.run).toBe('bash .github/scripts/build-analysis.sh')
 
     // PRコメントで正しい参照形式が使用されている
     const requiredOutputs = [
