@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vitejs.dev/config/
@@ -8,6 +9,25 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === 'true' ? '/study_github_agent/' : '/',
   plugins: [
     react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['vite.svg'],
+      manifest: {
+        name: 'Study GitHub Agent',
+        short_name: 'SGA',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#ffffff',
+        icons: [
+          {
+            src: 'vite.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+          },
+        ],
+        description: 'GitHub Copilot agent学習用PWAアプリケーション',
+      },
+    }),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
     ...(process.env.ANALYZE === 'true'
       ? [
@@ -34,6 +54,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     globals: true,
+    testTimeout: 20000,
     // レポーター設定
     reporter: process.env.CI
       ? ['default', 'html', 'json']
