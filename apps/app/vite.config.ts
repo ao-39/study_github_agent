@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vitejs.dev/config/
@@ -8,6 +9,7 @@ export default defineConfig({
   base: process.env.GITHUB_PAGES === 'true' ? '/study_github_agent/' : '/',
   plugins: [
     react(),
+    tsconfigPaths(),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
     ...(process.env.ANALYZE === 'true'
       ? [
