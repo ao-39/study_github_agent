@@ -218,6 +218,33 @@ export default config
 }
 ```
 
+#### TypeDoc (0.27.8)
+**目的**: TypeScriptソースコードからAPIドキュメントを自動生成  
+**選定理由**: 
+- TSDocコメントからHTMLドキュメント生成
+- TypeScript型情報の自動抽出
+- CI/CDでの自動生成とレポート配布
+- 開発チーム向けの詳細なAPIリファレンス
+
+**設定ファイル**: `typedoc.json`
+```json
+{
+  "name": "Study GitHub Agent App API Documentation",
+  "entryPoints": ["src"],
+  "out": "docs-api",
+  "exclude": ["**/*.test.*", "**/*.d.ts", "test-setup.ts", "e2e/"]
+}
+```
+
+**生成コマンド**:
+```bash
+# APIドキュメント生成
+pnpm typedoc
+
+# 特定のアプリのみ
+pnpm --filter app typedoc
+```
+
 ### monorepo管理
 
 #### Turborepo (2.5.4)

@@ -254,6 +254,24 @@ pnpm --filter app list
 pnpm outdated
 ```
 
+### APIドキュメント生成
+```bash
+# TypeDocでAPIドキュメント生成
+pnpm typedoc
+
+# 特定のアプリのみ
+pnpm --filter app typedoc
+
+# 生成されたドキュメントを確認
+# apps/app/docs-api/index.html をブラウザで開く
+```
+
+**APIドキュメントの活用**:
+- TypeScriptソースコードからのAPIリファレンス自動生成
+- TSDocコメントの内容をHTML形式で表示
+- 関数・クラス・型の詳細情報と使用例を提供
+- CI/CDでのレポート生成とダウンロード配布
+
 ## デバッグ・トラブルシューティング
 
 ### ログレベル調整

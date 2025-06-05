@@ -35,6 +35,10 @@
     "spell-check": {
       "outputs": []
     },
+    "typedoc": {
+      "dependsOn": ["build"],
+      "outputs": ["docs-api/**"]
+    },
     "clean": {
       "cache": false
     }

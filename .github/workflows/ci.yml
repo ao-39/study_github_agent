@@ -282,6 +282,8 @@ jobs:
               - **内容**: Vitestユニットテストの詳細HTMLレポート
             - **📈 バンドル分析レポート**: `bundle-analysis-report-${{ github.event.pull_request.number }}`
               - **内容**: JavaScriptバンドルサイズの詳細分析（rollup-plugin-visualizer）
+            - **📚 TypeDoc APIドキュメント**: `typedoc-api-docs-${{ github.event.pull_request.number }}`
+              - **内容**: TSDocコメントから自動生成されたAPIドキュメント（TypeDoc）
             - **🎭 Playwrightテストレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
               - **内容**: E2Eテスト（Playwright）の詳細HTMLレポート
             - **保存期間**: 14日間
@@ -301,6 +303,13 @@ jobs:
             - 依存関係のサイズ内訳（ライブラリ別）
             - ツリーマップによる視覚的なサイズ表示
             - gzip・brotli圧縮サイズの比較
+
+            **📚 TypeDoc APIドキュメントについて：**
+            TypeDoc APIドキュメントには以下の情報が含まれています：
+            - TypeScriptソースコードのAPIリファレンス
+            - TSDocコメントから自動生成された関数・クラス・型の説明
+            - 使用例とコードサンプル
+            - 型情報と継承関係の詳細
 
             </details>
 
@@ -596,6 +605,17 @@ jobs:
         with:
           name: vitest-html-report-${{ github.event.pull_request.number }}
           path: apps/app/test-results/
+          retention-days: 14
+
+      - name: TypeDocAPIドキュメント生成
+        run: pnpm typedoc
+
+      - name: TypeDocAPIドキュメントの成果物アップロード（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: typedoc-api-docs-${{ github.event.pull_request.number }}
+          path: apps/app/docs-api/
           retention-days: 14
 
       - name: Playwrightブラウザのインストール

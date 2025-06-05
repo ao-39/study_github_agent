@@ -23,6 +23,14 @@
 - **strict mode**: TypeScript strict modeを必須とする
 - **型アノテーション**: 明示的な型定義を推奨
 
+### TSDocドキュメント
+- **TSDoc必須**: 全てのexport関数・コンポーネント・型にTSDocコメントを記載
+- **説明文**: `@description`タグで機能の詳細な説明を記載
+- **使用例**: `@example`タグでコードサンプルを提供
+- **パラメータ説明**: `@param`タグで引数の詳細を記載
+- **戻り値説明**: `@returns`タグで戻り値の詳細を記載
+- **TypeDoc生成**: `pnpm typedoc`でAPIドキュメントを自動生成
+
 ### インポート・エクスポート規約
 - **named export推奨**: 基本的にnamed exportを使用
 - **default export**: 限定的な使用に留める
@@ -30,12 +38,27 @@
 
 ### TypeScript設定例
 ```typescript
-// Good: 明示的な型定義
+// Good: 明示的な型定義とTSDocコメント
+/**
+ * ユーザーデータを取得する
+ * 
+ * @description 指定されたユーザーIDからユーザーの詳細情報を非同期で取得します。
+ * APIエラーが発生した場合は適切なエラーハンドリングを行います。
+ * 
+ * @param userId - 取得対象のユーザーID
+ * @returns ユーザーデータを含むPromise
+ * 
+ * @example
+ * ```typescript
+ * const userData = await getUserData('user123')
+ * console.log(userData.name)
+ * ```
+ */
 const getUserData = (userId: string): Promise<UserData> => {
   return fetchUser(userId)
 }
 
-// Bad: any型の使用
+// Bad: any型の使用とドキュメントの欠如
 const getUserData = (userId: any): any => {
   return fetchUser(userId)
 }

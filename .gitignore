@@ -19,6 +19,9 @@ build
 bundle-report.html
 stats.html
 
+# TypeDoc documentation
+docs-api
+
 # Runtime data
 pids
 *.pid

@@ -23,7 +23,8 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:webkit": "playwright test --project=webkit",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "typedoc": "typedoc src --out docs-api --exclude **/*.test.* --exclude **/*.d.ts --exclude test-setup.ts --exclude e2e/"
   },
   "prettier": "@study-github-agent/prettier-config",
   "dependencies": {
@@ -49,6 +50,7 @@
     "jsdom": "26.1.0",
     "prettier": "3.5.3",
     "rollup-plugin-visualizer": "6.0.1",
+    "typedoc": "0.27.8",
     "typescript": "5.8.3",
     "vite": "6.3.5",
     "vite-bundle-analyzer": "0.22.0",
