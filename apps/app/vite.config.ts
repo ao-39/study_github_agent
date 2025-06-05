@@ -3,6 +3,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 
+/**
+ * Viteの設定を定義します。
+ *
+ * PWA対応のため `vite-plugin-pwa` を利用しています。
+ */
+
 // https://vitejs.dev/config/
 export default defineConfig({
   // GitHub Pages用のベースパス設定

@@ -4,6 +4,7 @@ build/
 coverage/
 test-results/
 bundle-report.html
+docs-api/
 playwright-report/
 playwright-results/
 
