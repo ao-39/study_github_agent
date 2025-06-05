@@ -65,3 +65,5 @@ if [ -f "apps/app/test-results/results.json" ]; then
 else
   echo "json_exists=false" >> $GITHUB_OUTPUT
 
+
+fi
