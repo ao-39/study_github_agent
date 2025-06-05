@@ -36,7 +36,7 @@ if [ -f "apps/app/playwright-results/results.json" ]; then
     ' "$json_file" | head -20)  # Limit output length
   fi
   
-  # ブラウザ別の実行状況（chrominumのみ実行の場合）
+  # ブラウザ別の実行状況（chromiumのみ実行の場合）
   browser_info="chromium"
   
   # GitHub Actions出力に設定
