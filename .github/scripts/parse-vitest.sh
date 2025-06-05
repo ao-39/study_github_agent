@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# スクリプト失敗時に即座に停止させる
+set -euo pipefail
 # apps/appのtest-results/results.jsonから結果を解析
 if [ -f "apps/app/test-results/results.json" ]; then
   json_file="apps/app/test-results/results.json"
