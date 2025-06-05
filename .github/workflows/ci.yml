@@ -434,3 +434,38 @@ jobs:
           name: playwright-html-report-${{ github.event.pull_request.number }}
           path: apps/app/playwright-report/
           retention-days: 14
+
+      - name: レポートをCloudflare Pages用に整理（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          mkdir -p reports/vitest reports/playwright
+          cp apps/app/bundle-report.html reports/
+          cp -r apps/app/test-results/* reports/vitest/
+          cp -r apps/app/playwright-report/* reports/playwright/
+
+      - name: レポートをCloudflare Pagesへデプロイ（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        id: deploy-reports
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy reports --project-name=study-github-agent-reports --branch=pr-${{ github.event.pull_request.number }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: PRにレポートURLをコメント（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## 📊 テストレポート公開完了
+
+            以下のレポートがCloudflare Pagesにデプロイされました。
+
+            - **URL**: ${{ steps.deploy-reports.outputs.deployment-url }}
+            - **Vitestレポート**: `vitest/index.html`
+            - **Playwrightレポート**: `playwright/index.html`
+            - **バンドル分析**: `bundle-report.html`
+
+            プレビューURLから各レポートを確認してください。
