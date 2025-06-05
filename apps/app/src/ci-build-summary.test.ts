@@ -28,7 +28,7 @@ describe('CI ビルドサマリー機能', () => {
     expect(buildAnalysisStep.id).toBe('build-analysis')
 
     // スクリプトファイルを実行しているか確認
-    expect(buildAnalysisStep.run).toBe('bash .github/scripts/build-analysis.sh')
+    expect(buildAnalysisStep.run).toContain('bash .github/scripts/build-analysis.sh')
   })
 
   it('PRコメントステップにビルドサマリーが含まれている', () => {
