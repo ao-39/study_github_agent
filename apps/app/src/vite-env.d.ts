@@ -8,3 +8,27 @@
  */
 
 /// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  /**
+   * PWA機能を有効にするかどうか
+   * @default 'true'
+   */
+  readonly VITE_ENABLE_PWA?: string
+
+  /**
+   * GitHub Pages用ビルドかどうか
+   * @default 'false'
+   */
+  readonly GITHUB_PAGES?: string
+
+  /**
+   * バンドル分析を有効にするかどうか
+   * @default 'false'
+   */
+  readonly ANALYZE?: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

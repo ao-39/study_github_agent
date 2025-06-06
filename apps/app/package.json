@@ -30,7 +30,8 @@
   "prettier": "@study-github-agent/prettier-config",
   "dependencies": {
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "zod": "^3.25.55"
   },
   "devDependencies": {
     "@playwright/test": "1.52.0",
