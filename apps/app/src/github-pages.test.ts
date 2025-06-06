@@ -32,9 +32,11 @@ describe('GitHub Pages デプロイメント設定', () => {
   })
 
   it('GitHub Pages用ビルドでは正しいベースパスを使用する', () => {
-    // GitHub Pages用ビルドを実行
-    process.env.GITHUB_PAGES = 'true'
-    execSync('pnpm vite build', { cwd: process.cwd() })
+    // GitHub Pages用ビルドを実行 (環境変数を設定して実行)
+    execSync('GITHUB_PAGES=true pnpm vite build', {
+      cwd: process.cwd(),
+      env: { ...process.env, GITHUB_PAGES: 'true' },
+    })
 
     // index.htmlを確認
     const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8')
@@ -46,9 +48,11 @@ describe('GitHub Pages デプロイメント設定', () => {
   })
 
   it('ビルド成果物に必要なファイルが含まれる', () => {
-    // GitHub Pages用ビルドを実行
-    process.env.GITHUB_PAGES = 'true'
-    execSync('pnpm vite build', { cwd: process.cwd() })
+    // GitHub Pages用ビルドを実行 (環境変数を設定して実行)
+    execSync('GITHUB_PAGES=true pnpm vite build', {
+      cwd: process.cwd(),
+      env: { ...process.env, GITHUB_PAGES: 'true' },
+    })
 
     // 必要なファイルの存在確認
     const indexHtml = readFileSync(join(distPath, 'index.html'), 'utf-8')

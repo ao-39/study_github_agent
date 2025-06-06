@@ -46,6 +46,21 @@ pnpm --filter app build:analyze
 pnpm --filter app preview
 ```
 
+#### 環境変数を使用したビルド
+```bash
+# PWA機能を無効にしてビルド
+VITE_ENABLE_PWA=false pnpm --filter app build
+
+# GitHub Pages用ビルド
+GITHUB_PAGES=true pnpm --filter app build
+
+# バンドル分析を有効にしてビルド
+ANALYZE=true pnpm --filter app build
+
+# 複数の環境変数を組み合わせ
+VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm --filter app build
+```
+
 ## 品質チェックコマンド
 
 ### リンティング

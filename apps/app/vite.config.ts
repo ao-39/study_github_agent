@@ -3,41 +3,48 @@ import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
+import { env } from './src/env'
 
 /**
  * Viteの設定を定義します。
  *
  * PWA対応のため `vite-plugin-pwa` を利用しています。
+ * 環境変数でPWA機能の有効化を制御できます。
  */
 
 // https://vitejs.dev/config/
 export default defineConfig({
   // GitHub Pages用のベースパス設定
-  base: process.env.GITHUB_PAGES === 'true' ? '/study_github_agent/' : '/',
+  base: env.GITHUB_PAGES ? '/study_github_agent/' : '/',
   plugins: [
     react(),
     tsconfigPaths(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['vite.svg'],
-      manifest: {
-        name: 'Study GitHub Agent',
-        short_name: 'SGA',
-        start_url: '.',
-        display: 'standalone',
-        background_color: '#ffffff',
-        icons: [
-          {
-            src: 'vite.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-          },
-        ],
-        description: 'GitHub Copilot agent学習用PWAアプリケーション',
-      },
-    }),
+    // PWA機能を環境変数で制御
+    ...(env.VITE_ENABLE_PWA
+      ? [
+          VitePWA({
+            registerType: 'autoUpdate',
+            includeAssets: ['vite.svg'],
+            manifest: {
+              name: 'Study GitHub Agent',
+              short_name: 'SGA',
+              start_url: '.',
+              display: 'standalone',
+              background_color: '#ffffff',
+              icons: [
+                {
+                  src: 'vite.svg',
+                  sizes: '512x512',
+                  type: 'image/svg+xml',
+                },
+              ],
+              description: 'GitHub Copilot agent学習用PWAアプリケーション',
+            },
+          }),
+        ]
+      : []),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
-    ...(process.env.ANALYZE === 'true'
+    ...(env.ANALYZE
       ? [
           visualizer({
             filename: 'bundle-report.html',

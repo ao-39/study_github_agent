@@ -27,7 +27,25 @@
 - **テスト**: Vitest (ユニット) + Playwright (E2E)
 - **品質管理**: ESLint (Flat Config) + Prettier + cspell
 - **CI/CD**: GitHub Actions + GitHub Pages + Cloudflare Pages
-- **PWA対応**: vite-plugin-pwa によるオフライン対応
+- **PWA対応**: vite-plugin-pwa によるオフライン対応（環境変数で制御可能）
+- **環境変数バリデーション**: Zod によるタイプセーフな環境変数管理
+
+### 環境変数設定
+プロジェクトでは以下の環境変数を使用してビルド動作を制御できます：
+
+- **VITE_ENABLE_PWA**: PWA機能の有効化 (`true`/`false`, デフォルト: `true`)
+- **GITHUB_PAGES**: GitHub Pages用ビルド (`true`/`false`, デフォルト: `false`)
+- **ANALYZE**: バンドル分析の有効化 (`true`/`false`, デフォルト: `false`)
+
+**設定例**:
+```bash
+export VITE_ENABLE_PWA=false
+export GITHUB_PAGES=true
+export ANALYZE=true
+pnpm --filter app build
+```
+
+**バリデーション**: 環境変数は `apps/app/src/env.ts` でZodを使用してバリデーションされ、不正な値が設定された場合は分かりやすいエラーメッセージが表示されます。
 
 ## コーディング規約
 - 変数名や関数名は英語で記述
