@@ -1,672 +1,331 @@
 # ルーティング機能方針
 
-このドキュメントでは、今後実装予定のSPA（Single Page Application）ルーティング機能の設計方針と実装計画を説明します。
+このドキュメントでは、TanStackRouterを使用したファイルベースルーティングの設計方針と実装について説明します。
 
 ## ルーティング機能の目的
 
 ### 学習目標
 - **SPA設計**: シングルページアプリケーションの設計パターン学習
+- **ファイルベースルーティング**: TanStackRouterによる現代的なルーティング
+- **型安全性**: TypeScriptを活用した完全な型推論
 - **ユーザーエクスペリエンス**: スムーズなページ遷移とナビゲーション体験
 - **SEO対応**: 検索エンジン最適化を考慮したルーティング設計
 - **状態管理**: ナビゲーション状態とアプリケーション状態の管理
 
-### 実装予定機能
-- **基本ルーティング**: パス設定とコンポーネントマッピング
-- **動的ルーティング**: パラメータベースのページ生成
-- **認証ルーティング**: 認証状態に基づくアクセス制御
-- **プログラマティックナビゲーション**: コード内からの画面遷移
+### 実装済み機能
+- **ファイルベースルーティング**: ディレクトリ構造による直感的なルート定義
+- **ハッシュルーティング**: 静的ホスティング対応（`#/` 形式）
+- **自動ルート生成**: TypeScript型安全なルートツリー自動生成
+- **開発者ツール統合**: リアルタイムデバッグ機能
 
 ## 技術選定
 
-### メインライブラリ: React Router v6
+### メインライブラリ: TanStack Router v1.120.16
 ```json
 {
   "dependencies": {
-    "react-router-dom": "^6.26.0",
-    "@types/react-router-dom": "^5.3.3"
+    "@tanstack/react-router": "^1.120.16"
+  },
+  "devDependencies": {
+    "@tanstack/router-devtools": "^1.120.16",
+    "@tanstack/router-cli": "^1.120.16"
   }
 }
 ```
 
 ### 選定理由
-- **React統合**: Reactエコシステムとの優れた統合
-- **型安全性**: TypeScriptサポート
-- **パフォーマンス**: 遅延読み込み（lazy loading）対応
-- **豊富な機能**: 高度なルーティング機能をサポート
-- **コミュニティ**: 活発な開発と豊富なドキュメント
+- **ファイルベース**: Next.jsライクな直感的なルート定義
+- **完全な型安全性**: TypeScriptファーストな設計
+- **自動コード生成**: ルートツリーの自動生成による開発効率化
+- **ハッシュルーティング**: 静的ホスティングサービス対応
+- **パフォーマンス**: 自動的なコード分割とプリロード機能
+- **開発体験**: 充実した開発者ツールとデバッグ機能
+
+### React Routerからの変更理由
+- **型安全性の向上**: より強力なTypeScript統合
+- **ファイルベース**: 設定ファイルでの複雑な定義が不要
+- **自動化**: ルート定義の手動メンテナンスが不要
+- **現代的なAPI**: より直感的で使いやすいAPI設計
 
 ## アーキテクチャ設計
 
 ### ルーティング階層構造
 ```
-App Router
-├── Public Routes（認証不要）
-│   ├── / (Home)
-│   ├── /about (About)
-│   ├── /contact (Contact)
-│   └── /login (Login)
-├── Protected Routes（認証必要）
-│   ├── /dashboard (Dashboard)
-│   ├── /profile (Profile)
-│   └── /settings (Settings)
-├── Admin Routes（管理者権限）
-│   ├── /admin (Admin Dashboard)
-│   └── /admin/users (User Management)
-└── Error Routes（エラー処理）
-    ├── /404 (Not Found)
-    └── /error (General Error)
+App Router (Hash-based)
+├── / (Home)                    # ホームページ
+├── /about (About)              # プロジェクト概要
+└── /404 (Not Found)           # 404エラーページ
 ```
 
 ### ディレクトリ構造
 ```
 src/
-├── router/                     # ルーティング設定
-│   ├── index.tsx              # メインルーター設定
-│   ├── AppRouter.tsx          # アプリケーションルーター
-│   ├── ProtectedRoute.tsx     # 認証が必要なルートのラッパー
-│   ├── AdminRoute.tsx         # 管理者権限が必要なルートのラッパー
-│   └── routes/                # ルート定義
-│       ├── publicRoutes.tsx   # パブリックルート
-│       ├── protectedRoutes.tsx # 保護されたルート
-│       └── adminRoutes.tsx    # 管理者ルート
-├── pages/                      # ページコンポーネント
-│   ├── public/                # パブリックページ
-│   │   ├── HomePage.tsx
-│   │   ├── AboutPage.tsx
-│   │   ├── ContactPage.tsx
-│   │   └── LoginPage.tsx
-│   ├── protected/             # 認証が必要なページ
-│   │   ├── DashboardPage.tsx
-│   │   ├── ProfilePage.tsx
-│   │   └── SettingsPage.tsx
-│   ├── admin/                 # 管理者ページ
-│   │   ├── AdminDashboardPage.tsx
-│   │   └── UserManagementPage.tsx
-│   └── error/                 # エラーページ
-│       ├── NotFoundPage.tsx
-│       └── ErrorPage.tsx
-├── components/
-│   ├── navigation/            # ナビゲーション関連
-│   │   ├── Navbar.tsx
-│   │   ├── Breadcrumb.tsx
-│   │   └── NavigationGuard.tsx
-│   └── layout/                # レイアウト
-│       ├── PublicLayout.tsx
-│       ├── ProtectedLayout.tsx
-│       └── AdminLayout.tsx
-└── hooks/
-    ├── useNavigation.ts       # ナビゲーション操作フック
-    ├── useAuth.ts             # 認証状態管理フック
-    └── useBreadcrumb.ts       # パンくずリスト管理フック
+├── routes/                     # ルートディレクトリ（TanStackRouter）
+│   ├── __root.tsx             # ルートレイアウト
+│   ├── index.tsx              # ホームページ（/）
+│   └── about.tsx              # Aboutページ（/about）
+├── routeTree.gen.ts           # 自動生成されるルートツリー（Git除外）
+├── main.tsx                   # ルーター初期化とアプリエントリー
+└── App.tsx                    # レガシーコンポーネント（テスト用保持）
 ```
 
 ## ルーター実装
 
 ### メインルーター設定
 ```typescript
-// src/router/AppRouter.tsx
-import React, { Suspense } from 'react'
-import {
-  createBrowserRouter,
-  RouterProvider,
-  Outlet,
-  Navigate,
-} from 'react-router-dom'
-import { ErrorBoundary } from 'react-error-boundary'
-
-import { PublicLayout } from '../components/layout/PublicLayout'
-import { ProtectedLayout } from '../components/layout/ProtectedLayout'
-import { AdminLayout } from '../components/layout/AdminLayout'
-import { LoadingSpinner } from '../components/common/LoadingSpinner'
-import { ErrorPage } from '../pages/error/ErrorPage'
-import { NotFoundPage } from '../pages/error/NotFoundPage'
-
-// 遅延読み込み対応
-const HomePage = lazy(() => import('../pages/public/HomePage'))
-const AboutPage = lazy(() => import('../pages/public/AboutPage'))
-const ContactPage = lazy(() => import('../pages/public/ContactPage'))
-const LoginPage = lazy(() => import('../pages/public/LoginPage'))
-const DashboardPage = lazy(() => import('../pages/protected/DashboardPage'))
-const ProfilePage = lazy(() => import('../pages/protected/ProfilePage'))
-const SettingsPage = lazy(() => import('../pages/protected/SettingsPage'))
-const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'))
-
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      // パブリックルート
-      {
-        path: '',
-        element: <PublicLayout />,
-        children: [
-          { index: true, element: <HomePage /> },
-          { path: 'about', element: <AboutPage /> },
-          { path: 'contact', element: <ContactPage /> },
-          { path: 'login', element: <LoginPage /> },
-        ],
-      },
-      // 保護されたルート
-      {
-        path: 'dashboard',
-        element: <ProtectedRoute><ProtectedLayout /></ProtectedRoute>,
-        children: [
-          { index: true, element: <DashboardPage /> },
-          { path: 'profile', element: <ProfilePage /> },
-          { path: 'settings', element: <SettingsPage /> },
-        ],
-      },
-      // 管理者ルート
-      {
-        path: 'admin',
-        element: <AdminRoute><AdminLayout /></AdminRoute>,
-        children: [
-          { index: true, element: <AdminDashboardPage /> },
-          { path: 'users', element: <UserManagementPage /> },
-        ],
-      },
-      // 404ページ
-      { path: '*', element: <NotFoundPage /> },
-    ],
-  },
-])
-
-const RootLayout: React.FC = () => {
-  return (
-    <ErrorBoundary FallbackComponent={ErrorPage}>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Outlet />
-      </Suspense>
-    </ErrorBoundary>
-  )
-}
-
-export const AppRouter: React.FC = () => {
-  return <RouterProvider router={router} />
-}
-```
-
-### 認証保護ルート
-```typescript
-// src/router/ProtectedRoute.tsx
+// src/main.tsx
 import React from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { LoadingSpinner } from '../components/common/LoadingSpinner'
+import ReactDOM from 'react-dom/client'
+import { RouterProvider, createRouter, createHashHistory } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-  requireAuth?: boolean
-  requiredRole?: string
-  redirectTo?: string
-}
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  history: createHashHistory(), // ハッシュルーティング
+})
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requireAuth = true,
-  requiredRole,
-  redirectTo = '/login',
-}) => {
-  const { user, isLoading, hasRole } = useAuth()
-  const location = useLocation()
-
-  if (isLoading) {
-    return <LoadingSpinner />
-  }
-
-  // 認証が必要だが未認証の場合
-  if (requireAuth && !user) {
-    return <Navigate to={redirectTo} state={{ from: location }} replace />
-  }
-
-  // 特定の役割が必要だが権限がない場合
-  if (requiredRole && !hasRole(requiredRole)) {
-    return <Navigate to="/unauthorized" replace />
-  }
-
-  return <>{children}</>
-}
-
-// 管理者専用ルート
-export const AdminRoute: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return (
-    <ProtectedRoute requiredRole="admin" redirectTo="/login">
-      {children}
-    </ProtectedRoute>
-  )
-}
-```
-
-### プログラマティックナビゲーション
-```typescript
-// src/hooks/useNavigation.ts
-import { useNavigate, useLocation, useParams } from 'react-router-dom'
-import { useCallback } from 'react'
-
-export const useNavigation = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const params = useParams()
-
-  const goTo = useCallback((path: string, options?: { replace?: boolean; state?: any }) => {
-    navigate(path, options)
-  }, [navigate])
-
-  const goBack = useCallback(() => {
-    navigate(-1)
-  }, [navigate])
-
-  const goForward = useCallback(() => {
-    navigate(1)
-  }, [navigate])
-
-  const reload = useCallback(() => {
-    window.location.reload()
-  }, [])
-
-  const redirectTo = useCallback((path: string, delay = 0) => {
-    setTimeout(() => {
-      navigate(path, { replace: true })
-    }, delay)
-  }, [navigate])
-
-  const getCurrentPath = useCallback(() => {
-    return location.pathname
-  }, [location.pathname])
-
-  const isCurrentPath = useCallback((path: string) => {
-    return location.pathname === path
-  }, [location.pathname])
-
-  const getQueryParams = useCallback(() => {
-    return new URLSearchParams(location.search)
-  }, [location.search])
-
-  return {
-    goTo,
-    goBack,
-    goForward,
-    reload,
-    redirectTo,
-    getCurrentPath,
-    isCurrentPath,
-    getQueryParams,
-    currentPath: location.pathname,
-    currentSearch: location.search,
-    currentParams: params,
-    currentState: location.state,
+// 型推論のための宣言
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
   }
 }
 
-// 使用例
-const SomeComponent: React.FC = () => {
-  const { goTo, goBack, isCurrentPath } = useNavigation()
-
-  const handleLogin = () => {
-    // ログイン処理後にダッシュボードに遷移
-    goTo('/dashboard')
-  }
-
-  const handleCancel = () => {
-    // 前のページに戻る
-    goBack()
-  }
-
-  return (
-    <div>
-      <button
-        onClick={handleLogin}
-        className={isCurrentPath('/login') ? 'active' : ''}
-      >
-        ログイン
-      </button>
-      <button onClick={handleCancel}>
-        戻る
-      </button>
-    </div>
-  )
-}
-```
-
-## ナビゲーション機能
-
-### ナビゲーションバー
-```typescript
-// src/components/navigation/Navbar.tsx
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { useAuth } from '../../hooks/useAuth'
-import { useTranslation } from '../../hooks/useTranslation'
-
-export const Navbar: React.FC = () => {
-  const { user, logout } = useAuth()
-  const { t } = useTranslation('navigation')
-
-  return (
-    <nav className="navbar">
-      <div className="navbar-brand">
-        <NavLink to="/" className="brand-link">
-          {t('appName')}
-        </NavLink>
-      </div>
-      
-      <div className="navbar-menu">
-        <div className="navbar-nav">
-          <NavLink
-            to="/"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            {t('home')}
-          </NavLink>
-          <NavLink
-            to="/about"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            {t('about')}
-          </NavLink>
-          <NavLink
-            to="/contact"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            {t('contact')}
-          </NavLink>
-          
-          {user ? (
-            <>
-              <NavLink
-                to="/dashboard"
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              >
-                {t('dashboard')}
-              </NavLink>
-              <NavLink
-                to="/profile"
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              >
-                {t('profile')}
-              </NavLink>
-              <button onClick={logout} className="nav-button">
-                {t('logout')}
-              </button>
-            </>
-          ) : (
-            <NavLink
-              to="/login"
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            >
-              {t('login')}
-            </NavLink>
-          )}
-        </div>
-      </div>
-    </nav>
-  )
-}
-```
-
-### パンくずリスト
-```typescript
-// src/components/navigation/Breadcrumb.tsx
-import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useBreadcrumb } from '../../hooks/useBreadcrumb'
-
-export const Breadcrumb: React.FC = () => {
-  const location = useLocation()
-  const { getBreadcrumbItems } = useBreadcrumb()
-  
-  const breadcrumbItems = getBreadcrumbItems(location.pathname)
-
-  if (breadcrumbItems.length <= 1) {
-    return null
-  }
-
-  return (
-    <nav className="breadcrumb" aria-label="パンくずリスト">
-      <ol className="breadcrumb-list">
-        {breadcrumbItems.map((item, index) => {
-          const isLast = index === breadcrumbItems.length - 1
-          
-          return (
-            <li key={item.path} className="breadcrumb-item">
-              {isLast ? (
-                <span className="breadcrumb-current" aria-current="page">
-                  {item.label}
-                </span>
-              ) : (
-                <Link to={item.path} className="breadcrumb-link">
-                  {item.label}
-                </Link>
-              )}
-              {!isLast && <span className="breadcrumb-separator">/</span>}
-            </li>
-          )
-        })}
-      </ol>
-    </nav>
-  )
-}
-
-// src/hooks/useBreadcrumb.ts
-import { useTranslation } from './useTranslation'
-
-interface BreadcrumbItem {
-  path: string
-  label: string
-}
-
-export const useBreadcrumb = () => {
-  const { t } = useTranslation('navigation')
-
-  const getBreadcrumbItems = (pathname: string): BreadcrumbItem[] => {
-    const paths = pathname.split('/').filter(Boolean)
-    const items: BreadcrumbItem[] = [
-      { path: '/', label: t('home') }
-    ]
-
-    let currentPath = ''
-    for (const path of paths) {
-      currentPath += `/${path}`
-      
-      // パス名から表示ラベルをマッピング
-      const label = getBreadcrumbLabel(path)
-      items.push({ path: currentPath, label })
-    }
-
-    return items
-  }
-
-  const getBreadcrumbLabel = (path: string): string => {
-    const labelMap: Record<string, string> = {
-      'dashboard': t('dashboard'),
-      'profile': t('profile'),
-      'settings': t('settings'),
-      'admin': t('admin'),
-      'about': t('about'),
-      'contact': t('contact'),
-    }
-
-    return labelMap[path] || path
-  }
-
-  return { getBreadcrumbItems }
-}
-```
-
-## SEO対応
-
-### メタタグ管理
-```typescript
-// src/hooks/useDocumentTitle.ts
-import { useEffect } from 'react'
-import { useTranslation } from './useTranslation'
-
-export const useDocumentTitle = (titleKey: string, namespace?: string) => {
-  const { t } = useTranslation(namespace)
-
-  useEffect(() => {
-    const title = t(titleKey)
-    const appName = t('appName', { ns: 'common' })
-    document.title = title ? `${title} - ${appName}` : appName
-  }, [t, titleKey])
-}
-
-// ページコンポーネントでの使用例
-const AboutPage: React.FC = () => {
-  useDocumentTitle('aboutPageTitle', 'pages')
-  
-  return (
-    <div>
-      <h1>About Us</h1>
-      {/* ページコンテンツ */}
-    </div>
-  )
-}
-```
-
-### 構造化データ
-```typescript
-// src/components/seo/StructuredData.tsx
-import React from 'react'
-import { Helmet } from 'react-helmet-async'
-
-interface StructuredDataProps {
-  type: 'WebSite' | 'WebPage' | 'Article' | 'Organization'
-  data: Record<string, any>
-}
-
-export const StructuredData: React.FC<StructuredDataProps> = ({ type, data }) => {
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': type,
-    ...data,
-  }
-
-  return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(structuredData, null, 2)}
-      </script>
-    </Helmet>
-  )
-}
-```
-
-## 実装計画
-
-### フェーズ1: 基本ルーティング（〜2024年Q2）
-- [ ] React Router v6のセットアップ
-- [ ] 基本的なページルーティング実装
-- [ ] ナビゲーションコンポーネントの作成
-- [ ] レイアウトシステムの構築
-
-### フェーズ2: 認証・認可（〜2024年Q3）
-- [ ] 認証システムの実装
-- [ ] 保護されたルートの実装
-- [ ] 権限ベースのアクセス制御
-- [ ] ログイン・ログアウト機能
-
-### フェーズ3: 高度なナビゲーション（〜2024年Q4）
-- [ ] 動的ルーティング（パラメータ対応）
-- [ ] パンくずリスト機能
-- [ ] ナビゲーションガード
-- [ ] 遅延読み込み最適化
-
-### フェーズ4: SEO・UX最適化（2025年〜）
-- [ ] メタタグ管理システム
-- [ ] 構造化データ対応
-- [ ] パフォーマンス最適化
-- [ ] アクセシビリティ改善
-
-## パフォーマンス最適化
-
-### コード分割
-```typescript
-// 動的インポートによる遅延読み込み
-const HomePage = lazy(() => import('../pages/public/HomePage'))
-const DashboardPage = lazy(() => 
-  import('../pages/protected/DashboardPage').then(module => ({
-    default: module.DashboardPage
-  }))
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
 )
-
-// プリロード対応
-const preloadDashboard = () => {
-  import('../pages/protected/DashboardPage')
-}
-
-// ユーザーがログインボタンにホバーした時にプリロード
-<button onMouseEnter={preloadDashboard} onClick={handleLogin}>
-  ログイン
-</button>
 ```
 
-### ルートベースの分割
+### ルートレイアウト
 ```typescript
-// src/router/routes/lazyRoutes.ts
-export const lazyRoutes = {
-  // パブリックページ
-  HomePage: lazy(() => import('../../pages/public/HomePage')),
-  AboutPage: lazy(() => import('../../pages/public/AboutPage')),
+// src/routes/__root.tsx
+import React, { Suspense } from 'react'
+import { Outlet, createRootRoute } from '@tanstack/react-router'
+import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+
+const RootComponent: React.FC = () => {
+  const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
   
-  // 認証が必要なページ（別バンドル）
-  DashboardPage: lazy(() => import('../../pages/protected/DashboardPage')),
-  ProfilePage: lazy(() => import('../../pages/protected/ProfilePage')),
-  
-  // 管理者ページ（別バンドル）
-  AdminDashboardPage: lazy(() => import('../../pages/admin/AdminDashboardPage')),
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
+        <a href="#/" style={{ marginRight: '1rem' }}>ホーム</a>
+        <a href="#/about">About</a>
+      </nav>
+      <main style={{ flex: 1, padding: '2rem' }}>
+        <Suspense fallback={<div>読み込み中...</div>}>
+          <Outlet />
+        </Suspense>
+      </main>
+      {!isTestEnvironment && <TanStackRouterDevtools />}
+    </div>
+  )
+}
+
+export const Route = createRootRoute({
+  component: RootComponent,
+  notFoundComponent: () => (
+    <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <h1>404 - ページが見つかりません</h1>
+      <p>お探しのページは存在しません。</p>
+      <a href="#/">ホームに戻る</a>
+    </div>
+  )
+})
+```
+
+### ページルート例
+```typescript
+// src/routes/index.tsx
+import { createFileRoute } from '@tanstack/react-router'
+
+const HomePage: React.FC = () => {
+  const handleMessageClick = () => {
+    alert('TanStackRouterでのファイルベースルーティング学習を開始しましょう！🚀')
+  }
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+      <h1>Study-Github-Agent</h1>
+      <p>TanStackRouterを使用したファイルベースルーティングの学習プロジェクトです。</p>
+      <button onClick={handleMessageClick}>
+        学習メッセージを表示
+      </button>
+    </div>
+  )
+}
+
+export const Route = createFileRoute('/')({
+  component: HomePage,
+})
+```
+
+## ハッシュルーティング
+
+### 設定と動作
+- **URL形式**: `https://example.com/#/about`
+- **設定方法**: `createHashHistory()`を使用
+- **利点**: 静的ホスティングサービスでの設定不要運用
+
+### 対応サービス
+- GitHub Pages
+- Netlify
+- Vercel
+- Cloudflare Pages
+- AWS S3 Static Website Hosting
+
+## 開発ワークフロー
+
+### CLIコマンド設定
+```json
+{
+  "scripts": {
+    "dev": "tsr watch --open=false & vite",
+    "build": "tsr generate && tsc && vite build",
+    "routes:generate": "tsr generate",
+    "routes:watch": "tsr watch --open=false"
+  }
 }
 ```
+
+### 自動ルート生成
+- ファイル保存時の自動更新
+- TypeScript型定義の自動生成
+- 開発サーバーでのホットリロード
 
 ## テスト戦略
 
 ### ルーティングテスト
 ```typescript
-// src/router/__tests__/AppRouter.test.tsx
-import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
-import { AppRouter } from '../AppRouter'
-import { AuthProvider } from '../../providers/AuthProvider'
+// src/App.test.tsx
+import { render, screen } from '@testing-library/react'
+import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router'
+import { routeTree } from './routeTree.gen'
 
-const renderWithRouter = (initialEntries = ['/']) => {
-  return render(
-    <MemoryRouter initialEntries={initialEntries}>
-      <AuthProvider>
-        <AppRouter />
-      </AuthProvider>
-    </MemoryRouter>
-  )
+function createTestRouter(initialEntries: string[] = ['/']) {
+  return createRouter({
+    routeTree,
+    history: createMemoryHistory({ initialEntries }),
+  })
 }
 
-describe('AppRouter', () => {
-  test('ホームページが正しく表示される', async () => {
+function renderWithRouter(initialEntries: string[] = ['/']) {
+  const router = createTestRouter(initialEntries)
+  return render(<RouterProvider router={router} />)
+}
+
+describe('TanStackRouter アプリケーション', () => {
+  test('ホームページが正常にレンダリングされる', async () => {
     renderWithRouter(['/'])
-    
-    await waitFor(() => {
-      expect(screen.getByText('ホームページ')).toBeInTheDocument()
-    })
+    expect(await screen.findByRole('heading', { level: 1 }))
+      .toHaveTextContent('Study-Github-Agent')
   })
-
-  test('認証が必要なページは未認証時にログインページにリダイレクトされる', async () => {
-    renderWithRouter(['/dashboard'])
-    
-    await waitFor(() => {
-      expect(screen.getByText('ログイン')).toBeInTheDocument()
-    })
-  })
-
-  test('存在しないパスは404ページを表示する', async () => {
+  
+  test('404ページが正しく表示される', async () => {
     renderWithRouter(['/non-existent-path'])
-    
-    await waitFor(() => {
-      expect(screen.getByText('ページが見つかりません')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('404 - ページが見つかりません'))
+      .toBeInTheDocument()
   })
 })
 ```
 
-このルーティング機能方針により、ユーザビリティとパフォーマンスを両立した、スケーラブルなSPAアプリケーションの構築を目指します。
+### テスト環境での考慮事項
+- 開発者ツールの自動無効化
+- メモリヒストリーの使用
+- ルート遷移のテスト
+
+## 実装済み機能
+
+### フェーズ1: 基本ルーティング ✅
+- [x] TanStack Router v1.120.16のセットアップ
+- [x] ファイルベースルーティング実装
+- [x] ハッシュルーティング設定
+- [x] 基本的なページルーティング実装
+- [x] ナビゲーションコンポーネントの作成
+- [x] レイアウトシステムの構築
+- [x] 404エラーハンドリング
+
+### 今後の拡張予定
+
+#### フェーズ2: 高度なルーティング機能
+- [ ] 動的ルーティング（パラメータ対応）
+- [ ] 検索パラメータの型安全な管理
+- [ ] ローダー機能によるデータフェッチ
+- [ ] 遅延読み込み最適化
+
+#### フェーズ3: 認証・認可
+- [ ] 認証システムの実装
+- [ ] 保護されたルートの実装
+- [ ] 権限ベースのアクセス制御
+- [ ] ログイン・ログアウト機能
+
+#### フェーズ4: UX・パフォーマンス最適化
+- [ ] プリロード戦略の最適化
+- [ ] エラーバウンダリの強化
+- [ ] SEOメタデータ管理
+- [ ] アクセシビリティ改善
+
+## パフォーマンス最適化
+
+### 自動コード分割
+```typescript
+// TanStackRouterは自動的にルートベースのコード分割を実行
+// 追加設定不要でパフォーマンス最適化
+
+// カスタムコード分割（必要に応じて）
+import { lazy } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+
+const HeavyComponent = lazy(() => import('../components/HeavyComponent'))
+
+export const Route = createFileRoute('/heavy')({
+  component: () => (
+    <Suspense fallback={<div>読み込み中...</div>}>
+      <HeavyComponent />
+    </Suspense>
+  ),
+})
+```
+
+### プリロード戦略
+```typescript
+const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent', // マウスホバー時にプリロード
+  // defaultPreload: 'viewport', // ビューポート内のリンクをプリロード
+})
+```
+
+## ベストプラクティス
+
+### 1. ファイル命名規則
+- `index.tsx`: ルートページ（`/`）
+- `about.tsx`: 静的ページ（`/about`）
+- `$id.tsx`: 動的パラメータ（`/users/123`）
+- `[...all].tsx`: キャッチオールルート
+
+### 2. TypeScript活用
+- 自動生成される型定義の活用
+- パラメータ・検索クエリの型安全性
+- ルートナビゲーションの型チェック
+
+### 3. エラーハンドリング
+- ルートレベルでのエラーバウンダリ
+- 404ページの適切な実装
+- ユーザーフレンドリーなエラーメッセージ
+
+### 4. テスト戦略
+- ルート単位でのテスト
+- ナビゲーション機能のテスト
+- エラーケースのテスト
+
+## 関連ドキュメント
+
+- [TanStackRouter実装ガイド](../development/tanstack-router-guide.md) - 詳細な実装手順
+- [アーキテクチャ概要](./overview.md) - プロジェクト全体設計
+- [開発ガイド](../development/) - 開発環境とワークフロー
+
+このルーティング機能により、現代的で保守性の高い、型安全なSPAアプリケーションの構築を実現しています。
