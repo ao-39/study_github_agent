@@ -56,6 +56,34 @@ pnpm --filter app dev
 pnpm fullcheck  # 包括的な品質チェック
 ```
 
+## 環境変数
+
+プロジェクトでは以下の環境変数を使用してビルド動作を制御できます：
+
+| 環境変数 | 説明 | デフォルト値 | 例 |
+|----------|------|-------------|-----|
+| `VITE_ENABLE_PWA` | PWA機能の有効化 | `true` | `true`/`false` |
+| `GITHUB_PAGES` | GitHub Pages用ビルド | `false` | `true`/`false` |
+| `ANALYZE` | バンドル分析の有効化 | `false` | `true`/`false` |
+
+### 使用例
+
+```bash
+# PWAを無効にしてビルド
+VITE_ENABLE_PWA=false pnpm --filter app build
+
+# GitHub Pages用ビルド（PWA有効）
+GITHUB_PAGES=true pnpm --filter app build
+
+# PWA無効 + GitHub Pages用ビルド
+VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm --filter app build
+
+# バンドル分析付きビルド
+ANALYZE=true pnpm --filter app build
+```
+
+**注意**: 環境変数は[Zod](https://github.com/colinhacks/zod)でバリデーションされ、不正な値が設定された場合は詳細なエラーメッセージが表示されます。詳細は **[PWA対応ガイド](docs/development/pwa.md)** を参照してください。
+
 ## ドキュメント
 
 ### 📚 開発ガイド
