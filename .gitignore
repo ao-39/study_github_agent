@@ -22,6 +22,9 @@ stats.html
 # TypeDoc documentation
 docs-api
 
+# TanStack Router generated files
+src/routeTree.gen.ts
+
 # Runtime data
 pids
 *.pid

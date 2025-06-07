@@ -1,40 +1,63 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * Study GitHub Agentアプリケーションの基本機能テスト
+ * Study GitHub Agent - TanStackRouterアプリケーションの基本機能テスト
  * chromium、firefox、safariで実行されるE2Eテスト
  */
-test.describe('Study GitHub Agent アプリケーション', () => {
-  test('アプリケーションが正常に読み込まれる', async ({ page }) => {
-    // アプリケーションにアクセス
+test.describe('Study GitHub Agent - TanStackRouter アプリケーション', () => {
+  test('ホームページが正常に読み込まれる', async ({ page }) => {
+    // ホームページにアクセス
     await page.goto('/')
 
     // ページタイトルが正しく表示されることを確認
     await expect(page).toHaveTitle(/Study GitHub Agent/)
 
-    // メインヘッダーが表示されることを確認
-    await expect(page.locator('h1')).toContainText('Study-Github-Agent')
+    // ナビゲーションが表示されることを確認
+    await expect(page.locator('nav')).toBeVisible()
+    await expect(page.locator('nav a').first()).toContainText('ホーム')
+    await expect(page.locator('nav a').last()).toContainText('About')
 
-    // メッセージ表示ボタンが表示されることを確認
-    await expect(page.locator('.message-button')).toContainText(
-      'メッセージを表示する'
-    )
+    // メインヘッダーが表示されることを確認
+    await expect(page.locator('main h1')).toContainText('Study-Github-Agent')
+
+    // 学習メッセージボタンが表示されることを確認（devtoolsのボタンを除外）
+    await expect(
+      page.locator('main button:has-text("学習メッセージを表示")')
+    ).toBeVisible()
   })
 
-  test('シンプルなレイアウトが正しく表示される', async ({ page }) => {
+  test('ナビゲーションとルーティングが正しく動作する', async ({ page }) => {
     await page.goto('/')
 
-    // アプリコンテナが存在することを確認
-    await expect(page.locator('.app-container')).toBeVisible()
+    // ホームページの内容を確認
+    await expect(page.locator('main h1')).toContainText('Study-Github-Agent')
+    await expect(page.locator('main p').first()).toContainText(
+      'TanStackRouterを使用したファイルベースルーティングの学習プロジェクトです。'
+    )
 
-    // タイトルが正しく表示されることを確認
-    await expect(page.locator('.app-title')).toContainText('Study-Github-Agent')
+    // Aboutページに移動
+    await page.click('nav a[href="#/about"]')
+    
+    // URLが変更されることを確認（ハッシュルーティング）
+    await expect(page).toHaveURL(/#\/about/)
 
-    // メッセージボタンが存在することを確認
-    await expect(page.locator('.message-button')).toBeVisible()
+    // Aboutページの内容を確認
+    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
+    await expect(
+      page.locator('main').getByText('プロジェクトの目的')
+    ).toBeVisible()
+
+    // ホームページに戻る
+    await page.click('nav a[href="#/"]')
+    
+    // URLが変更されることを確認
+    await expect(page).toHaveURL(/\/$|#\//)
+
+    // ホームページの内容が再表示されることを確認
+    await expect(page.locator('main h1')).toContainText('Study-Github-Agent')
   })
 
-  test('メッセージ表示ボタンをクリックするとアラートが表示される', async ({
+  test('学習メッセージボタンをクリックするとアラートが表示される', async ({
     page,
   }) => {
     await page.goto('/')
@@ -42,18 +65,38 @@ test.describe('Study GitHub Agent アプリケーション', () => {
     // アラートのダイアログを監視
     page.on('dialog', async dialog => {
       expect(dialog.message()).toContain(
-        'GitHub Copilot agentとの学習を開始しましょう！🎉'
+        'TanStackRouterでのファイルベースルーティング学習を開始しましょう！🚀'
       )
       await dialog.accept()
     })
 
-    // メッセージ表示ボタンをクリック
-    await page.click('.message-button')
+    // 学習メッセージボタンをクリック（メインコンテンツエリア内のボタンのみ対象）
+    await page.click('main button:has-text("学習メッセージを表示")')
 
     // ボタンが正しく表示されていることを確認
-    await expect(page.locator('.message-button')).toContainText(
-      'メッセージを表示する'
-    )
+    await expect(
+      page.locator('main button:has-text("学習メッセージを表示")')
+    ).toBeVisible()
+  })
+
+  test('404ページが正しく表示される', async ({ page }) => {
+    // 存在しないパスにアクセス
+    await page.goto('/#/nonexistent-page')
+
+    // 404ページの内容を確認
+    await expect(page.locator('h1')).toContainText('404 - ページが見つかりません')
+    await expect(page.locator('text=お探しのページは存在しません。')).toBeVisible()
+    
+    // ホームに戻るリンクが存在することを確認（ナビゲーション以外の404ページ内のリンク）
+    await expect(
+      page.locator('a[href="#/"]:has-text("ホームに戻る")')
+    ).toBeVisible()
+
+    // ホームに戻るリンクをクリック
+    await page.click('a[href="#/"]:has-text("ホームに戻る")')
+    
+    // ホームページに戻ることを確認
+    await expect(page.locator('main h1')).toContainText('Study-Github-Agent')
   })
 
   test('レスポンシブデザインの確認（モバイルビュー）', async ({ page }) => {
@@ -61,29 +104,45 @@ test.describe('Study GitHub Agent アプリケーション', () => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/')
 
-    // モバイルでもコンテンツが正しく表示されることを確認
-    await expect(page.locator('h1')).toBeVisible()
-    await expect(page.locator('.app-container')).toBeVisible()
-    await expect(page.locator('.message-button')).toBeVisible()
+    // モバイルでもナビゲーションが正しく表示されることを確認
+    await expect(page.locator('nav')).toBeVisible()
+    await expect(page.locator('nav a').first()).toContainText('ホーム')
+    await expect(page.locator('nav a').last()).toContainText('About')
 
-    // タイトルとボタンが表示されることを確認
-    await expect(page.locator('.app-title')).toContainText('Study-Github-Agent')
-    await expect(page.locator('.message-button')).toContainText(
-      'メッセージを表示する'
-    )
+    // コンテンツが正しく表示されることを確認
+    await expect(page.locator('main h1')).toBeVisible()
+    await expect(
+      page.locator('main button:has-text("学習メッセージを表示")')
+    ).toBeVisible()
+
+    // Aboutページでもレスポンシブデザインを確認
+    await page.click('nav a[href="#/about"]')
+    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
+    
+    // 技術スタック情報が表示されることを確認（メインコンテンツエリア内のみ）
+    await expect(page.locator('main strong:has-text("TanStack Router")')).toBeVisible()
   })
 
-  test('CSSスタイルが正しく適用されている', async ({ page }) => {
-    await page.goto('/')
+  test('Aboutページの詳細な内容が表示される', async ({ page }) => {
+    await page.goto('/#/about')
 
-    // 背景色が正しく適用されていることを確認
-    const appElement = page.locator('.app')
-    await expect(appElement).toHaveCSS('background-color', 'rgb(255, 255, 255)')
+    // メインタイトルの確認
+    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
 
-    // ボタンのスタイルが適用されていることを確認
-    const button = page.locator('.message-button')
-    await expect(button).toHaveCSS('background-color', 'rgb(0, 23, 193)')
-    await expect(button).toHaveCSS('border-radius', '8px')
-    await expect(button).toHaveCSS('color', 'rgb(255, 255, 255)')
+    // セクションの確認
+    await expect(page.locator('text=🎯 プロジェクトの目的')).toBeVisible()
+    await expect(page.locator('text=🛠️ 技術スタック')).toBeVisible()
+    await expect(page.locator('text=🚀 ルーティング機能')).toBeVisible()
+
+    // 技術スタックの詳細確認（メインコンテンツエリア内のみ）
+    await expect(page.locator('main strong:has-text("TanStack Router")')).toBeVisible()
+    await expect(page.locator('main').getByText('1.120.16')).toBeVisible()
+    await expect(page.locator('main strong:has-text("React")')).toBeVisible()
+    await expect(page.locator('main').getByText('19.1.0')).toBeVisible()
+
+    // ルーティング機能の確認（見出しレベルで確認）
+    await expect(page.getByRole('heading', { name: 'ファイルベース' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'ハッシュルーティング' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '型安全性' })).toBeVisible()
   })
 })
