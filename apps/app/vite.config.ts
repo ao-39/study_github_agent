@@ -58,7 +58,8 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    open: true,
+    host: '0.0.0.0', // バインドをすべてのネットワークインターフェースに設定（E2Eテスト対応）
+    open: false, // ブラウザの自動起動を無効化（テスト環境での干渉を防ぐ）
   },
   build: {
     outDir: 'dist',
