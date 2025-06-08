@@ -37,19 +37,21 @@ test.describe('Study GitHub Agent - TanStackRouter アプリケーション', ()
 
     // Aboutページに移動
     await page.click('nav a[href="#/about"]')
-    
+
     // URLが変更されることを確認（ハッシュルーティング）
     await expect(page).toHaveURL(/#\/about/)
 
     // Aboutページの内容を確認
-    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
+    await expect(page.locator('main h1')).toContainText(
+      '📚 プロジェクトについて'
+    )
     await expect(
       page.locator('main').getByText('プロジェクトの目的')
     ).toBeVisible()
 
     // ホームページに戻る
     await page.click('nav a[href="#/"]')
-    
+
     // URLが変更されることを確認
     await expect(page).toHaveURL(/\/$|#\//)
 
@@ -84,9 +86,13 @@ test.describe('Study GitHub Agent - TanStackRouter アプリケーション', ()
     await page.goto('/#/nonexistent-page')
 
     // 404ページの内容を確認
-    await expect(page.locator('h1')).toContainText('404 - ページが見つかりません')
-    await expect(page.locator('text=お探しのページは存在しません。')).toBeVisible()
-    
+    await expect(page.locator('h1')).toContainText(
+      '404 - ページが見つかりません'
+    )
+    await expect(
+      page.locator('text=お探しのページは存在しません。')
+    ).toBeVisible()
+
     // ホームに戻るリンクが存在することを確認（ナビゲーション以外の404ページ内のリンク）
     await expect(
       page.locator('a[href="#/"]:has-text("ホームに戻る")')
@@ -94,7 +100,7 @@ test.describe('Study GitHub Agent - TanStackRouter アプリケーション', ()
 
     // ホームに戻るリンクをクリック
     await page.click('a[href="#/"]:has-text("ホームに戻る")')
-    
+
     // ホームページに戻ることを確認
     await expect(page.locator('main h1')).toContainText('Study-Github-Agent')
   })
@@ -117,17 +123,23 @@ test.describe('Study GitHub Agent - TanStackRouter アプリケーション', ()
 
     // Aboutページでもレスポンシブデザインを確認
     await page.click('nav a[href="#/about"]')
-    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
-    
+    await expect(page.locator('main h1')).toContainText(
+      '📚 プロジェクトについて'
+    )
+
     // 技術スタック情報が表示されることを確認（メインコンテンツエリア内のみ）
-    await expect(page.locator('main strong:has-text("TanStack Router")')).toBeVisible()
+    await expect(
+      page.locator('main strong:has-text("TanStack Router")')
+    ).toBeVisible()
   })
 
   test('Aboutページの詳細な内容が表示される', async ({ page }) => {
     await page.goto('/#/about')
 
     // メインタイトルの確認
-    await expect(page.locator('main h1')).toContainText('📚 プロジェクトについて')
+    await expect(page.locator('main h1')).toContainText(
+      '📚 プロジェクトについて'
+    )
 
     // セクションの確認
     await expect(page.locator('text=🎯 プロジェクトの目的')).toBeVisible()
@@ -135,14 +147,20 @@ test.describe('Study GitHub Agent - TanStackRouter アプリケーション', ()
     await expect(page.locator('text=🚀 ルーティング機能')).toBeVisible()
 
     // 技術スタックの詳細確認（メインコンテンツエリア内のみ）
-    await expect(page.locator('main strong:has-text("TanStack Router")')).toBeVisible()
+    await expect(
+      page.locator('main strong:has-text("TanStack Router")')
+    ).toBeVisible()
     await expect(page.locator('main').getByText('1.120.16')).toBeVisible()
     await expect(page.locator('main strong:has-text("React")')).toBeVisible()
     await expect(page.locator('main').getByText('19.1.0')).toBeVisible()
 
     // ルーティング機能の確認（見出しレベルで確認）
-    await expect(page.getByRole('heading', { name: 'ファイルベース' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'ハッシュルーティング' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'ファイルベース' })
+    ).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'ハッシュルーティング' })
+    ).toBeVisible()
     await expect(page.getByRole('heading', { name: '型安全性' })).toBeVisible()
   })
 })
