@@ -65,10 +65,11 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
     },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // webkitに対応している環境が用意できないためコメントアウト
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     // モバイル端末でのテストも追加可能
     // {
@@ -86,8 +87,8 @@ export default defineConfig({
     command: 'pnpm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI, // CI環境では新しいサーバーを起動
-    timeout: 30 * 1000, // 30秒でタイムアウト
-    stdout: 'pipe', // サーバーログをパイプして表示を制御
-    stderr: 'pipe', // エラーログをパイプして表示を制御
+    timeout: 60 * 1000, // 60秒でタイムアウト（TanStackRouterの初期化時間を考慮）
+    stdout: 'ignore', // サーバーログを非表示にして干渉を防ぐ
+    stderr: 'ignore', // エラーログを非表示にして干渉を防ぐ
   },
 })

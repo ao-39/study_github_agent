@@ -1,10 +1,23 @@
+/**
+ * @fileoverview メインアプリケーションコンポーネント（現在未使用）
+ *
+ * @description このファイルは以前のSPAアプリケーションのメインコンポーネントでした。
+ * 現在はTanStackRouterのルーティングシステムに置き換えられており、
+ * main.tsxから直接RouterProviderが使用されています。
+ *
+ * テスト用途のために保持されています。
+ *
+ * @author Study GitHub Agent Team
+ * @version 0.1.0
+ */
+
 import './App.css'
 
 /**
- * メインアプリケーションコンポーネント
+ * レガシーメインアプリケーションコンポーネント
  *
- * @description GitHub Copilot agentの学習用Reactアプリケーションのルートコンポーネントです。
- * シンプルなボタンクリックでメッセージを表示する機能を提供します。
+ * @description 現在は使用されていませんが、テスト用途のために保持されています。
+ * TanStackRouterのルーティングシステムに置き換えられました。
  *
  * @returns Reactエレメント - アプリケーションのメインコンテンツ
  *
