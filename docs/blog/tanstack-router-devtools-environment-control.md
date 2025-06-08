@@ -40,7 +40,7 @@ const envSchema = z.object({
 })
 ```
 
-環境変数は`VITE_`プレフィックスを付けることで、フロントエンドコードからアクセス可能になります。デフォルト値は`true`とし、明示的に無効化したい場合のみ`false`を設定する形にしました。
+環境変数は`VITE_`プレフィックスを付けることで、フロントエンドコードからアクセス可能になります。本番環境での安全性を考慮し、デフォルト値は`false`とし、開発時に必要な場合のみ明示的に`true`を設定する形にしました。
 
 TypeScriptの型定義も追加しておきます。
 
@@ -49,7 +49,7 @@ TypeScriptの型定義も追加しておきます。
 interface ImportMetaEnv {
   /**
    * TanStack Router開発者ツールを有効にするかどうか
-   * @default 'true'
+   * @default 'false'
    */
   readonly VITE_ENABLE_DEVTOOLS?: string
 }
@@ -86,17 +86,17 @@ const RootComponent: React.FC = () => {
 
 この実装では、以下の条件で開発者ツールが制御されます。まずテスト環境では常に無効化され、テストの実行に影響を与えません。通常の開発環境では環境変数`VITE_ENABLE_DEVTOOLS`の値に従って表示が切り替わります。そして本番ビルドでは、TanStack Routerの仕組みにより自動的に無効化されます。
 
-使用方法は非常にシンプルです。開発者ツールを無効化したい場合は、プロジェクトルートで以下のコマンドを実行してから開発サーバーを起動します。
-
-```bash
-export VITE_ENABLE_DEVTOOLS=false
-pnpm dev
-```
-
-再度有効化したい場合は、環境変数を`true`に設定するか、変数自体を削除してデフォルト値を使用します。
+使用方法は非常にシンプルです。開発者ツールを有効化したい場合は、プロジェクトルートで以下のコマンドを実行してから開発サーバーを起動します。
 
 ```bash
 export VITE_ENABLE_DEVTOOLS=true
+pnpm dev
+```
+
+無効化したい場合は、環境変数を`false`に設定するか、変数自体を削除してデフォルト値を使用します。
+
+```bash
+export VITE_ENABLE_DEVTOOLS=false
 # または
 unset VITE_ENABLE_DEVTOOLS
 ```
@@ -105,10 +105,10 @@ unset VITE_ENABLE_DEVTOOLS
 
 ```bash
 # .env.local（個人設定用、gitignoreに含める）
-VITE_ENABLE_DEVTOOLS=false
+VITE_ENABLE_DEVTOOLS=true
 ```
 
-この機能により、開発者ツールが画面に表示されることで集中力が妨げられる場面でも、簡単に非表示にして作業に集中できます。一方で、ルーティングに関する問題をデバッグする際には、環境変数を変更するだけで開発者ツールを有効化し、詳細な情報を確認できます。
+この機能により、通常の開発では本番環境に近い状態で作業でき、ルーティングに関する問題をデバッグする際のみ、環境変数を変更するだけで開発者ツールを有効化し、詳細な情報を確認できます。デフォルトで無効化されているため、意図しない本番環境への開発者ツール混入も防止できます。
 
 ## まとめ
 

@@ -390,10 +390,10 @@ TanStack Routerの開発者ツールは、ルーティングのデバッグに�
 開発者ツールの表示は環境変数で制御できます：
 
 ```bash
-# 開発者ツールを有効化（デフォルト）
+# 開発者ツールを有効化
 export VITE_ENABLE_DEVTOOLS=true
 
-# 開発者ツールを無効化
+# 開発者ツールを無効化（デフォルト）
 export VITE_ENABLE_DEVTOOLS=false
 ```
 

@@ -59,7 +59,7 @@ const envSchema = z.object({
   VITE_ENABLE_DEVTOOLS: z
     .string()
     .optional()
-    .default('true')
+    .default('false')
     .refine(val => val === 'true' || val === 'false', {
       message:
         "VITE_ENABLE_DEVTOOLS は 'true' または 'false' である必要があります",
@@ -123,7 +123,7 @@ export function validateEnv(): EnvVars {
       // eslint-disable-next-line no-console
       console.error('  export ANALYZE=false')
       // eslint-disable-next-line no-console
-      console.error('  export VITE_ENABLE_DEVTOOLS=true')
+      console.error('  export VITE_ENABLE_DEVTOOLS=false')
       // eslint-disable-next-line no-console
       console.error('\n📁 バリデーション設定ファイル:')
       // eslint-disable-next-line no-console

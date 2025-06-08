@@ -29,8 +29,8 @@ describe('環境変数設定', () => {
     expect(env.ANALYZE).toBe(false)
   })
 
-  test('VITE_ENABLE_DEVTOOLSのデフォルト値はtrue', () => {
-    expect(env.VITE_ENABLE_DEVTOOLS).toBe(true)
+  test('VITE_ENABLE_DEVTOOLSのデフォルト値はfalse', () => {
+    expect(env.VITE_ENABLE_DEVTOOLS).toBe(false)
   })
 
   test('フロントエンドで環境変数にアクセス可能', () => {
