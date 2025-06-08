@@ -15,6 +15,16 @@ jobs:
       contents: read
       deployments: write
       pull-requests: write
+    strategy:
+      matrix:
+        devtools: [true, false]
+        include:
+          - devtools: true
+            suffix: "devtools-on"
+            description: "開発者ツール有効"
+          - devtools: false
+            suffix: "devtools-off"
+            description: "開発者ツール無効"
     
     steps:
       - name: リポジトリのチェックアウト
@@ -46,20 +56,30 @@ jobs:
       - name: 依存関係のインストール
         run: pnpm install
 
-      - name: アプリケーションのビルド
+      - name: アプリケーションのビルド（${{ matrix.description }}）
         run: pnpm --filter app build
+        env:
+          VITE_ENABLE_DEVTOOLS: ${{ matrix.devtools }}
 
-      - name: Cloudflare Pagesへのデプロイ
+      - name: Cloudflare Pagesへのデプロイ（${{ matrix.description }}）
         uses: cloudflare/wrangler-action@v3
         id: deploy
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/app/dist --project-name=study-github-agent --branch=${{ github.head_ref || github.ref_name }}
+          command: pages deploy apps/app/dist --project-name=study-github-agent --branch=${{ github.head_ref || github.ref_name }}-${{ matrix.suffix }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: PRにデプロイ結果をコメント（PR時のみ）
-        if: github.event_name == 'pull_request'
+  comment:
+    name: PRコメント作成
+    runs-on: ubuntu-latest
+    needs: preview
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: PRにデプロイ結果をコメント
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -69,13 +89,20 @@ jobs:
             PR #${{ github.event.pull_request.number }} のCloudflare Pagesプレビューデプロイが完了しました！
 
             ### 📋 デプロイ情報
-            - **プレビューURL**: ${{ steps.deploy.outputs.deployment-url }}
-            - **ブランチ**: `${{ github.head_ref }}`
-            - **コミット**: `${{ github.sha }}`
-            - **デプロイID**: ${{ steps.deploy.outputs.deployment-id }}
+
+            #### 🛠️ 開発者ツール有効版
+            - **プレビューURL**: [開発者ツール有効版を確認](https://study-github-agent.pages.dev/${{ github.head_ref }}-devtools-on)
+            - **ブランチ**: `${{ github.head_ref }}-devtools-on`
+            - **説明**: TanStack Router開発者ツールが表示されます
+
+            #### 🔒 開発者ツール無効版  
+            - **プレビューURL**: [開発者ツール無効版を確認](https://study-github-agent.pages.dev/${{ github.head_ref }}-devtools-off)
+            - **ブランチ**: `${{ github.head_ref }}-devtools-off`
+            - **説明**: 本番環境と同様の状態で開発者ツールは表示されません
 
             ### 🔗 アクセス方法
             上記のプレビューURLをクリックしてアプリケーションを確認できます。
+            両方のバージョンを比較して、開発者ツールの表示/非表示を確認してください。
             
             **注意**: プレビューURLは数分でアクセス可能になります。すぐにアクセスできない場合は少しお待ちください。
 
@@ -84,6 +111,12 @@ jobs:
             - **デプロイ先**: Cloudflare Pages
             - **ビルドコマンド**: `pnpm --filter app build`
             - **出力ディレクトリ**: `apps/app/dist`
+            - **環境変数制御**: `VITE_ENABLE_DEVTOOLS=true/false`
+
+            ### 💡 開発者ツールについて
+            - **有効版**: ページ下部にTanStack Routerの開発者ツールが表示されます
+            - **無効版**: 開発者ツールは表示されず、本番環境と同じ状態です
+            - **切り替え**: 環境変数 `VITE_ENABLE_DEVTOOLS` で制御されています
 
             ---
             *このコメントはCloudflare Pages自動デプロイワークフローによって生成されました。*

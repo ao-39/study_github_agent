@@ -51,6 +51,20 @@ const envSchema = z.object({
       message: "ANALYZE は 'true' または 'false' である必要があります",
     })
     .transform(val => val === 'true'),
+
+  /**
+   * TanStack Router開発者ツールを有効にするかどうか
+   * 開発時のルーティングデバッグに使用
+   */
+  VITE_ENABLE_DEVTOOLS: z
+    .string()
+    .optional()
+    .default('false')
+    .refine(val => val === 'true' || val === 'false', {
+      message:
+        "VITE_ENABLE_DEVTOOLS は 'true' または 'false' である必要があります",
+    })
+    .transform(val => val === 'true'),
 })
 
 /**
@@ -97,6 +111,10 @@ export function validateEnv(): EnvVars {
         '  - ANALYZE: バンドル分析の有効化 (true/false) [オプション]'
       )
       // eslint-disable-next-line no-console
+      console.error(
+        '  - VITE_ENABLE_DEVTOOLS: TanStack Router開発者ツールの有効化 (true/false) [オプション]'
+      )
+      // eslint-disable-next-line no-console
       console.error('\n💡 設定方法:')
       // eslint-disable-next-line no-console
       console.error('  export VITE_ENABLE_PWA=true')
@@ -104,6 +122,8 @@ export function validateEnv(): EnvVars {
       console.error('  export GITHUB_PAGES=false')
       // eslint-disable-next-line no-console
       console.error('  export ANALYZE=false')
+      // eslint-disable-next-line no-console
+      console.error('  export VITE_ENABLE_DEVTOOLS=false')
       // eslint-disable-next-line no-console
       console.error('\n📁 バリデーション設定ファイル:')
       // eslint-disable-next-line no-console
