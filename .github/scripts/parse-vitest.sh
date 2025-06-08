@@ -1,9 +1,43 @@
 #!/usr/bin/env bash
 # スクリプト失敗時に即座に停止させる
 set -euo pipefail
-# apps/appのtest-results/results.jsonから結果を解析
-if [ -f "apps/app/test-results/results.json" ]; then
-  json_file="apps/app/test-results/results.json"
+
+# results.jsonファイルのパスを定義
+RESULTS_FILE="apps/app/test-results/results.json"
+
+# ファイルの存在確認（最大10秒間リトライ）
+for i in {1..10}; do
+  if [ -f "$RESULTS_FILE" ]; then
+    echo "results.jsonファイルが見つかりました: $RESULTS_FILE"
+    break
+  fi
+  echo "results.jsonファイルが見つかりません。待機中... ($i/10)"
+  sleep 1
+done
+
+# 最終的な存在確認
+if [ ! -f "$RESULTS_FILE" ]; then
+  echo "エラー: results.jsonファイルが見つかりません: $RESULTS_FILE"
+  echo "json_exists=false" >> $GITHUB_OUTPUT
+  exit 0
+fi
+
+# ファイルが空でないことを確認
+if [ ! -s "$RESULTS_FILE" ]; then
+  echo "エラー: results.jsonファイルが空です: $RESULTS_FILE"
+  echo "json_exists=false" >> $GITHUB_OUTPUT
+  exit 0
+fi
+
+# JSONファイルの有効性を確認
+if ! jq . "$RESULTS_FILE" > /dev/null 2>&1; then
+  echo "エラー: results.jsonファイルが無効なJSONです: $RESULTS_FILE"
+  echo "json_exists=false" >> $GITHUB_OUTPUT
+  exit 0
+fi
+
+# results.jsonから結果を解析
+json_file="$RESULTS_FILE"
   
   # 基本統計情報の抽出
   total_tests=$(jq -r '.numTotalTests' "$json_file")
@@ -64,8 +98,6 @@ if [ -f "apps/app/test-results/results.json" ]; then
   fi
   
   echo "json_exists=true" >> $GITHUB_OUTPUT
-else
-  echo "json_exists=false" >> $GITHUB_OUTPUT
-
-
-fi
+  
+  echo "Vitestテスト結果の解析が完了しました。"
+  echo "総テスト数: $total_tests, 成功: $passed_tests, 失敗: $failed_tests"
