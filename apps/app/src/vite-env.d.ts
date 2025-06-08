@@ -27,6 +27,12 @@ interface ImportMetaEnv {
    * @default 'false'
    */
   readonly ANALYZE?: string
+
+  /**
+   * TanStack Router開発者ツールを有効にするかどうか
+   * @default 'true'
+   */
+  readonly VITE_ENABLE_DEVTOOLS?: string
 }
 
 interface ImportMeta {

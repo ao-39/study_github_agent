@@ -10,7 +10,8 @@
 
 import React, { Suspense } from 'react'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { env } from '../env'
 
 /**
  * アプリケーションのメインナビゲーションコンポーネント
@@ -83,6 +84,7 @@ const LoadingSpinner: React.FC = () => {
  *
  * @description アプリケーション全体の共通レイアウトを提供します。
  * ナビゲーション、メインコンテンツエリア、開発ツールを含みます。
+ * 開発ツールは環境変数とテスト環境に応じて制御されます。
  *
  * @returns Reactエレメント - ルートレイアウト
  */
@@ -90,6 +92,9 @@ const RootComponent: React.FC = () => {
   // テスト環境では開発ツールを無効にする
   const isTestEnvironment =
     typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+
+  // 環境変数による開発ツールの制御
+  const shouldShowDevtools = env.VITE_ENABLE_DEVTOOLS && !isTestEnvironment
 
   return (
     <div
@@ -101,7 +106,7 @@ const RootComponent: React.FC = () => {
           <Outlet />
         </Suspense>
       </main>
-      {!isTestEnvironment && <TanStackRouterDevtools />}
+      {shouldShowDevtools && <TanStackRouterDevtools />}
     </div>
   )
 }

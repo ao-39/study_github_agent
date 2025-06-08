@@ -372,12 +372,83 @@ cat src/routeTree.gen.ts
 
 ### 2. 開発者ツール
 
-開発環境では、画面下部にTanStackRouterDevtoolsが表示され、以下の情報を確認できます：
+TanStack Routerの開発者ツールは、ルーティングのデバッグに非常に有用な機能を提供します。
 
-- 現在のルート情報
-- ルートパラメータ
-- 検索パラメータ
-- ローダーデータ
+#### 2.1 開発者ツールの概要
+
+開発者ツールを使用すると、以下の情報をリアルタイムで確認できます：
+
+- **現在のルート情報**: アクティブなルートパスとコンポーネント
+- **ルートパラメータ**: 動的ルートのパラメータ値
+- **検索パラメータ**: URLクエリパラメータ
+- **ローダーデータ**: 各ルートで読み込まれたデータ
+- **ルートツリー**: アプリケーション全体のルート構造
+- **ナビゲーション履歴**: ページ遷移の履歴
+
+#### 2.2 環境変数による制御
+
+開発者ツールの表示は環境変数で制御できます：
+
+```bash
+# 開発者ツールを有効化（デフォルト）
+export VITE_ENABLE_DEVTOOLS=true
+
+# 開発者ツールを無効化
+export VITE_ENABLE_DEVTOOLS=false
+```
+
+#### 2.3 自動制御の仕組み
+
+開発者ツールは以下の条件で自動的に制御されます：
+
+- **テスト環境**: 自動的に無効化される
+- **本番ビルド**: `process.env.NODE_ENV === 'production'`では表示されない
+- **環境変数**: `VITE_ENABLE_DEVTOOLS=false`で明示的に無効化可能
+
+#### 2.4 実装の詳細
+
+開発者ツールは`__root.tsx`で以下のように実装されています：
+
+```typescript
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import { env } from '../env'
+
+const RootComponent: React.FC = () => {
+  // テスト環境では開発ツールを無効にする
+  const isTestEnvironment = 
+    typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
+
+  // 環境変数による開発ツールの制御
+  const shouldShowDevtools = env.VITE_ENABLE_DEVTOOLS && !isTestEnvironment
+
+  return (
+    <div>
+      {/* メインコンテンツ */}
+      <Outlet />
+      
+      {/* 条件付きで開発者ツールを表示 */}
+      {shouldShowDevtools && <TanStackRouterDevtools />}
+    </div>
+  )
+}
+```
+
+#### 2.5 開発者ツールの活用方法
+
+**ルーティングのデバッグ**:
+- ページ遷移が期待通りに動作しない場合
+- パラメータが正しく渡されているかの確認
+- ローダーデータの読み込み状況の監視
+
+**パフォーマンス監視**:
+- ページ読み込み時間の確認
+- 不要な再レンダリングの特定
+- コード分割の効果測定
+
+**開発効率の向上**:
+- ルート構造の視覚的な確認
+- 動的ルートのテスト
+- エラー発生時の原因特定
 
 ### 3. よくある問題と解決法
 
