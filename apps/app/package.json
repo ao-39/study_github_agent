@@ -55,7 +55,7 @@
     "eslint": "9.28.0",
     "jsdom": "26.1.0",
     "prettier": "3.5.3",
-    "rollup-plugin-visualizer": "6.0.1",
+    "rollup-plugin-visualizer": "6.0.3",
     "typedoc": "0.28.5",
     "typescript": "5.8.3",
     "vite": "6.3.5",
