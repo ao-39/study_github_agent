@@ -5,6 +5,7 @@
 ## 基本コマンド
 
 ### 依存関係管理
+
 ```bash
 # 依存関係のインストール
 pnpm install
@@ -20,6 +21,7 @@ pnpm --filter <package-name> add <dependency>
 ```
 
 ### 開発サーバー
+
 ```bash
 # メインアプリケーション（apps/app）の開発サーバー起動
 pnpm --filter app dev
@@ -32,6 +34,7 @@ pnpm dev
 ```
 
 ### ビルド
+
 ```bash
 # 全パッケージのビルド
 pnpm build
@@ -47,6 +50,7 @@ pnpm --filter app preview
 ```
 
 #### 環境変数を使用したビルド
+
 ```bash
 # PWA機能を無効にしてビルド
 VITE_ENABLE_PWA=false pnpm --filter app build
@@ -64,6 +68,7 @@ VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm --filter app build
 ## 品質チェックコマンド
 
 ### リンティング
+
 ```bash
 # 全パッケージのリンティング
 pnpm lint
@@ -76,6 +81,7 @@ pnpm --filter app lint --fix
 ```
 
 ### フォーマット
+
 ```bash
 # 全パッケージのフォーマット
 pnpm format
@@ -83,14 +89,11 @@ pnpm format
 # フォーマットチェック（修正なし）
 pnpm run format:check
 
-# package.jsonのフォーマット
-pnpm run format:package
 
-# package.jsonフォーマットチェック
-pnpm run format:package --check
 ```
 
 ### スペルチェック
+
 ```bash
 # 全パッケージのスペルチェック
 pnpm spell-check
@@ -100,6 +103,7 @@ pnpm --filter app spell-check
 ```
 
 ### 型チェック
+
 ```bash
 # 全パッケージの型チェック
 pnpm type-check
@@ -111,6 +115,7 @@ pnpm --filter app type-check
 ## テストコマンド
 
 ### ユニットテスト（Vitest）
+
 ```bash
 # 全パッケージのテスト実行
 pnpm test
@@ -128,7 +133,8 @@ pnpm --filter app test:coverage
 pnpm --filter app test --ui
 ```
 
-### E2Eテスト（Playwright）
+### E2E テスト（Playwright）
+
 ```bash
 # 全ブラウザでE2Eテスト実行
 pnpm --filter app test:e2e
@@ -151,6 +157,7 @@ pnpm --filter app exec playwright show-report
 ## 包括的チェックコマンド
 
 ### フルチェック
+
 ```bash
 # 基本的なフルチェック（日常開発用）
 pnpm fullcheck
@@ -163,6 +170,7 @@ pnpm run pre-commit
 ```
 
 **フルチェックの実行内容**:
+
 1. リンティング（ESLint）
 2. フォーマットチェック（Prettier）
 3. スペルチェック（cspell）
@@ -170,13 +178,15 @@ pnpm run pre-commit
 5. 単体テスト（Vitest）
 
 ### 使い分けの指針
-- **日常開発**: `pnpm fullcheck` - 高速で包括的なチェック
-- **リリース前**: `pnpm fullcheck:e2e` - E2Eテスト込みの完全チェック
-- **自動実行**: `pnpm run pre-commit` - Gitコミット時に自動実行
 
-## monorepo操作コマンド
+- **日常開発**: `pnpm fullcheck` - 高速で包括的なチェック
+- **リリース前**: `pnpm fullcheck:e2e` - E2E テスト込みの完全チェック
+- **自動実行**: `pnpm run pre-commit` - Git コミット時に自動実行
+
+## monorepo 操作コマンド
 
 ### パッケージ指定実行
+
 ```bash
 # 特定のパッケージでコマンド実行
 pnpm --filter <package-name> <command>
@@ -189,6 +199,7 @@ pnpm --filter @study-github-agent/eslint-config build
 ```
 
 ### 全パッケージ実行
+
 ```bash
 # 全パッケージでコマンド実行
 pnpm -r <command>
@@ -200,7 +211,8 @@ pnpm -r install
 pnpm -r clean
 ```
 
-### Turborepo直接実行
+### Turborepo 直接実行
+
 ```bash
 # Turborepoで特定のタスクを実行
 pnpm exec turbo run <task>
@@ -212,22 +224,23 @@ pnpm exec turbo run build test
 pnpm exec turbo run lint --filter=[HEAD^1]
 ```
 
-## CI/CD関連コマンド
+## CI/CD 関連コマンド
 
-### CI環境再現
+### CI 環境再現
+
 ```bash
 # CI全体の実行（ローカルでのCI環境再現）
 pnpm ci
 
 # フォーマットチェック（CIと同じ）
 pnpm exec turbo run lint:format
-pnpm run format:package --check
 
 # テストファイル未存在でもOKなテスト実行
 pnpm exec turbo run test -- --passWithNoTests
 ```
 
 ### バンドル分析
+
 ```bash
 # バンドル分析付きビルド実行
 pnpm --filter app build:analyze
@@ -237,14 +250,16 @@ pnpm --filter app build:analyze
 ```
 
 **バンドル分析レポートの活用**:
+
 - ツリーマップ表示でファイルサイズを視覚化
 - 依存関係ライブラリのサイズ内訳を確認
-- gzip・brotli圧縮後のサイズ比較
+- gzip・brotli 圧縮後のサイズ比較
 - パフォーマンス最適化箇所の特定
 
 ## ユーティリティコマンド
 
 ### クリーンアップ
+
 ```bash
 # ビルド成果物のクリーンアップ
 pnpm clean
@@ -258,6 +273,7 @@ pnpm exec turbo clean
 ```
 
 ### 依存関係分析
+
 ```bash
 # 依存関係ツリーの表示
 pnpm list
@@ -269,7 +285,8 @@ pnpm --filter app list
 pnpm outdated
 ```
 
-### APIドキュメント生成
+### API ドキュメント生成
+
 ```bash
 # TypeDocでAPIドキュメント生成
 pnpm typedoc
@@ -281,15 +298,17 @@ pnpm --filter app typedoc
 # apps/app/docs-api/index.html をブラウザで開く
 ```
 
-**APIドキュメントの活用**:
-- TypeScriptソースコードからのAPIリファレンス自動生成
-- TSDocコメントの内容をHTML形式で表示
+**API ドキュメントの活用**:
+
+- TypeScript ソースコードからの API リファレンス自動生成
+- TSDoc コメントの内容を HTML 形式で表示
 - 関数・クラス・型の詳細情報と使用例を提供
-- CI/CDでのレポート生成とダウンロード配布
+- CI/CD でのレポート生成とダウンロード配布
 
 ## デバッグ・トラブルシューティング
 
 ### ログレベル調整
+
 ```bash
 # 詳細ログ付きでコマンド実行
 pnpm --loglevel=debug <command>
@@ -299,6 +318,7 @@ pnpm exec turbo run <task> --verbosity=2
 ```
 
 ### キャッシュ管理
+
 ```bash
 # Turborepoキャッシュの表示
 pnpm exec turbo run <task> --dry
@@ -311,6 +331,7 @@ pnpm exec turbo clean
 ```
 
 ### 環境診断
+
 ```bash
 # pnpm環境の確認
 pnpm config list
@@ -323,9 +344,10 @@ pnpm --version
 volta list
 ```
 
-## 開発効率化のTips
+## 開発効率化の Tips
 
 ### よく使うエイリアス例
+
 ```bash
 # .bashrc または .zshrc に追加推奨
 alias pdev="pnpm --filter app dev"
@@ -334,9 +356,10 @@ alias ptest="pnpm --filter app test"
 alias pcheck="pnpm fullcheck"
 ```
 
-### VS Code統合
+### VS Code 統合
+
 - **タスク設定**: `.vscode/tasks.json` でコマンドをタスク化
 - **デバッグ設定**: `.vscode/launch.json` でテストデバッグ設定
-- **拡張機能**: ESLint、Prettier、TypeScript拡張機能の活用
+- **拡張機能**: ESLint、Prettier、TypeScript 拡張機能の活用
 
 このコマンドリファレンスを活用して、効率的な開発を行ってください。

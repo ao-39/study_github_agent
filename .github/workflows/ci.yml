@@ -22,7 +22,7 @@ jobs:
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: pnpmのセットアップ
         uses: pnpm/action-setup@v4
@@ -68,7 +68,6 @@ jobs:
       - name: フォーマットチェック
         run: |
           pnpm exec turbo run lint:format
-          pnpm run format:package --check
 
       - name: 型チェック
         run: pnpm type-check
