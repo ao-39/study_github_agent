@@ -37,7 +37,41 @@ volta install node
 volta install pnpm
 ```
 
-### 4. 依存関係のインストール
+### 4. GitHub CLI (gh) のインストール（Claude Code用）
+Claude CodeでPR作成など、GitHub操作を自動化するためにGitHub CLIが必要です：
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install gh
+
+# macOS（Homebrew）
+brew install gh
+
+# または公式スクリプト（Linux/macOS）
+(type -p wget >/dev/null || (sudo apt update && sudo apt install wget -y)) \
+&& sudo mkdir -p -m 755 /etc/apt/keyrings \
+&& wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+&& sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+&& echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+&& sudo apt update \
+&& sudo apt install gh
+
+# 認証（初回のみ）
+gh auth login
+```
+
+**認証手順**:
+1. `gh auth login`実行
+2. `GitHub.com`を選択
+3. `HTTPS`を選択
+4. `Login with a web browser`を選択
+5. ブラウザでGitHubにログイン
+6. 表示されたコードを入力
+
+**目的**: Claude CodeがPR作成、イシュー管理、リポジトリ操作を自動実行するために必要
+
+### 5. 依存関係のインストール
 ```bash
 # プロジェクトルートで実行
 pnpm install

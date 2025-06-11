@@ -1,0 +1,363 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Claude使用時の重要な参照ファイル
+
+**必読**: 作業前に以下のファイルを参照し、過去の指摘事項や学習内容を確認してください：
+- **[Claude学習ノート](docs/development/claude-learning-notes.md)**: ユーザーからの指摘事項と改善点を記録
+- **[開発ログ](docs/devlog/)**: 過去の対応内容と解決策の詳細記録
+- このファイル(CLAUDE.md)と併せて、常に最新の知見を活用してください
+
+## 開発ログ（devlog）記録ルール
+
+**重要**: 各タスク完了時は必ず以下の手順で記録を残してください：
+
+### 記録手順
+1. **ファイル作成**: `docs/devlog/[対応内容を日本語で端的に表現].md`の形式で新規ファイルを作成
+2. **テンプレート使用**: `docs/devlog/_template.md`をベースとして記録を作成
+3. **内容記録**: 指示内容、問題、対応、結果、学習事項を詳細に記載
+4. **関連ファイル更新**: 必要に応じて学習ノートにも追記
+
+### 記録活用
+- **タスク開始前**: 類似した過去の対応記録を参照し、効率的なアプローチを検討
+- **問題解決時**: 過去の解決策を参考にして迅速な対応を実施
+- **品質向上**: 蓄積された知見を活用してより良い解決策を提案
+
+## 開発者情報
+- 開発者は日本人です
+- コミュニケーションは日本語で行います
+- コメントやドキュメントは日本語で記述してください
+
+## プロジェクト概要
+
+このプロジェクトは GitHub Copilot agent の学習を目的とした monorepo プロジェクトです。React + TypeScript を使用したモダンなフロントエンド開発環境と、包括的な CI/CD パイプラインを特徴としています。
+
+**主要技術スタック:**
+
+- **フロントエンド**: React 19.1.0 + TypeScript 5.8.3 + Vite 6.3.5
+- **Monorepo**: pnpm + Turborepo
+- **テスト**: Vitest (ユニット) + Playwright (E2E)
+- **品質管理**: ESLint (Flat Config) + Prettier + cspell
+- **CI/CD**: GitHub Actions + GitHub Pages + Cloudflare Pages
+- **PWA対応**: vite-plugin-pwa によるオフライン対応（環境変数で制御可能）
+- **環境変数バリデーション**: Zod によるタイプセーフな環境変数管理
+
+## 主要コマンド
+
+### 開発
+
+```bash
+# 依存関係のインストール
+pnpm install
+
+# 開発サーバー起動
+pnpm --filter app dev
+
+# アプリケーションビルド
+pnpm --filter app build
+
+# 包括的品質チェック（日常開発用）
+pnpm fullcheck
+
+# E2Eテスト込み完全チェック（リリース前）
+pnpm fullcheck:e2e
+```
+
+### テスト
+
+```bash
+# ユニットテスト
+pnpm --filter app test
+
+# E2Eテスト（全ブラウザ）
+pnpm --filter app test:e2e
+
+# E2Eテスト（特定ブラウザ）
+pnpm --filter app test:e2e:chromium
+```
+
+### 品質保証
+
+```bash
+# リンティング
+pnpm lint
+
+# フォーマット
+pnpm format
+
+# 型チェック
+pnpm type-check
+
+# スペルチェック
+pnpm spell-check
+```
+
+### 環境変数
+
+プロジェクトでは以下の環境変数を使用してビルド動作を制御できます：
+
+- **VITE_ENABLE_PWA**: PWA機能の有効化 (`true`/`false`, デフォルト: `true`)
+- **GITHUB_PAGES**: GitHub Pages用ビルド (`true`/`false`, デフォルト: `false`)
+- **ANALYZE**: バンドル分析の有効化 (`true`/`false`, デフォルト: `false`)
+
+**設定例**:
+```bash
+export VITE_ENABLE_PWA=false
+export GITHUB_PAGES=true
+export ANALYZE=true
+pnpm --filter app build
+```
+
+**バリデーション**: 環境変数は `apps/app/src/env.ts` でZodを使用してバリデーションされ、不正な値が設定された場合は分かりやすいエラーメッセージが表示されます。
+
+## アーキテクチャ
+
+### Monorepo 構造
+
+```
+study_github_agent/
+├── apps/app/                   # メインReactアプリケーション
+├── packages/                   # 共有ライブラリパッケージ
+│   ├── eslint-config/          # ESLint設定
+│   └── prettier-config/        # Prettier設定
+└── docs/                       # プロジェクトドキュメント
+```
+
+### 重要な設計決定
+
+**ルーティング**: 静的ホスティング（GitHub Pages、Cloudflare Pages）に対応するため、TanStack Router のハッシュルーティング (#/) を使用。ナビゲーションはハッシュリンク（例: `href="#/about"`）で処理。
+
+**PWA 対応**: vite-plugin-pwa を使用した設定可能な PWA 機能。環境変数による異なるデプロイシナリオへの対応。
+
+**環境変数管理**: `apps/app/src/env.ts`で Zod を使用した型安全な環境変数バリデーション。
+
+**Monorepo 依存関係**: `workspace:*`参照を使用した単方向依存パターン（apps → packages）。
+
+### ビルド最適化
+
+- Turborepo キャッシュによる増分ビルド
+- rollup-plugin-visualizer によるバンドル分析
+- 環境別ビルド設定
+- vite-tsconfig-paths による TypeScript パスマッピング
+
+### 重要な設定ファイル
+- `package.json`: monorepo設定とTurborepo設定
+- `pnpm-workspace.yaml`: pnpmワークスペース設定
+- `turbo.json`: Turborepoタスク設定
+- `apps/app/vite.config.ts`: Vite設定（テスト含む）
+- `apps/app/playwright.config.ts`: E2Eテスト設定
+
+## 開発ガイドライン
+
+### フルチェックコマンド
+プロジェクト品質の包括的なチェックのために、以下のコマンドが使用可能です：
+
+#### 基本的なフルチェック
+```bash
+# 日常開発で使用する包括的チェック
+pnpm fullcheck
+```
+**実行内容**:
+- リンティング（ESLint）
+- フォーマットチェック（Prettier）
+- スペルチェック（cspell）
+- ビルド（TypeScript + Vite）
+- 単体テスト（Vitest）
+
+#### E2Eテスト込み完全チェック
+```bash
+# E2Eテスト込みの完全チェック（時間がかかる）
+pnpm fullcheck:e2e
+```
+**実行内容**:
+- 基本的なフルチェック + E2Eテスト（Playwright）
+
+#### プレコミットチェック
+```bash
+# コミット前の自動チェック（huskyで自動実行）
+pnpm run pre-commit
+```
+**実行内容**:
+- `pnpm fullcheck`と同じ内容
+- Gitコミット時に自動実行される
+
+### 開発効率化のための使い分け
+- **日常開発**: `pnpm fullcheck` - 高速で包括的なチェック
+- **リリース前**: `pnpm fullcheck:e2e` - E2Eテスト込みの完全チェック
+- **自動実行**: `pnpm run pre-commit` - コミット時の品質保証
+
+### package.json管理基準
+- **バージョン固定**: `^`や`~`プレフィックスは使用せず、具体的なバージョン番号を指定
+- **プロパティソート**: `sort-package-json`を使用して標準的な順序でプロパティを自動整列
+- **依存関係整理**: 使用していない依存関係は定期的に削除し、必要最小限に保つ
+- **セマンティックバージョニング**: バージョン更新時はセマンティックバージョニングルールに従う
+- **自動フォーマット**: `pnpm run format`実行時にpackage.jsonも含めて一括フォーマット
+- **pnpm専用**: pnpm を専用使用（npm/yarn 禁止）
+- **ローカルパッケージ**: workspace:*を使用してローカルパッケージを参照
+
+### テスト戦略
+
+#### TDD（テスト駆動開発）
+- **Red-Green-Refactor**: 失敗するテスト → 実装 → リファクタリングのサイクル
+- **テストファースト**: 機能実装前にテストを書く
+- **小さなステップ**: 一度に一つの機能をテストする
+
+#### テストカバレッジ
+- **最低カバレッジ**: 80%以上を目標とする
+- **重要な機能**: ビジネスロジックは100%カバレッジを目指す
+- **境界値テスト**: エッジケースや異常系のテストを重視
+- **カバレッジツール**: Istanbul/nycを使用してカバレッジを可視化
+
+#### E2Eテスト（Playwright）
+- **ユーザーシナリオ**: 実際のユーザー操作フローをテスト
+- **ブラウザ横断**: Chrome、Firefox、Safariでの動作確認
+- **視覚回帰テスト**: スクリーンショット比較による見た目の確認
+- **パフォーマンステスト**: ページ読み込み速度の監視
+
+#### テスト構造
+```typescript
+// テストの構造例
+describe('ユーザー認証機能', () => {
+  describe('正常系', () => {
+    test('有効な認証情報でログインできる', () => {
+      // テスト実装
+    });
+  });
+  
+  describe('異常系', () => {
+    test('無効なパスワードでログインが拒否される', () => {
+      // テスト実装
+    });
+  });
+});
+```
+
+### コーディング規約
+- 変数名や関数名は英語で記述
+- コメントは日本語で記述
+- READMEやドキュメントは日本語で記述
+- エラーメッセージやログは日本語で記述
+- コミットメッセージは日本語で記述
+- **TSDocコメント必須**: 全てのexport関数・コンポーネント・型にはTSDocコメントを日本語で記載
+- **TypeDoc生成**: コード修正時は必ず`pnpm typedoc`でAPIドキュメントを更新確認
+- React 関数コンポーネントと Hooks を使用
+- default export より named export を優先
+- 環境変数は Zod スキーマによるバリデーション
+
+## CI/CD（継続的インテグレーション・継続的デプロイメント）統合
+
+### CI/CDの基本方針
+- **自動化**: 手動作業を最小限に抑え、ヒューマンエラーを防止
+- **品質保証**: コードの品質を自動的にチェックし、問題を早期発見
+- **高速フィードバック**: 開発者が迅速に問題を把握し、修正できる環境
+- **一貫性**: 全ての環境で同じプロセスで実行し、環境差異を排除
+
+### GitHub Actionsの使用指針
+
+#### ワークフロー構成
+本プロジェクトでは`.github/workflows/ci.yml`でCI/CDパイプラインを定義しています。
+
+#### 実行タイミング
+- **Pull Request作成時**: コードレビュー前の自動品質チェック
+- **mainブランチプッシュ時**: マージ後の最終確認
+- **手動実行**: 必要に応じて任意のタイミングでの実行
+
+#### CI実行項目と順序
+1. **環境セットアップ**: Node.js 24 + pnpm 10.11.0の準備
+2. **キャッシュ復元**: pnpmストアとTurborepoキャッシュの活用
+3. **依存関係インストール**: `pnpm install`
+4. **リンティング**: `pnpm lint` (ESLint)
+5. **フォーマットチェック**: Prettier + package.json順序チェック
+6. **型チェック**: `pnpm type-check` (TypeScript)
+7. **ビルド**: `pnpm build` (Vite + TypeScript)
+8. **テスト実行**: `pnpm test --passWithNoTests` (Vitest)
+
+### パフォーマンス最適化戦略
+
+#### キャッシュ戦略
+- **pnpmストアキャッシュ**: 依存関係インストール時間の大幅短縮
+- **Turborepoキャッシュ**: ビルド・テスト結果の効率的な再利用
+- **キャッシュキー**: `pnpm-lock.yaml`ハッシュとgit SHAを使用
+
+#### 並列実行
+- **monorepo対応**: Turborepoによる効率的なタスク実行
+- **依存関係解決**: パッケージ間の依存関係を考慮した最適な実行順序
+
+### 品質ゲート基準
+
+#### 必須チェック項目
+- **ESLintエラー0件**: コーディング規約の完全遵守
+- **TypeScriptエラー0件**: 型安全性の保証
+- **フォーマットチェック**: コードスタイルの統一
+- **ビルド成功**: 本番環境への展開可能性確認
+- **テスト通過**: 機能の正常動作確認
+
+
+### 禁止事項・避けるべき実装
+
+#### 絶対に禁止
+- **pnpm以外のパッケージマネージャー**: npm、yarnの使用は禁止
+- **console.log**: 本番コードでのデバッグ用console.logの残存
+- **any型の濫用**: TypeScriptでのany型の安易な使用
+- **直接DOM操作**: Reactを使っている際の直接的なDOM操作
+
+#### 避けるべきパターン
+- **過度な最適化**: 必要のない早期最適化
+- **巨大なコンポーネント**: 500行を超えるReactコンポーネント
+- **deep nesting**: 5階層を超えるネスト構造
+- **magic numbers**: 意味が不明な数値のハードコーディング
+
+#### 非推奨ライブラリ
+- **moment.js**: date-fnsやdayjsを使用
+- **lodash全体**: 必要な関数のみを個別にインポート
+- **jQuery**: React環境では使用しない
+- **古いReact APIs**: componentDidMount等のクラスコンポーネントAPI
+
+#### セキュリティ上の禁止事項
+- **秘密情報のハードコーディング**: APIキーやパスワードのコード内記述
+- **eval()の使用**: 動的コード実行の禁止
+- **dangerouslySetInnerHTML**: XSSリスクのある使用法
+- **非検証の外部データ**: 外部APIからの未検証データの直接使用
+
+## 共通パターン
+
+### 新しいルートの追加
+
+TanStack Router でルートを追加する際は、ハッシュベースナビゲーションを使用:
+
+```jsx
+<a href="#/new-route">新しいルートへ移動</a>
+```
+
+### 環境変数の使用
+
+環境変数は必ず`src/env.ts`の Zod スキーマを通してバリデーション:
+
+```typescript
+import { env } from "./env";
+// env.VITE_ENABLE_PWAは型安全でバリデーション済み
+```
+
+### Monorepo パッケージコマンド
+
+`--filter`フラグを使用して特定パッケージを対象にコマンド実行:
+
+```bash
+pnpm --filter app <command>
+pnpm --filter @study-github-agent/eslint-config <command>
+```
+
+### ブログ記事の記録
+
+開発中に得た気付きや工夫は、社外に向けた技術ブログとして `docs/blog` ディレクトリへまとめます。`template.md` をコピーして利用し、記事は「タイトル」「内容」「まとめ」の三部構成としてください。日付は不要で、ファイル名や本文にも入れません。箇条書きを避けつつ、読みやすい文章で記述します。
+
+内容の冠頭では、何を伝えたいかと得られるメリットを整理します。その後に詳細な手順や背景を解説し、必要に応じてサンプルコードを掲載してください。ライブラリ紹介では特徴や優れている点、活用例を具体的に示します。開発中に詰まった点や解決策、工夫したポイントも積極的に盛り込み、読み手が興味を持つ外部公開向けの記事に仕上げてください。
+
+この monorepo は、GitHub Copilot を活用したモダンな開発プラクティスの学習、包括的な自動化による高品質なコードベースの維持、環境駆動設定による柔軟なデプロイメントシナリオのサポートに重点を置いています。
+
+**重要**: プロジェクトの詳細な技術情報については、以下のドキュメントを参照してください：
+- **[README.md](../README.md)**: プロジェクト概要と基本情報
+- **[アーキテクチャ概要](../docs/architecture/overview.md)**: 全体設計と技術スタック
+- **[開発ガイド](../docs/development/)**: 環境セットアップと開発ルール
+- **[GitHub Copilot活用ガイド](../docs/guides/github-copilot.md)**: 効果的なCopilot活用方法

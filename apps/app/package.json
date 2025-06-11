@@ -14,6 +14,7 @@
     "lint": "eslint . --max-warnings 0",
     "lint:format": "prettier --check .",
     "preview": "vite preview",
+    "postinstall": "pnpm exec playwright install",
     "routes:generate": "tsr generate",
     "routes:watch": "tsr watch --open=false",
     "spell-check": "cspell \"**/*.{ts,tsx,js,jsx,md,json}\" --no-progress --config .cspell.json --root .",
