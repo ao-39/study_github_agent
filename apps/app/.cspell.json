@@ -55,7 +55,8 @@
     "precommit",
     "fileoverview",
     "tsdoc",
-    "dist"
+    "dist",
+    "fullcheck"
   ],
   "flagWords": [],
   "ignoreWords": [],

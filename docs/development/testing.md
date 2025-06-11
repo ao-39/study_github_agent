@@ -151,6 +151,41 @@ export default defineConfig({
 })
 ```
 
+### 環境セットアップ
+E2Eテストを実行する前に、システム依存関係のインストールが必要です：
+
+```bash
+# Linux/Ubuntu環境での依存関係インストール
+sudo apt-get update
+sudo apt-get install -y libnss3 libnspr4 libasound2t64
+
+# または Playwright の依存関係を自動インストール
+# pnpmがsudoで見つからない場合は、フルパスを指定
+sudo $(which pnpm) exec playwright install-deps
+
+# またはnpxを使用
+sudo npx playwright install-deps
+
+# または依存関係を個別にインストール
+sudo apt-get install -y \
+  libnss3-dev \
+  libatk-bridge2.0-dev \
+  libdrm2 \
+  libxkbcommon0 \
+  libxcomposite1 \
+  libxdamage1 \
+  libxrandr2 \
+  libgbm1 \
+  libxss1 \
+  libasound2
+```
+
+**Docker環境での実行**（推奨）:
+```bash
+# Docker環境でのE2Eテスト実行
+docker run --rm -v $(pwd):/app -w /app mcr.microsoft.com/playwright:v1.52.0 pnpm --filter app test:e2e:chromium
+```
+
 ### テスト実行コマンド
 ```bash
 # 全ブラウザでE2Eテスト実行
