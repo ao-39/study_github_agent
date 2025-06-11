@@ -157,7 +157,7 @@ E2Eテストを実行する前に、システム依存関係のインストー�
 ```bash
 # Linux/Ubuntu環境での依存関係インストール
 sudo apt-get update
-sudo apt-get install -y libnss3 libnspr4 libasound2t64
+sudo apt-get install -y libnss3 libnspr4 libasound2
 
 # または Playwright の依存関係を自動インストール
 # pnpmがsudoで見つからない場合は、フルパスを指定
