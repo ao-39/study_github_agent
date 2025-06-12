@@ -68,6 +68,11 @@ jobs:
       - name: フォーマットチェック
         run: pnpm fmt
 
+      - name: TypeScriptキャッシュクリア
+        run: |
+          find . -name "*.tsbuildinfo" -delete
+          find . -name "dist-node" -type d -exec rm -rf {} + || true
+
       - name: 型チェック
         run: pnpm type-check
 
