@@ -12,15 +12,6 @@
     "index.js",
     "README.md"
   ],
-  "scripts": {
-    "build": "echo 'No build step required for config package'",
-    "format:check": "echo 'No format check step required for config package'",
-    "lint": "echo 'No lint step required for config package'",
-    "spell-check": "echo 'No spell-check step required for config package'",
-    "test": "echo 'No test step required for config package'",
-    "test:e2e": "echo 'No e2e test step required for config package'",
-    "typedoc": "echo 'No typedoc step required for config package'"
-  },
   "peerDependencies": {
     "prettier": "3.0.0"
   }

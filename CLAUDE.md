@@ -7,22 +7,83 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **必読**: 作業前に以下のファイルを参照し、過去の指摘事項や学習内容を確認してください：
 - **[Claude学習ノート](docs/development/claude-learning-notes.md)**: ユーザーからの指摘事項と改善点を記録
 - **[開発ログ](docs/devlog/)**: 過去の対応内容と解決策の詳細記録
+- **[開発用語集](docs/development/glossary.md)**: プロジェクト固有の用語や概念の定義集
+- **[変更影響チェックリスト](docs/development/change-impact-checklist.md)**: 変更時に影響する関連ファイルの確認リスト
 - このファイル(CLAUDE.md)と併せて、常に最新の知見を活用してください
 
-## 開発ログ（devlog）記録ルール
+## 開発ログ（devlog）自動記録ルール
 
-**重要**: 各タスク完了時は必ず以下の手順で記録を残してください：
+**重要**: 一定規模以上のタスクでは作業中に自動的に開発ログを記録します：
 
-### 記録手順
-1. **ファイル作成**: `docs/devlog/[対応内容を日本語で端的に表現].md`の形式で新規ファイルを作成
-2. **テンプレート使用**: `docs/devlog/_template.md`をベースとして記録を作成
-3. **内容記録**: 指示内容、問題、対応、結果、学習事項を詳細に記載
-4. **関連ファイル更新**: 必要に応じて学習ノートにも追記
+### 自動記録の対象
+- 複数ファイルの変更を伴うタスク
+- 新しい機能や仕組みの導入
+- 問題解決や最適化作業
+- 設定やアーキテクチャの変更
+
+### 記録プロセス
+1. **ファイル作成**: タスク開始時に`docs/devlog/[対応内容を日本語で端的に表現].md`を作成
+2. **作業中更新**: 作業進行に合わせて内容を逐次更新（重要：作業中でも忘れずに更新する）
+3. **完了時確定**: タスク完了時に最終的な結果と学習事項を記載
+4. **テンプレート準拠**: `docs/devlog/_template.md`の構造に従って記録
+
+**重要リマインダー**: 作業が進行したら必ずdevlogを更新すること。新しい問題発見、対応内容追加、結果更新など、リアルタイムで記録を保持する。
+
+### 記録内容
+- **指示内容**: ユーザーからの具体的な要求
+- **発生問題**: 作業中に発見された問題と原因
+- **対応内容**: 実施した具体的な対応と実行コマンド
+- **対応結果**: 成功項目、技術的成果、ドキュメント改善
+- **学習事項**: 重要な知見、今後の改善点、ベストプラクティス
 
 ### 記録活用
 - **タスク開始前**: 類似した過去の対応記録を参照し、効率的なアプローチを検討
 - **問題解決時**: 過去の解決策を参考にして迅速な対応を実施
 - **品質向上**: 蓄積された知見を活用してより良い解決策を提案
+
+## 用語集（glossary）管理ルール
+
+**重要**: 新しい用語や概念が出てきた場合は必ず用語集に追記してください：
+
+### 用語追加の対象
+- プロジェクト固有の用語や概念
+- 技術的な専門用語で定義が曖昧なもの
+- 開発チーム内で共通理解が必要な概念
+- AIアシスタントとのやり取りで新たに定義された概念
+
+### 追加手順
+1. **[開発用語集](docs/development/glossary.md)** を開く
+2. 50音順（英数字は末尾）で適切な位置に挿入
+3. 以下の項目を記載：
+   - **定義**: 明確で簡潔な説明
+   - **使用例**: 実際の使用シーン
+   - **関連情報**: 補足や参照先
+
+### 用語集活用
+- **作業開始前**: 不明な用語があれば用語集を確認
+- **ドキュメント作成時**: 用語の表記統一のため参照
+- **AIアシスタント指示時**: 用語の意味を明確にして効率的なコミュニケーション
+
+## 変更影響チェックリスト活用ルール
+
+**重要**: 任意の変更作業前に必ず影響チェックリストを確認してください：
+
+### 必須確認タイミング
+- package.jsonのscripts変更時（コマンド名変更、追加、削除）
+- 依存関係変更時（dependencies、devDependencies）
+- ディレクトリ構造変更時（ファイル移動、リネーム）
+- 環境変数変更時（追加、削除、名前変更）
+
+### 確認手順
+1. **[変更影響チェックリスト](docs/development/change-impact-checklist.md)** を開く
+2. 該当する変更タイプのセクションを確認
+3. 記載されている全ファイルを確認・修正
+4. 新しい影響関係を発見した場合は即座にチェックリストに追記
+
+### ユーザー指摘への対応
+- ユーザーから変更漏れの指摘を受けた場合は直ちにチェックリストに追記
+- 指摘内容は具体的なファイルパス、確認観点、実例を含めて記録
+- 同じ見落としを二度と起こさないよう継続的に改善
 
 ## 開発者情報
 - 開発者は日本人です
@@ -45,6 +106,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 主要コマンド
 
+**詳細なコマンドリファレンス**: [docs/development/commands.md](docs/development/commands.md) を参照
+
 ### 開発
 
 ```bash
@@ -55,26 +118,23 @@ pnpm install
 pnpm --filter app dev
 
 # アプリケーションビルド
-pnpm --filter app build
+pnpm build
 
-# 包括的品質チェック（日常開発用）
+# 包括的品質チェック（E2Eテスト込み）
 pnpm fullcheck
-
-# E2Eテスト込み完全チェック（リリース前）
-pnpm fullcheck:e2e
 ```
 
 ### テスト
 
 ```bash
 # ユニットテスト
-pnpm --filter app test
+pnpm test
 
-# E2Eテスト（全ブラウザ）
-pnpm --filter app test:e2e
+# E2Eテスト（Chromiumのみ、高速）
+pnpm e2e
 
 # E2Eテスト（特定ブラウザ）
-pnpm --filter app test:e2e:chromium
+pnpm --filter app e2e:firefox
 ```
 
 ### 品質保証
@@ -83,14 +143,17 @@ pnpm --filter app test:e2e:chromium
 # リンティング
 pnpm lint
 
-# フォーマット
-pnpm format
+# フォーマットチェック
+pnpm fmt
+
+# フォーマット修正
+pnpm fmt:fix
 
 # 型チェック
 pnpm type-check
 
 # スペルチェック
-pnpm spell-check
+pnpm spell
 ```
 
 ### 環境変数
@@ -153,9 +216,9 @@ study_github_agent/
 ### フルチェックコマンド
 プロジェクト品質の包括的なチェックのために、以下のコマンドが使用可能です：
 
-#### 基本的なフルチェック
+#### フルチェック
 ```bash
-# 日常開発で使用する包括的チェック
+# 包括的な品質チェック（E2Eテスト込み）
 pnpm fullcheck
 ```
 **実行内容**:
@@ -164,14 +227,7 @@ pnpm fullcheck
 - スペルチェック（cspell）
 - ビルド（TypeScript + Vite）
 - 単体テスト（Vitest）
-
-#### E2Eテスト込み完全チェック
-```bash
-# E2Eテスト込みの完全チェック（時間がかかる）
-pnpm fullcheck:e2e
-```
-**実行内容**:
-- 基本的なフルチェック + E2Eテスト（Playwright）
+- E2Eテスト（Playwright）
 
 #### プレコミットチェック
 ```bash
@@ -183,8 +239,8 @@ pnpm run pre-commit
 - Gitコミット時に自動実行される
 
 ### 開発効率化のための使い分け
-- **日常開発**: `pnpm fullcheck` - 高速で包括的なチェック
-- **リリース前**: `pnpm fullcheck:e2e` - E2Eテスト込みの完全チェック
+- **包括的チェック**: `pnpm fullcheck` - リンティング、フォーマット、ビルド、テスト、E2Eテストを一括実行
+- **個別チェック**: `pnpm lint`, `pnpm test`, `pnpm e2e` など - 特定の項目のみチェック
 - **自動実行**: `pnpm run pre-commit` - コミット時の品質保証
 
 ### package.json管理基準
@@ -341,11 +397,18 @@ import { env } from "./env";
 
 ### Monorepo パッケージコマンド
 
-`--filter`フラグを使用して特定パッケージを対象にコマンド実行:
-
+**基本**: ルートpackage.jsonのコマンドを使用（推奨）:
 ```bash
-pnpm --filter app <command>
-pnpm --filter @study-github-agent/eslint-config <command>
+pnpm lint     # 全パッケージでリンティング
+pnpm test     # 全パッケージでテスト
+pnpm build    # 全パッケージでビルド
+```
+
+**特定パッケージのみ**: `--filter`フラグを使用:
+```bash
+pnpm --filter app dev                              # 開発サーバー起動
+pnpm --filter app test:watch                       # ウォッチモード
+pnpm --filter @study-github-agent/eslint-config    # 設定パッケージ操作
 ```
 
 ### ブログ記事の記録

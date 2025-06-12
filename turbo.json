@@ -3,40 +3,41 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["dist/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "outputs": ["coverage/**", "test-results/**"]
     },
-    "test:e2e": {
+    "test:ci": {
+      "outputs": ["coverage/**", "test-results/**"]
+    },
+    "e2e": {
       "dependsOn": ["build"],
       "outputs": ["test-results/**", "playwright-report/**"]
     },
     "lint": {
       "outputs": []
     },
-    "lint:format": {
+    "lint:fix": {
       "outputs": []
     },
-    "format": {
+    "fmt": {
       "outputs": []
     },
-    "format:check": {
+    "fmt:fix": {
       "outputs": []
     },
     "type-check": {
       "outputs": []
     },
-    "spell-check": {
+    "spell": {
       "outputs": []
     },
     "typedoc": {
-      "dependsOn": ["build"],
       "outputs": ["docs-api/**"]
     },
     "clean": {

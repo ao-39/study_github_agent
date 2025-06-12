@@ -66,8 +66,7 @@ jobs:
         run: pnpm lint
 
       - name: フォーマットチェック
-        run: |
-          pnpm exec turbo run lint:format
+        run: pnpm fmt
 
       - name: 型チェック
         run: pnpm type-check
@@ -279,7 +278,7 @@ jobs:
             *このセキュリティ監査・パッケージ更新状況レポートは自動で生成されました。重要な脆弱性が検出された場合は適切に対処し、古いパッケージがある場合は更新を検討してください。*
 
       - name: Vitestユニットテスト実行
-        run: pnpm exec turbo run test -- --passWithNoTests
+        run: pnpm test:ci
 
       - name: Vitestテスト結果を解析・準備（PR時のみ）
         if: github.event_name == 'pull_request'
@@ -360,7 +359,7 @@ jobs:
         run: pnpm --filter app exec playwright install --with-deps chromium
 
       - name: E2Eテスト実行
-        run: pnpm --filter app test:e2e:chromium
+        run: pnpm e2e
 
       - name: Playwrightテスト結果を解析・準備（PR時のみ）
         if: always() && github.event_name == 'pull_request'

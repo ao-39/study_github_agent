@@ -23,6 +23,7 @@
 - **[README.md](../README.md)**: プロジェクト概要と基本情報
 - **[アーキテクチャ概要](../docs/architecture/overview.md)**: 全体設計と技術スタック
 - **[開発ガイド](../docs/development/)**: 環境セットアップと開発ルール
+- **[コマンドリファレンス](../docs/development/commands.md)**: 全ての開発コマンドの詳細リファレンス
 - **[GitHub Copilot 活用ガイド](../docs/guides/github-copilot.md)**: 効果的な Copilot 活用方法
 
 ### 技術スタック
@@ -49,7 +50,7 @@
 export VITE_ENABLE_PWA=false
 export GITHUB_PAGES=true
 export ANALYZE=true
-pnpm --filter app build
+pnpm app build
 ```
 
 **バリデーション**: 環境変数は `apps/app/src/env.ts` で Zod を使用してバリデーションされ、不正な値が設定された場合は分かりやすいエラーメッセージが表示されます。
@@ -105,9 +106,11 @@ study_github_agent/
 ### 開発フロー
 
 1. `pnpm install`: 依存関係インストール
-2. `pnpm --filter app dev`: 開発サーバー起動
+2. `pnpm app dev`: 開発サーバー起動
 3. `pnpm fullcheck`: 包括的品質チェック
 4. `pnpm fullcheck:e2e`: E2E テスト込み完全チェック
+
+**詳細なコマンド使用方法**: [docs/development/commands.md](../docs/development/commands.md) を参照
 
 ## GitHub Copilot 学習指針
 
