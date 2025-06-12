@@ -1,10 +1,10 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "name": "Study GitHub Agent App API Documentation",
-  "entryPoints": ["src"],
+  "entryPoints": ["src/main.tsx", "src/routes"],
   "entryPointStrategy": "expand",
   "out": "docs-api",
-  "exclude": ["**/*.test.*", "**/*.d.ts", "test-setup.ts", "e2e/"],
+  "exclude": ["**/*.test.*", "**/*.d.ts", "test-setup.ts", "e2e/", "env.ts"],
   "plugin": [],
   "theme": "default",
   "readme": "none",

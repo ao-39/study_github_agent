@@ -10,7 +10,7 @@
 
 import React, { Suspense } from 'react'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 /**
  * アプリケーションのメインナビゲーションコンポーネント

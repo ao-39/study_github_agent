@@ -44,7 +44,7 @@ src/
 pnpm add @tanstack/react-router
 
 # 開発ツール
-pnpm add -D @tanstack/router-devtools @tanstack/router-cli
+pnpm add -D @tanstack/react-router-devtools @tanstack/router-cli
 ```
 
 ### 2. TanStackRouter CLI設定
@@ -82,7 +82,7 @@ pnpm add -D @tanstack/router-devtools @tanstack/router-cli
 ```typescript
 import React, { Suspense } from 'react'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 const RootComponent: React.FC = () => {
   const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'

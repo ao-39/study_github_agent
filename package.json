@@ -17,14 +17,13 @@
     "dev": "turbo run dev",
     "fmt": "turbo run fmt",
     "fmt:fix": "turbo run fmt:fix",
-    "fullcheck": "turbo run lint fmt spell build test e2e",
+    "fullcheck": "turbo run lint fmt spell build test e2e type-check",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "pre-commit": "pnpm fullcheck",
     "prepare": "husky",
     "spell": "turbo run spell",
     "test": "turbo run test",
-    "test:ci": "turbo run test:ci",
     "e2e": "turbo run e2e",
     "type-check": "turbo run type-check",
     "typedoc": "turbo run typedoc"
@@ -32,7 +31,7 @@
   "devDependencies": {
     "husky": "9.1.7",
     "turbo": "2.5.4",
-    "wrangler": "4.19.1"
+    "wrangler": "4.20.0"
   },
   "packageManager": "pnpm@10.11.0",
   "engines": {
