@@ -49,6 +49,10 @@ jobs:
       - name: アプリケーションのビルド
         run: pnpm --filter app build
 
+      - name: Vitestテスト実行（PR時のみ）
+        if: github.event_name == 'pull_request'
+        run: pnpm --filter app test
+
       - name: Cloudflare Pagesへのデプロイ
         uses: cloudflare/wrangler-action@v3
         id: deploy
@@ -56,6 +60,16 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy apps/app/dist --project-name=study-github-agent --branch=${{ github.head_ref || github.ref_name }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: VitestテストレポートをCloudflare Pagesにデプロイ（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        id: vitest-deploy
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/app/test-results --project-name=study-github-agent --branch=vitest-${{ github.head_ref }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: PRにデプロイ結果をコメント（PR時のみ）
@@ -70,6 +84,7 @@ jobs:
 
             ### 📋 デプロイ情報
             - **プレビューURL**: ${{ steps.deploy.outputs.deployment-url }}
+            - **Vitestテストレポート**: ${{ steps.vitest-deploy.outputs.deployment-url }}
             - **ブランチ**: `${{ github.head_ref }}`
             - **コミット**: `${{ github.sha }}`
             - **デプロイID**: ${{ steps.deploy.outputs.deployment-id }}

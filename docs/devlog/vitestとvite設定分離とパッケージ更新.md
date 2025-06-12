@@ -439,3 +439,66 @@ command: pages deploy apps/app/test-results --project-name=study-github-agent-vi
 - ✅ 不要なパラメータの削除によるシンプル化
 
 この修正により、VitestテストレポートのCloudflare Pagesデプロイが正常に動作するようになりました。
+
+## 追加修正: Cloudflare Pagesプロジェクト統合
+
+### 発生した問題
+**問題:** Cloudflare Pagesデプロイで新しいプロジェクトが見つからないエラー
+```
+✘ [ERROR] A request to the Cloudflare API failed.
+Project not found. The specified project name does not match any of your existing projects. [code: 8000007]
+```
+
+### 解決アプローチ
+**戦略:** 新規プロジェクト作成ではなく、既存の`study-github-agent`プロジェクトを活用
+
+### 実装した変更
+
+#### 1. CI.ymlからCloudflare Pagesデプロイを削除
+```yaml
+# 削除された部分
+- name: VitestテストレポートをCloudflare Pagesにデプロイ（PR時のみ）
+  uses: cloudflare/wrangler-action@v3
+  # ...
+```
+
+#### 2. pages-preview.ymlにVitestレポートデプロイを統合
+```yaml
+# 追加された部分
+- name: Vitestテスト実行（PR時のみ）
+  if: github.event_name == 'pull_request'
+  run: pnpm --filter app test
+
+- name: VitestテストレポートをCloudflare Pagesにデプロイ（PR時のみ）
+  if: github.event_name == 'pull_request'
+  uses: cloudflare/wrangler-action@v3
+  id: vitest-deploy
+  with:
+    command: pages deploy apps/app/test-results --project-name=study-github-agent --branch=vitest-${{ github.head_ref }}
+```
+
+#### 3. PRコメントの統合
+```yaml
+### 📋 デプロイ情報
+- **プレビューURL**: ${{ steps.deploy.outputs.deployment-url }}
+- **Vitestテストレポート**: ${{ steps.vitest-deploy.outputs.deployment-url }}
+```
+
+### 技術的メリット
+**統合のメリット:**
+1. **プロジェクト管理簡素化**: 単一のCloudflare Pagesプロジェクトで管理
+2. **ブランチ分離**: `vitest-{branch-name}`でテストレポートを分離
+3. **コスト効率**: 新規プロジェクト作成不要
+4. **一元管理**: pages-preview.ymlで全体のプレビュー管理
+
+**ブランチ戦略:**
+- メインアプリ: `${{ github.head_ref }}`
+- Vitestレポート: `vitest-${{ github.head_ref }}`
+
+### 対応結果
+- ✅ 既存プロジェクトの活用でエラー解消
+- ✅ CI.ymlとpages-preview.ymlの役割分離明確化
+- ✅ 統合されたPRコメントでユーザビリティ向上
+- ✅ ワークフローの簡素化とメンテナンス性向上
+
+この統合により、既存のCloudflare Pagesインフラを活用してVitestテストレポートの自動デプロイが実現されました。
