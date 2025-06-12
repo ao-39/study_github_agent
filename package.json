@@ -31,7 +31,7 @@
   "devDependencies": {
     "husky": "9.1.7",
     "turbo": "2.5.4",
-    "wrangler": "4.19.1"
+    "wrangler": "4.20.0"
   },
   "packageManager": "pnpm@10.11.0",
   "engines": {

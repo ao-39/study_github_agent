@@ -27,7 +27,7 @@
     "@tanstack/react-router": "^1.120.16"
   },
   "devDependencies": {
-    "@tanstack/router-devtools": "^1.120.16",
+    "@tanstack/react-router-devtools": "^1.120.16",
     "@tanstack/router-cli": "^1.120.16"
   }
 }
@@ -104,7 +104,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 // src/routes/__root.tsx
 import React, { Suspense } from 'react'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 const RootComponent: React.FC = () => {
   const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test'
