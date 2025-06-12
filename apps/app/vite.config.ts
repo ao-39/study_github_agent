@@ -12,11 +12,30 @@ import { env } from './src/env'
  * 環境変数でPWA機能の有効化を制御できます。
  */
 
+/**
+ * ビルド時に環境変数を表示するプラグイン
+ */
+function envDisplayPlugin() {
+  return {
+    name: 'env-display',
+    buildStart() {
+      console.log('\n📊 ビルド環境変数:')
+      console.log(`  VITE_ENABLE_PWA: ${env.VITE_ENABLE_PWA}`)
+      console.log(`  GITHUB_PAGES: ${env.GITHUB_PAGES}`)
+      console.log(`  ANALYZE: ${env.ANALYZE}`)
+      console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`)
+      console.log(`  CI: ${process.env.CI || 'false'}`)
+      console.log('')
+    },
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   // GitHub Pages用のベースパス設定
   base: env.GITHUB_PAGES ? '/study_github_agent/' : '/',
   plugins: [
+    envDisplayPlugin(),
     react(),
     tsconfigPaths(),
     // PWA機能を環境変数で制御
