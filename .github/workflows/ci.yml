@@ -367,7 +367,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest --compatibility-date=2024-05-13
+          command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest
 
       - name: TypeDocAPIドキュメント生成
         run: pnpm --filter app typedoc

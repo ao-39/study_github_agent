@@ -231,7 +231,7 @@ visualizer({ ... }) as unknown as PluginOption,
   with:
     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-    command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest --compatibility-date=2024-05-13
+    command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest
 ```
 
 ### PRコメント拡張
@@ -407,3 +407,35 @@ dist-node          # 追加: Node.js用ビルド出力
 - CI環境想定: キャッシュクリア手順を含む設定で動作確認
 
 この追加対応により、ローカル・CI環境の両方で安定したTypeScript型チェックが実現され、開発環境の一貫性が完全に保証されました。
+
+## 最終修正: Cloudflare Pagesデプロイコマンドエラー解決
+
+### 発生したエラー
+**問題:** CI環境でCloudflare Pagesデプロイ時にエラーが発生
+```
+✘ [ERROR] Unknown arguments: compatibility-date, compatibilityDate
+```
+
+### 原因と解決策
+**原因:** `wrangler pages deploy`コマンドで`--compatibility-date`パラメータがサポートされていない
+
+**解決策:** 不要なパラメータを削除
+```yaml
+# 修正前
+command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest --compatibility-date=2024-05-13
+
+# 修正後
+command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest
+```
+
+### 技術的背景
+- Cloudflare Pagesの`compatibility-date`設定はプロジェクト設定で管理される
+- `wrangler pages deploy`コマンドではこのパラメータは不要
+- プロジェクト作成時やWeb UIで設定済み
+
+### 対応結果
+- ✅ Cloudflare Pagesデプロイコマンドの修正
+- ✅ devlog記録の更新
+- ✅ 不要なパラメータの削除によるシンプル化
+
+この修正により、VitestテストレポートのCloudflare Pagesデプロイが正常に動作するようになりました。
