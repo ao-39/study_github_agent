@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, PluginOption } from 'vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -66,7 +66,7 @@ export default defineConfig({
               ],
               description: 'GitHub Copilot agent学習用PWAアプリケーション',
             },
-          }),
+          }) as unknown as PluginOption,
         ]
       : []),
     // バンドル分析を有効にする場合のみvisualizerプラグインを追加
@@ -78,7 +78,7 @@ export default defineConfig({
             gzipSize: true,
             brotliSize: true,
             template: 'treemap',
-          }),
+          }) as unknown as PluginOption,
         ]
       : []),
   ],
