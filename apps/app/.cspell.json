@@ -69,16 +69,14 @@
     ".turbo/**",
     "coverage/**",
     "test-results/**",
-    "playwright-report/**",
-    "playwright-results/**",
+    "e2e-reports/**",
     "bundle-report.html",
     "pnpm-lock.yaml",
     "*.min.js",
     "*.map",
     "apps/*/dist/**",
     "apps/*/test-results/**",
-    "apps/*/playwright-report/**",
-    "apps/*/playwright-results/**",
+    "apps/*/e2e-reports/**",
     "docs-api/**"
   ],
   "ignoreRegExpList": [

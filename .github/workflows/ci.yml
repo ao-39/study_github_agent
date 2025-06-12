@@ -135,6 +135,10 @@ jobs:
               - **内容**: TSDocコメントから自動生成されたAPIドキュメント（TypeDoc）
             - **🎭 Playwrightテストレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
               - **内容**: E2Eテスト（Playwright）の詳細HTMLレポート
+            - **🎭 PlaywrightテストJSONレポート**: `playwright-json-report-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテスト（Playwright）の詳細JSONレポート（results.json）
+            - **🎭 Playwrightテスト成果物**: `playwright-test-artifacts-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテスト（Playwright）実行時の成果物（スクリーンショット、ビデオ、トレース）
             - **保存期間**: 14日間
 
             **📋 ダウンロード手順：**
@@ -408,6 +412,10 @@ jobs:
             **Artifactsセクションから以下のファイルをダウンロードできます：**
             - **🎭 PlaywrightHTMLレポート**: `playwright-html-report-${{ github.event.pull_request.number }}`
               - **内容**: E2Eテストの詳細HTMLレポート、スクリーンショット、実行ログ、各ブラウザでの結果
+            - **🎭 PlaywrightJSONレポート**: `playwright-json-report-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテストの詳細JSONレポート（results.json）、プログラム処理用データ
+            - **🎭 Playwrightテスト成果物**: `playwright-test-artifacts-${{ github.event.pull_request.number }}`
+              - **内容**: E2Eテスト実行時の成果物（スクリーンショット、ビデオ、トレース）
 
             </details>
 
@@ -430,5 +438,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-html-report-${{ github.event.pull_request.number }}
-          path: apps/app/playwright-report/
+          path: apps/app/e2e-reports/html/
+          retention-days: 14
+
+      - name: PlaywrightテストJSONレポートのArtifactsアップロード（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-json-report-${{ github.event.pull_request.number }}
+          path: apps/app/e2e-reports/json/
+          retention-days: 14
+
+      - name: Playwrightテスト成果物のArtifactsアップロード（PR時のみ）
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-artifacts-${{ github.event.pull_request.number }}
+          path: apps/app/e2e-reports/artifacts/
           retention-days: 14

@@ -3,10 +3,9 @@ dist/
 build/
 coverage/
 test-results/
+e2e-reports/
 bundle-report.html
 docs-api/
-playwright-report/
-playwright-results/
 
 # Dependencies
 node_modules/
