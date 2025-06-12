@@ -7,8 +7,7 @@ pnpm-lock.yaml
 # Testing
 coverage
 test-results
-playwright-report
-playwright-results
+e2e-reports
 
 # Production
 dist

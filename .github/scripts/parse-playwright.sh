@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# apps/appのplaywright-results/results.jsonから結果を解析
-if [ -f "apps/app/playwright-results/results.json" ]; then
-  json_file="apps/app/playwright-results/results.json"
+# apps/appのe2e-reports/json/results.jsonから結果を解析
+if [ -f "apps/app/e2e-reports/json/results.json" ]; then
+  json_file="apps/app/e2e-reports/json/results.json"
   
   # 基本統計情報の抽出
   total_suites=$(jq -r '.suites | length' "$json_file")

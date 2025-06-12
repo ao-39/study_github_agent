@@ -26,31 +26,33 @@ export default defineConfig({
   // レポート設定（テスト結果をコンソールに表示して自動終了）
   reporter: process.env.CI
     ? [
-        ['html', { outputFolder: 'playwright-report', open: 'never' }],
-        ['json', { outputFile: 'playwright-results/results.json' }],
+        ['html', { outputFolder: 'e2e-reports/html', open: 'never' }],
+        ['json', { outputFile: 'e2e-reports/json/results.json' }],
+        ['github'], // GitHub Actions統合レポート
         ['list'], // CI環境ではコンソールにリスト形式で結果を表示
       ]
     : [
+        ['html', { outputFolder: 'e2e-reports/html', open: 'never' }], // ローカル環境でもHTMLレポート生成
+        ['json', { outputFile: 'e2e-reports/json/results.json' }], // ローカル環境でもJSONレポート生成
         ['list'], // ローカル環境でもコンソールに結果を表示して自動終了
-        ['html', { outputFolder: 'playwright-report', open: 'never' }],
       ],
 
   // テスト成果物の出力ディレクトリ
-  outputDir: 'playwright-results',
+  outputDir: 'e2e-reports/artifacts',
 
   // 全てのテストで使用する設定
   use: {
     // 各テスト実行時のベースURL
     baseURL: 'http://localhost:3000',
 
-    // 失敗時のスクリーンショット取得
-    screenshot: 'only-on-failure',
+    // スクリーンショット取得（常に撮影）
+    screenshot: 'on',
 
-    // 失敗時のビデオ録画
-    video: 'retain-on-failure',
+    // ビデオ録画（常に録画）
+    video: 'on',
 
-    // テスト実行のトレース（デバッグ用）
-    trace: 'on-first-retry',
+    // テスト実行のトレース（常に取得）
+    trace: 'on',
   },
 
   // 各ブラウザでのテスト設定
