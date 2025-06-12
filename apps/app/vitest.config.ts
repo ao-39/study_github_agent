@@ -20,7 +20,7 @@ export default defineConfig({
     testTimeout: 20000,
     // レポーター設定
     reporters: process.env.CI
-      ? ['default', 'html', 'json']
+      ? ['default', 'html', 'json', 'github-actions']
       : ['default', 'html'],
     outputFile: {
       html: './test-results/index.html',

@@ -120,6 +120,9 @@ jobs:
 
             PR #${{ github.event.pull_request.number }} のビルド成果物が準備できました！
 
+            ### 🌐 オンラインレポート（ブラウザで直接確認）
+            - **📊 Vitestテストレポート**: ${{ steps.vitest-deploy.outputs.url }}
+
             **📦 ダウンロードはこちら👉** [GitHub Actionsの実行ページ](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
             <details>
@@ -282,7 +285,7 @@ jobs:
             *このセキュリティ監査・パッケージ更新状況レポートは自動で生成されました。重要な脆弱性が検出された場合は適切に対処し、古いパッケージがある場合は更新を検討してください。*
 
       - name: Vitestユニットテスト実行
-        run: pnpm test:ci
+        run: pnpm test
 
       - name: Vitestテスト結果を解析・準備（PR時のみ）
         if: github.event_name == 'pull_request'
@@ -319,6 +322,10 @@ jobs:
             ${{ steps.parse-vitest.outputs.failed_tests != '0' && '### 🔍 失敗したテストの詳細' || '' }}
             ${{ steps.parse-vitest.outputs.failed_test_details }}
 
+            ### 📊 オンラインレポート
+            **🌐 Vitestテストレポート（オンライン）**: ${{ steps.vitest-deploy.outputs.url }}
+            > ↑ブラウザで直接テストレポートを確認できます（ダウンロード不要）
+
             <details>
             <summary>📋 詳細レポート（クリックで展開）</summary>
 
@@ -329,10 +336,11 @@ jobs:
               - **内容**: テスト結果の詳細HTMLレポート、カバレッジ情報、実行時間詳細
 
             ### 💡 テストについて
-            - **テストランナー**: Vitest v3.2.0
+            - **テストランナー**: Vitest v3.2.3
             - **カバレッジプロバイダー**: V8
             - **テスト環境**: jsdom
             - **実行タイミング**: PR作成・更新時
+            - **オンラインレポート**: Cloudflare Pages（自動デプロイ）
 
             </details>
 
@@ -347,8 +355,17 @@ jobs:
           path: apps/app/test-results/
           retention-days: 14
 
+      - name: VitestテストレポートをCloudflare Pagesにデプロイ（PR時のみ）
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        id: vitest-deploy
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest --compatibility-date=2024-05-13
+
       - name: TypeDocAPIドキュメント生成
-        run: pnpm typedoc
+        run: pnpm --filter app typedoc
 
       - name: TypeDocAPIドキュメントの成果物アップロード（PR時のみ）
         if: github.event_name == 'pull_request'

@@ -217,4 +217,57 @@ visualizer({ ... }) as unknown as PluginOption,
 - 環境変数表示: デバッグ支援
 - 型安全性: PluginOption明示的変換
 
-この対応により、プロジェクトの設定管理が大幅に改善され、開発効率とコード品質の両方が向上しました。特にVitest設定の分離は、今後のテスト環境拡張時の基盤となる重要な改善です。型安全性の向上により、ビルド時エラーの発生リスクも大幅に削減されました。
+## 追加対応: VitestテストレポートのCloudflare Pagesデプロイ
+
+### GitHub Actionsワークフロー拡張
+**目的:** VitestテストレポートをCloudflare Pagesに自動デプロイしてオンラインで確認できるようにする
+
+**実装内容:**
+```yaml
+- name: VitestテストレポートをCloudflare Pagesにデプロイ（PR時のみ）
+  if: github.event_name == 'pull_request'
+  uses: cloudflare/wrangler-action@v3
+  id: vitest-deploy
+  with:
+    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    command: pages deploy apps/app/test-results --project-name=study-github-agent-vitest --compatibility-date=2024-05-13
+```
+
+### PRコメント拡張
+**オンラインレポートURLの追加:**
+- VitestテストレポートのPRコメントにCloudflare PagesのURLを表示
+- メインのArtifactsコメントにもオンラインレポートセクションを追加
+- ダウンロード不要でブラウザから直接アクセス可能
+
+**表示例:**
+```
+### 🌐 オンラインレポート（ブラウザで直接確認）
+- 📊 Vitestテストレポート: https://xxxxx.study-github-agent-vitest.pages.dev
+
+🌐 Vitestテストレポート（オンライン）: https://xxxxx.study-github-agent-vitest.pages.dev
+> ↑ブラウザで直接テストレポートを確認できます（ダウンロード不要）
+```
+
+### ワークフロー修正
+**その他の改善:**
+1. **test:ciコマンド修正**: `pnpm test:ci` → `pnpm test`（未定義コマンドの修正）
+2. **TypeDoc実行修正**: `pnpm typedoc` → `pnpm --filter app typedoc`（個別実行に変更）
+3. **Vitestレポーター追加**: CI環境で`github-actions`レポーターを追加してGitHub Actions統合を強化
+
+### 必要な環境変数
+**Cloudflare設定:**
+- `CLOUDFLARE_API_TOKEN`: Cloudflare APIトークン
+- `CLOUDFLARE_ACCOUNT_ID`: CloudflareアカウントID
+
+**プロジェクト設定:**
+- プロジェクト名: `study-github-agent-vitest`
+- 互換性日付: `2024-05-13`
+
+### メリット
+1. **アクセシビリティ向上**: Artifactsダウンロード不要でテストレポート確認
+2. **レビュー効率化**: ブラウザで直接HTMLレポートを確認可能
+3. **共有容易性**: URLの共有でステークホルダーとの情報共有が簡単
+4. **自動化完全対応**: PR作成時に自動でデプロイ・URL通知
+
+この対応により、プロジェクトの設定管理が大幅に改善され、開発効率とコード品質の両方が向上しました。特にVitest設定の分離は、今後のテスト環境拡張時の基盤となる重要な改善です。型安全性の向上により、ビルド時エラーの発生リスクも大幅に削減され、さらにテストレポートのオンライン化により開発チームの生産性が大幅に向上しました。
