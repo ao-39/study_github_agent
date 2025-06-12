@@ -12,9 +12,6 @@
     "test": {
       "outputs": ["coverage/**", "test-results/**"]
     },
-    "test:ci": {
-      "outputs": ["coverage/**", "test-results/**"]
-    },
     "e2e": {
       "dependsOn": ["build"],
       "outputs": ["test-results/**", "playwright-report/**"]

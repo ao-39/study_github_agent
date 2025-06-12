@@ -19,7 +19,6 @@
     "routes:watch": "tsr watch --open=false",
     "spell": "cspell \"**/*.{ts,tsx,js,jsx,md,json}\" --no-progress --config .cspell.json --root .",
     "test": "vitest run",
-    "test:ci": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest watch",
     "e2e": "playwright test --project=chromium",
