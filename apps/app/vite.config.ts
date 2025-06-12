@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -6,10 +6,11 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import { env } from './src/env'
 
 /**
- * Viteの設定を定義します。
+ * Viteビルド設定ファイル
  *
  * PWA対応のため `vite-plugin-pwa` を利用しています。
  * 環境変数でPWA機能の有効化を制御できます。
+ * テスト設定は vitest.config.ts で管理されています。
  */
 
 /**
@@ -89,46 +90,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-  },
-  test: {
-    // テスト環境設定
-    environment: 'jsdom',
-    setupFiles: ['./src/test-setup.ts'],
-    globals: true,
-    // Watchモードを無効化してテスト完了後に終了
-    watch: false,
-    testTimeout: 20000,
-    // レポーター設定
-    reporters: process.env.CI
-      ? ['default', 'html', 'json']
-      : ['default', 'html'],
-    outputFile: {
-      html: './test-results/index.html',
-      json: './test-results/results.json',
-    },
-    // コードカバレッジ設定
-    coverage: {
-      enabled: true,
-      provider: 'v8',
-      reporter: ['text', 'html'],
-      reportsDirectory: './test-results/coverage',
-      exclude: [
-        'coverage/**',
-        'dist/**',
-        '**/node_modules/**',
-        '**/src/e2e/**', // E2Eテストディレクトリを除外
-        '**/*.config.*',
-        '**/test-setup.ts',
-      ],
-    },
-    // Playwrightテストファイルを除外
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/cypress/**',
-      '**/.{idea,git,cache,output,temp}/**',
-      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*',
-      '**/src/e2e/**', // Playwrightテストディレクトリを除外
-    ],
   },
 })

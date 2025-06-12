@@ -5,8 +5,8 @@
   "description": "Reactアプリケーション",
   "type": "module",
   "scripts": {
-    "build": "tsr generate && tsc && vite build",
-    "build:analyze": "ANALYZE=true tsr generate && tsc && vite build",
+    "build": "tsr generate && vite build",
+    "build:analyze": "ANALYZE=true tsr generate && vite build",
     "clean": "rm -rf dist",
     "dev": "tsr watch --open=false & vite",
     "fmt": "prettier --check .",
@@ -18,16 +18,16 @@
     "routes:generate": "tsr generate",
     "routes:watch": "tsr watch --open=false",
     "spell": "cspell \"**/*.{ts,tsx,js,jsx,md,json}\" --no-progress --config .cspell.json --root .",
-    "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest watch",
+    "test": "vitest run --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:watch": "vitest watch --config vitest.config.ts",
     "e2e": "playwright test --project=chromium",
     "e2e:chromium": "playwright test --project=chromium",
     "e2e:firefox": "playwright test --project=firefox",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui",
     "type-check": "tsc --noEmit",
-    "typedoc": "typedoc src --out docs-api --exclude **/*.test.* --exclude **/*.d.ts --exclude test-setup.ts --exclude e2e/"
+    "typedoc": "typedoc"
   },
   "prettier": "@study-github-agent/prettier-config",
   "dependencies": {
