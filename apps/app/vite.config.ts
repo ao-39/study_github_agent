@@ -20,11 +20,17 @@ function envDisplayPlugin() {
     name: 'env-display',
     buildStart() {
       console.log('\n📊 ビルド環境変数:')
-      console.log(`  VITE_ENABLE_PWA: ${env.VITE_ENABLE_PWA}`)
-      console.log(`  GITHUB_PAGES: ${env.GITHUB_PAGES}`)
-      console.log(`  ANALYZE: ${env.ANALYZE}`)
-      console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`)
-      console.log(`  CI: ${process.env.CI || 'false'}`)
+      console.log(
+        `  VITE_ENABLE_PWA: ${env.VITE_ENABLE_PWA} (PWA機能の有効/無効)`
+      )
+      console.log(
+        `  GITHUB_PAGES: ${env.GITHUB_PAGES} (GitHub Pages用ビルド設定)`
+      )
+      console.log(`  ANALYZE: ${env.ANALYZE} (バンドル分析の有効/無効)`)
+      console.log(
+        `  NODE_ENV: ${process.env.NODE_ENV || 'development'} (Node.js実行環境)`
+      )
+      console.log(`  CI: ${process.env.CI || 'false'} (CI環境での実行判定)`)
       console.log('')
     },
   }
