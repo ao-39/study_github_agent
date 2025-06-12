@@ -24,10 +24,10 @@ pnpm --filter <package-name> add <dependency>
 
 ```bash
 # メインアプリケーション（apps/app）の開発サーバー起動
-pnpm --filter app dev
+pnpm app dev
 
 # 別のポートで起動
-pnpm --filter app dev -- --port 3001
+pnpm app dev -- --port 3001
 
 # 全てのパッケージの開発サーバーを起動（該当する場合）
 pnpm dev
@@ -40,29 +40,29 @@ pnpm dev
 pnpm build
 
 # 特定のパッケージのみビルド
-pnpm --filter app build
+pnpm app build
 
 # バンドル分析付きビルド
-pnpm --filter app build:analyze
+pnpm app build:analyze
 
 # プレビューサーバーでビルド成果物を確認
-pnpm --filter app preview
+pnpm app preview
 ```
 
 #### 環境変数を使用したビルド
 
 ```bash
 # PWA機能を無効にしてビルド
-VITE_ENABLE_PWA=false pnpm --filter app build
+VITE_ENABLE_PWA=false pnpm app build
 
 # GitHub Pages用ビルド
-GITHUB_PAGES=true pnpm --filter app build
+GITHUB_PAGES=true pnpm app build
 
 # バンドル分析を有効にしてビルド
-ANALYZE=true pnpm --filter app build
+ANALYZE=true pnpm app build
 
 # 複数の環境変数を組み合わせ
-VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm --filter app build
+VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm app build
 ```
 
 ## 品質チェックコマンド
@@ -73,33 +73,36 @@ VITE_ENABLE_PWA=false GITHUB_PAGES=true pnpm --filter app build
 # 全パッケージのリンティング
 pnpm lint
 
-# 特定のパッケージのみ
-pnpm --filter app lint
+# 全パッケージのリンティング修正
+pnpm lint:fix
 
-# 自動修正可能なエラーを修正
-pnpm --filter app lint --fix
+# 単一パッケージでの実行も可能
+pnpm app lint
+pnpm app lint:fix
 ```
 
 ### フォーマット
 
 ```bash
-# 全パッケージのフォーマット
-pnpm format
+# 全パッケージのフォーマットチェック
+pnpm fmt
 
-# フォーマットチェック（修正なし）
-pnpm run format:check
+# 全パッケージのフォーマット修正
+pnpm fmt:fix
 
-
+# 単一パッケージでの実行も可能
+pnpm app fmt
+pnpm app fmt:fix
 ```
 
 ### スペルチェック
 
 ```bash
 # 全パッケージのスペルチェック
-pnpm spell-check
+pnpm spell
 
-# 特定のパッケージのみ
-pnpm --filter app spell-check
+# 単一パッケージでの実行も可能
+pnpm app spell
 ```
 
 ### 型チェック
@@ -108,8 +111,8 @@ pnpm --filter app spell-check
 # 全パッケージの型チェック
 pnpm type-check
 
-# 特定のパッケージのみ
-pnpm --filter app type-check
+# 単一パッケージでの実行も可能
+pnpm app type-check
 ```
 
 ## テストコマンド
@@ -120,38 +123,34 @@ pnpm --filter app type-check
 # 全パッケージのテスト実行
 pnpm test
 
-# 特定のパッケージのみ
-pnpm --filter app test
+# CI用テスト実行（テストファイル不存在でもOK）
+pnpm test:ci
 
 # ウォッチモードでテスト実行
-pnpm --filter app test --watch
+pnpm app test:watch
 
 # カバレッジ付きテスト実行
-pnpm --filter app test:coverage
-
-# UIモードでテスト実行
-pnpm --filter app test --ui
+pnpm app test:coverage
 ```
 
 ### E2E テスト（Playwright）
 
 ```bash
-# 全ブラウザでE2Eテスト実行
-pnpm --filter app test:e2e
+# E2Eテスト実行（Chromiumのみ、高速）
+pnpm e2e
 
 # 特定のブラウザでのみ実行
-pnpm --filter app test:e2e:chromium  # Chromiumのみ
-pnpm --filter app test:e2e:firefox   # Firefoxのみ
-pnpm --filter app test:e2e:webkit    # Safari（WebKit）のみ
+pnpm app e2e:chromium  # Chromiumのみ
+pnpm app e2e:firefox   # Firefoxのみ
 
 # ヘッド付きモード（ブラウザを表示）
-pnpm --filter app test:e2e:headed
+pnpm app e2e:headed
 
 # UIモード（インタラクティブ）
-pnpm --filter app test:e2e:ui
+pnpm app e2e:ui
 
 # テストレポートの表示
-pnpm --filter app exec playwright show-report
+pnpm app exec playwright show-report
 ```
 
 ## 包括的チェックコマンド
@@ -177,6 +176,9 @@ pnpm run pre-commit
 4. ビルド（TypeScript + Vite）
 5. 単体テスト（Vitest）
 
+**fullcheck:e2e の追加内容**:
+- E2E テスト（Playwright）
+
 ### 使い分けの指針
 
 - **日常開発**: `pnpm fullcheck` - 高速で包括的なチェック
@@ -184,6 +186,20 @@ pnpm run pre-commit
 - **自動実行**: `pnpm run pre-commit` - Git コミット時に自動実行
 
 ## monorepo 操作コマンド
+
+### ルートコマンド vs フィルターコマンド
+
+```bash
+# ルートpackage.jsonに定義されたコマンド（推奨）
+pnpm lint      # 全パッケージでリンティング実行
+pnpm test      # 全パッケージでテスト実行
+pnpm build     # 全パッケージでビルド実行
+
+# フィルターコマンド（特定パッケージのみ、または未定義コマンド）
+pnpm --filter app dev              # 開発サーバー（ルートに未定義）
+pnpm --filter app test:watch       # ウォッチモード（ルートに未定義）
+pnpm --filter app lint             # 単一パッケージでのリンティング
+```
 
 ### パッケージ指定実行
 
@@ -196,6 +212,15 @@ pnpm --filter app dev
 
 # 例: eslint-configパッケージでビルド実行
 pnpm --filter @study-github-agent/eslint-config build
+```
+
+### 設定パッケージについて
+
+設定パッケージ（eslint-config、prettier-config）には scripts セクションがありません。Turborepo では、コマンドが定義されていないパッケージは自動的にスキップされるため、全パッケージ実行時に問題は発生しません。
+
+```bash
+# 設定パッケージではコマンドが未定義のため自動スキップ
+pnpm build  # eslint-config、prettier-configは自動でスキップされる
 ```
 
 ### 全パッケージ実行
@@ -233,7 +258,7 @@ pnpm exec turbo run lint --filter=[HEAD^1]
 pnpm ci
 
 # フォーマットチェック（CIと同じ）
-pnpm exec turbo run lint:format
+pnpm fmt
 
 # テストファイル未存在でもOKなテスト実行
 pnpm exec turbo run test -- --passWithNoTests
