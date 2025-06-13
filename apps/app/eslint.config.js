@@ -10,4 +10,12 @@ export default [
       'src/routeTree.gen.ts', // TanStackRouter 自動生成ファイル
     ],
   },
+  {
+    languageOptions: {
+      globals: {
+        __APP_VERSION__: 'readonly',
+        __BUILD_TIME__: 'readonly',
+      },
+    },
+  },
 ]

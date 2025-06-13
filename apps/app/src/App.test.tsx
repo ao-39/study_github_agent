@@ -84,14 +84,16 @@ describe('TanStackRouter アプリケーション', () => {
 
     // アンカータグを直接検索する（aタグはrole="link"を持つ）
     const links = screen.getAllByRole('link')
-    expect(links).toHaveLength(2)
+    expect(links).toHaveLength(3) // ホーム、About、デバッグの3つ
 
-    // ホームリンクとAboutリンクを確認
+    // ホームリンク、About リンク、デバッグリンクを確認
     const homeLink = links.find(link => link.textContent === 'ホーム')
     const aboutLink = links.find(link => link.textContent === 'About')
+    const debugLink = links.find(link => link.textContent === '🔧 デバッグ')
 
     expect(homeLink).toHaveAttribute('href', '#/')
     expect(aboutLink).toHaveAttribute('href', '#/about')
+    expect(debugLink).toHaveAttribute('href', '#/debug')
   })
 
   test('学習メッセージボタンをクリックするとアラートが表示される', async () => {
@@ -130,5 +132,31 @@ describe('TanStackRouter アプリケーション', () => {
     // ホームに戻るリンクが表示されることを確認
     const homeLink = screen.getByRole('link', { name: 'ホームに戻る' })
     expect(homeLink).toHaveAttribute('href', '#/')
+  })
+
+  test('デバッグページが正常にレンダリングされる', async () => {
+    renderWithRouter(['/debug'])
+
+    // デバッグページの主要な要素が表示されることを確認
+    expect(
+      await screen.findByText('🔧 開発者用デバッグページ')
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('アプリケーションのビルド情報と環境変数を確認できます')
+    ).toBeInTheDocument()
+
+    // 各セクションの見出しが表示されることを確認
+    expect(screen.getByText('📱 アプリケーション情報')).toBeInTheDocument()
+    expect(screen.getByText('⚙️ ビルド時環境変数')).toBeInTheDocument()
+    expect(screen.getByText('🌐 実行時環境情報')).toBeInTheDocument()
+
+    // 環境変数の項目が表示されることを確認
+    expect(screen.getByText('VITE_ENABLE_PWA:')).toBeInTheDocument()
+    expect(screen.getByText('GITHUB_PAGES:')).toBeInTheDocument()
+    expect(screen.getByText('ANALYZE:')).toBeInTheDocument()
+
+    // アプリケーション情報の項目が表示されることを確認
+    expect(screen.getByText('バージョン:')).toBeInTheDocument()
+    expect(screen.getByText('ビルド時刻:')).toBeInTheDocument()
   })
 })

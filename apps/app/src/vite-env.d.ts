@@ -32,3 +32,9 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/**
+ * ビルド時に埋め込まれるグローバル変数の型定義
+ */
+declare const __APP_VERSION__: string
+declare const __BUILD_TIME__: string
