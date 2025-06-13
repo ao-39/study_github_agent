@@ -4,6 +4,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { env } from './src/env'
+import fs from 'fs'
+import path from 'path'
 
 /**
  * Viteビルド設定ファイル
@@ -12,6 +14,26 @@ import { env } from './src/env'
  * 環境変数でPWA機能の有効化を制御できます。
  * テスト設定は vitest.config.ts で管理されています。
  */
+
+/**
+ * package.jsonからバージョン情報を取得
+ */
+function getAppVersion(): string {
+  try {
+    const packageJsonPath = path.resolve(__dirname, 'package.json')
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+    return packageJson.version || '0.0.0'
+  } catch {
+    return '0.0.0'
+  }
+}
+
+/**
+ * ビルド時刻を取得
+ */
+function getBuildTime(): string {
+  return new Date().toISOString()
+}
 
 /**
  * ビルド時に環境変数を表示するプラグイン
@@ -41,6 +63,11 @@ function envDisplayPlugin() {
 export default defineConfig({
   // GitHub Pages用のベースパス設定
   base: env.GITHUB_PAGES ? '/study_github_agent/' : '/',
+  // ビルド時情報を環境変数として定義
+  define: {
+    __APP_VERSION__: JSON.stringify(getAppVersion()),
+    __BUILD_TIME__: JSON.stringify(getBuildTime()),
+  },
   plugins: [
     envDisplayPlugin(),
     react(),

@@ -50,6 +50,17 @@ const Navigation: React.FC = () => {
       >
         About
       </a>
+      <a
+        href="#/debug"
+        style={{
+          textDecoration: 'none',
+          color: '#6c757d',
+          fontWeight: 'bold',
+          fontSize: '0.9rem',
+        }}
+      >
+        🔧 デバッグ
+      </a>
     </nav>
   )
 }

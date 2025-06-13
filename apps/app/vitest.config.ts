@@ -10,6 +10,11 @@ import tsconfigPaths from 'vite-tsconfig-paths'
  */
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  // テスト環境でのグローバル変数定義
+  define: {
+    __APP_VERSION__: JSON.stringify('test-version'),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   test: {
     // テスト環境設定
     environment: 'jsdom',
