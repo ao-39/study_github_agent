@@ -260,6 +260,33 @@
 - **本番環境**: https://study-github-agent.pages.dev
 - **プレビュー環境**: https://{branch-name}--study-github-agent.pages.dev
 
+### Cloudflare Pages レポート公開
+Pull Request 時に生成されるテストレポートとバンドル分析レポートを
+Cloudflare Pages にデプロイして共有します。
+
+```yaml
+- name: Copy reports
+  if: always() && github.event_name == 'pull_request'
+  run: |
+    mkdir -p reports/vitest reports/playwright
+    cp apps/app/bundle-report.html reports/
+    cp -r apps/app/test-results/* reports/vitest/
+    cp -r apps/app/playwright-report/* reports/playwright/
+
+- name: Deploy reports to Cloudflare Pages
+  if: always() && github.event_name == 'pull_request'
+  uses: cloudflare/wrangler-action@v3
+  with:
+    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    command: pages deploy reports --project-name=study-github-agent-reports --branch=${{ github.head_ref }}
+```
+
+**機能**:
+- Vitest、Playwright、バンドル分析レポートをまとめて公開
+- PRごとに独立したURLで確認可能
+- PRコメントに公開URLを自動通知
+
 ## リリース自動化
 
 ### GitHub Release 作成
