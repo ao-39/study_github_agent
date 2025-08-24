@@ -182,6 +182,29 @@ throw new Error('ユーザー認証に失敗しました。メールアドレス
 throw new Error('エラーが発生しました')
 ```
 
+### Result型の利用
+
+エラーを例外として扱うのではなく、`Result`型で成功・失敗を明示的に返す実装を推奨します。
+
+```typescript
+import { divide } from '@/utils/divide'
+
+const result = divide(10, 2)
+if (result.ok) {
+  console.log(result.value)
+} else {
+  console.error(result.error)
+}
+```
+
+`Result`型の定義例は次のとおりです。
+
+```typescript
+export type Result<T, E> =
+  | { ok: true; value: T }
+  | { ok: false; error: E }
+```
+
 ### 避けるべきパターン
 - **過度な最適化**: 必要のない早期最適化
 - **deep nesting**: 5階層を超えるネスト構造
