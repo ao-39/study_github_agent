@@ -59,7 +59,7 @@
     "rollup-plugin-visualizer": "6.0.3",
     "typedoc": "0.28.5",
     "typescript": "5.8.3",
-    "vite": "6.3.5",
+    "vite": "6.3.6",
     "vite-bundle-analyzer": "0.22.2",
     "vite-plugin-pwa": "1.0.0",
     "vite-tsconfig-paths": "5.1.4",
